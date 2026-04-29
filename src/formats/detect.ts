@@ -23,13 +23,7 @@ export const detectFormatByExtension = (filePath: string): AudioFormat | undefin
     return undefined;
   }
 
-  for (const reg of getAllRegistrations()) {
-    if (reg.extensions.includes(ext)) {
-      return reg.format;
-    }
-  }
-
-  return undefined;
+  return getAllRegistrations().find((reg) => reg.extensions.includes(ext))?.format;
 };
 
 /**
@@ -44,13 +38,7 @@ export const detectFormatByExtension = (filePath: string): AudioFormat | undefin
  */
 export const detectFormatBySignature = (header: Uint8Array): AudioFormat | undefined => {
   const probe = header.subarray(0, Math.min(header.length, SIGNATURE_PROBE_BYTES));
-  for (const reg of getAllRegistrations()) {
-    if (reg.detectSignature(probe)) {
-      return reg.format;
-    }
-  }
-
-  return undefined;
+  return getAllRegistrations().find((reg) => reg.detectSignature(probe))?.format;
 };
 
 /**
