@@ -22,5 +22,5 @@
 
 - 各フェーズは **完了条件 (DoD)** を満たすことをもって完了とします。
 - フェーズをまたぐ依存は「依存」セクションで明示します。前提となるフェーズが TODO のまま着手しないこと。
-- ATL.NET ([Zeugma440/atldotnet](https://github.com/Zeugma440/atldotnet)) は **挙動の参考実装**です。コードをそのまま移植するのではなく、Node.js + TypeScript として最適な形に再設計します (実装ルールは `../../CLAUDE.md` を参照)。
+- ATL.NET ([Zeugma440/atldotnet](https://github.com/Zeugma440/atldotnet)) は **挙動の参考実装**です。コードをそのまま移植するのではなく、Node.js + TypeScript として最適な形に再設計します (開発ルールは `../rules/README.md` を参照)。
 - ATL.NET のソースが必要になった場合は、ローカルへの clone パスを Claude Code がユーザーに確認します (`../../CLAUDE.md` の「プロジェクト概要」を参照)。

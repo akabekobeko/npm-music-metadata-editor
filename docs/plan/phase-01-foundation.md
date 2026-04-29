@@ -16,7 +16,7 @@
 
 ### 共通 type 定義 (`src/types.ts`)
 
-全モジュール共用の `type` は **`src/types.ts` 1 ファイル** に集約する (CLAUDE.md「実装ルール / 型定義、定数」の方針)。
+全モジュール共用の `type` は **`src/types.ts` 1 ファイル** に集約する (`docs/rules/types-and-constants.md`の方針)。
 
 - `TagData` — 主要メタデータの集合 (title, artist, album, year, genre, trackNumber, ...)
 - `AudioFormat` — コンテナ種別 + コーデック種別 (`'mp3' | 'flac' | 'mp4' | ...`) の as const + Union 型
@@ -135,7 +135,7 @@ src/
     syncSafeInt.ts
 ```
 
-> グローバルな定数が必要になった時点で `src/constants.ts` を新設する。サブモジュール (例: `tags/id3v2/`) 内で複数ファイルが共有する型/定数も、それぞれの階層に `types.ts` / `constants.ts` を置く方針 (CLAUDE.md「実装ルール / 型定義、定数」)。
+> グローバルな定数が必要になった時点で `src/constants.ts` を新設する。サブモジュール (例: `tags/id3v2/`) 内で複数ファイルが共有する型/定数も、それぞれの階層に `types.ts` / `constants.ts` を置く方針 (`docs/rules/types-and-constants.md`)。
 
 ## 依存
 
@@ -153,7 +153,7 @@ src/
 - 上記 type 定義、I/O ヘルパー、検出器、公開 API 骨格が `src/` に配置されている
 - すべての追加コードに対応する `*.test.ts` がある
 - `pnpm typecheck`、`pnpm test`、`pnpm exec biome check .` が通る
-- `CLAUDE.md` の「ディレクトリ規約」と本フェーズで決めた構成が一致している (ずれたら CLAUDE.md を更新)
+- `docs/rules/directory-structure.md` と本フェーズで決めた構成が一致している (ずれたら `directory-structure.md` を更新)
 
 ## 参考資料
 
