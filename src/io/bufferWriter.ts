@@ -188,7 +188,7 @@ export const createBufferWriter = (): BufferWriter => {
 };
 
 /** Arguments for {@link nextCapacity}. */
-type NextCapacityArgs = {
+type Args = {
   /** Current capacity in bytes (must be `>= 1`). */
   current: number;
   /** Required capacity in bytes (must be `> current`). */
@@ -204,7 +204,7 @@ type NextCapacityArgs = {
  *
  * @returns The new capacity (always `>= required`).
  */
-const nextCapacity = (args: NextCapacityArgs): number => {
+const nextCapacity = (args: Args): number => {
   let next = args.current;
   while (next < args.required) {
     next *= 2;

@@ -4,7 +4,7 @@ import type { Id3v2Frame } from "../types.js";
 import { buildTextFrame } from "./buildTextFrame.js";
 
 /** Arguments for {@link appendSlashPair}. */
-export type AppendSlashPairArgs = {
+type Args = {
   /** Frame list mutated in place. */
   frames: Id3v2Frame[];
   /** Source `TagData` to read from. */
@@ -20,7 +20,7 @@ export type AppendSlashPairArgs = {
 };
 
 /** Emit a `TRCK` / `TPOS`-style `"X/Y"` (or `"X"` when no total) frame. */
-export const appendSlashPair = (args: AppendSlashPairArgs): void => {
+export const appendSlashPair = (args: Args): void => {
   const number = args.tag[args.numberField];
   if (number === undefined) {
     return;

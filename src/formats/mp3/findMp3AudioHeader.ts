@@ -1,7 +1,7 @@
 import { parseMp3AudioHeader } from "./parseMp3AudioHeader.js";
 
 /** Arguments for {@link findMp3AudioHeader}. */
-export type FindMp3AudioHeaderArgs = {
+type Args = {
   /** Source bytes to scan. */
   bytes: Uint8Array;
   /** Offset to start scanning from. */
@@ -21,7 +21,7 @@ export type FindMp3AudioHeaderArgs = {
  *
  * @returns The offset where the header begins, or `-1` when no header is found.
  */
-export const findMp3AudioHeader = (args: FindMp3AudioHeaderArgs): number => {
+export const findMp3AudioHeader = (args: Args): number => {
   const { bytes, startOffset } = args;
   const maxScan = args.maxScan ?? 0x10000;
   const end = Math.min(bytes.length - 4, startOffset + maxScan);

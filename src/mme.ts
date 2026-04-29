@@ -91,7 +91,7 @@ const loadInput = async (
 };
 
 /** Arguments for {@link resolveFormat}. */
-type ResolveFormatArgs = {
+type Args = {
   /** Raw bytes of the input. Only the first {@link SIGNATURE_PROBE_BYTES} are inspected. */
   bytes: Uint8Array;
   /** Original file path, when the caller passed one. Used for extension-based fallback. */
@@ -110,7 +110,7 @@ type ResolveFormatArgs = {
  * @returns The resolved {@link AudioFormat}.
  * @throws when the format cannot be determined and no override was supplied.
  */
-const resolveFormat = (args: ResolveFormatArgs): AudioFormat => {
+const resolveFormat = (args: Args): AudioFormat => {
   if (args.override !== undefined) {
     return args.override;
   }

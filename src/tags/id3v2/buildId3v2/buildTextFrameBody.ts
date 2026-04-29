@@ -2,7 +2,7 @@ import { Buffer } from "node:buffer";
 import { encodeText } from "../../../utils/encoding/encodeText.js";
 import type { TextEncoding } from "../../../utils/encoding/types.js";
 
-type BuildTextFrameBodyArgs = {
+type Args = {
   /** Text payload to encode. */
   text: string;
   /** Text encoding to use (`"latin1"`, `"utf8"`, `"utf16"`, `"utf16be"`). */
@@ -27,7 +27,7 @@ const ENCODING_TO_BYTE: Readonly<Record<string, number>> = {
  *
  * @returns The encoded body ready to wrap in a frame header.
  */
-export const buildTextFrameBody = (args: BuildTextFrameBodyArgs): Uint8Array => {
+export const buildTextFrameBody = (args: Args): Uint8Array => {
   const encByte = ENCODING_TO_BYTE[args.encoding];
   if (encByte === undefined) {
     throw new Error(`buildTextFrameBody: unsupported encoding "${args.encoding}"`);

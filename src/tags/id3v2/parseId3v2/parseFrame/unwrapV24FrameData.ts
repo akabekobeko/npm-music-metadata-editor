@@ -2,7 +2,7 @@ import { removeUnsynchronization } from "../../removeUnsynchronization.js";
 import type { Id3v2FrameFlags, Id3v2MajorVersion } from "../../types.js";
 
 /** Arguments for {@link unwrapV24FrameData}. */
-export type UnwrapV24FrameDataArgs = {
+type Args = {
   /** Raw frame body sliced from the tag body. */
   raw: Uint8Array;
   /** Decoded frame flags (the v2.4 unsync / data-length flags are inspected). */
@@ -25,7 +25,7 @@ export type UnwrapV24FrameDataArgs = {
  *
  * @returns The unwrapped frame body ready to hand to a body-specific parser.
  */
-export const unwrapV24FrameData = (args: UnwrapV24FrameDataArgs): Uint8Array => {
+export const unwrapV24FrameData = (args: Args): Uint8Array => {
   const isV24 = args.majorVersion === 4;
   const unsynced =
     isV24 && args.flags.unsynchronization ? removeUnsynchronization(args.raw) : args.raw;

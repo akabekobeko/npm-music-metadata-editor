@@ -1,7 +1,7 @@
 import type { TagData } from "../../../types.js";
 
 /** Arguments for {@link assignSlashPair}. */
-export type AssignSlashPairArgs = {
+type Args = {
   /** Mutated tag-data target. */
   target: TagData;
   /** Field receiving the leading number. */
@@ -16,7 +16,7 @@ export type AssignSlashPairArgs = {
  * Splits on `/` and writes the leading number into `trackNumber` / `discNumber`,
  * the trailing number (when present) into `trackTotal` / `discTotal`.
  */
-export const assignSlashPair = (args: AssignSlashPairArgs): void => {
+export const assignSlashPair = (args: Args): void => {
   const [head, tail] = args.text.split("/", 2);
   const headNum = Number.parseInt(head ?? "", 10);
   if (Number.isFinite(headNum)) {

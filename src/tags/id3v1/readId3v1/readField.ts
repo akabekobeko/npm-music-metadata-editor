@@ -1,7 +1,7 @@
 import { decodeText } from "../../../utils/encoding/decodeText.js";
 
 /** Arguments for {@link readField}. */
-export type ReadFieldArgs = {
+type Args = {
   /** The 128-byte trailer slice. */
   trailer: Uint8Array;
   /** Byte offset within `trailer` where the field starts. */
@@ -15,7 +15,7 @@ export type ReadFieldArgs = {
  *
  * @returns The decoded string with trailing padding stripped.
  */
-export const readField = (args: ReadFieldArgs): string => {
+export const readField = (args: Args): string => {
   const { trailer, offset, length } = args;
   const slice = trailer.subarray(offset, offset + length);
   const end = trimTrailingPadding(slice);

@@ -1,5 +1,5 @@
 /** Arguments for {@link skipExtendedHeader}. */
-export type SkipExtendedHeaderArgs = {
+type Args = {
   /** Tag body (already de-unsynchronised). */
   body: Uint8Array;
   /** `true` for ID3v2.4 (extended header size is sync-safe), `false` for ID3v2.3. */
@@ -12,7 +12,7 @@ export type SkipExtendedHeaderArgs = {
  * @returns The offset (within `body`) where frame parsing should start, or `-1`
  *   when the extended header is malformed.
  */
-export const skipExtendedHeader = (args: SkipExtendedHeaderArgs): number => {
+export const skipExtendedHeader = (args: Args): number => {
   const { body, syncSafe } = args;
   if (body.length < 4) {
     return -1;

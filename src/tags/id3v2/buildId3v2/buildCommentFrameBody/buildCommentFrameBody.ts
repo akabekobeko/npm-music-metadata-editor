@@ -4,7 +4,7 @@ import type { TextEncoding } from "../../../../utils/encoding/types.js";
 import { padLanguage } from "./padLanguage.js";
 
 /** Arguments for {@link buildCommentFrameBody}. */
-export type BuildCommentFrameBodyArgs = {
+type Args = {
   /** ISO-639 language code (3 lower-case letters; padded / truncated to 3). */
   language: string;
   /** Short content descriptor; usually empty. */
@@ -31,7 +31,7 @@ const ENCODING_TO_BYTE: Readonly<Record<string, number>> = {
  *
  * @returns The encoded body ready to wrap in a frame header.
  */
-export const buildCommentFrameBody = (args: BuildCommentFrameBodyArgs): Uint8Array => {
+export const buildCommentFrameBody = (args: Args): Uint8Array => {
   const encByte = ENCODING_TO_BYTE[args.encoding];
   if (encByte === undefined) {
     throw new Error(`buildCommentFrameBody: unsupported encoding "${args.encoding}"`);

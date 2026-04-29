@@ -12,7 +12,7 @@ const NUMERIC_TAG_FIELDS: ReadonlySet<keyof TagData> = new Set([
 ]);
 
 /** Arguments for {@link assignTextFrame}. */
-export type AssignTextFrameArgs = {
+type Args = {
   /** Mutated tag-data target. */
   target: TagData;
   /** Frame ID being assigned (e.g. `"TIT2"`). */
@@ -22,7 +22,7 @@ export type AssignTextFrameArgs = {
 };
 
 /** Look up the public field for `frameId` and assign the parsed text to it. */
-export const assignTextFrame = (args: AssignTextFrameArgs): void => {
+export const assignTextFrame = (args: Args): void => {
   const field = ID3V2_TEXT_FRAME_MAP[args.frameId];
   if (field === undefined) {
     return;

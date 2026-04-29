@@ -2,7 +2,7 @@ import { Buffer } from "node:buffer";
 import { encodeSyncSafeInt32 } from "../../../utils/syncSafeInt/encodeSyncSafeInt32.js";
 import { ID3V2_FLAG_UNSYNCH, ID3V2_HEADER_SIZE, ID3V2_MAGIC } from "../constants.js";
 
-type BuildHeaderArgs = {
+type Args = {
   /** Major version to emit (`3` or `4`). v2.2 write is unsupported. */
   majorVersion: 3 | 4;
   /** Tag body size in bytes (excluding the 10-byte header). */
@@ -19,7 +19,7 @@ type BuildHeaderArgs = {
  *
  * @returns The 10-byte header ready to prepend to the body.
  */
-export const buildHeader = (args: BuildHeaderArgs): Uint8Array => {
+export const buildHeader = (args: Args): Uint8Array => {
   const out = Buffer.alloc(ID3V2_HEADER_SIZE);
   out.set(ID3V2_MAGIC, 0);
   out[3] = args.majorVersion;

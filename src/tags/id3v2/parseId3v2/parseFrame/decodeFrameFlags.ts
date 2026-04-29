@@ -1,7 +1,7 @@
 import type { Id3v2FrameFlags, Id3v2MajorVersion } from "../../types.js";
 
 /** Arguments for {@link decodeFrameFlags}. */
-export type DecodeFrameFlagsArgs = {
+type Args = {
   /** First flag byte (offset +8 within the frame header). */
   statusFlags: number;
   /** Second flag byte (offset +9 within the frame header). */
@@ -15,7 +15,7 @@ export type DecodeFrameFlagsArgs = {
  *
  * @returns The decoded frame flags.
  */
-export const decodeFrameFlags = (args: DecodeFrameFlagsArgs): Id3v2FrameFlags => {
+export const decodeFrameFlags = (args: Args): Id3v2FrameFlags => {
   const { statusFlags, formatFlags, majorVersion } = args;
   if (majorVersion === 4) {
     return {

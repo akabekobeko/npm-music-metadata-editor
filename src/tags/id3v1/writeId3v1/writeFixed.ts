@@ -2,7 +2,7 @@ import type { Buffer } from "node:buffer";
 import { encodeText } from "../../../utils/encoding/encodeText.js";
 
 /** Arguments for {@link writeFixed}. */
-export type WriteFixedArgs = {
+type Args = {
   /** Destination buffer. */
   out: Buffer;
   /** Byte offset within `out` where the field starts. */
@@ -17,7 +17,7 @@ export type WriteFixedArgs = {
  * Latin-1 encode `value`, truncate to `length` bytes, and copy into `out` at `offset`.
  * Remaining bytes in the field are left as the buffer's existing zero padding.
  */
-export const writeFixed = (args: WriteFixedArgs): void => {
+export const writeFixed = (args: Args): void => {
   if (args.value === "") {
     return;
   }
