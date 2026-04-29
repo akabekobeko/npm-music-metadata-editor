@@ -69,11 +69,13 @@ src/
       writeFlac.ts
       detectFlac.ts
       parseFlac/
-        parseStreamInfo.ts
+        parseFlac.ts             # 代表関数
+        parseStreamInfo.ts       # サブルーチン
         parseMetadataBlock.ts
         ...
       buildFlac/
-        buildMetadataBlock.ts
+        buildFlac.ts             # 代表関数
+        buildMetadataBlock.ts    # サブルーチン
         rebalancePadding.ts
         ...
 ```

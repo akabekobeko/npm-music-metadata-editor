@@ -34,7 +34,7 @@
   - Extended header (読み飛ばし優先)
   - Frame flags (compression / encryption は **未対応として明示エラー**)
 
-`parseId3v2/` サブディレクトリに `parseHeader.ts`、`parseFrame.ts`、`parseTextFrame.ts` などをコロケーション配置する。書き込み側も同様。
+`parseId3v2/` サブディレクトリに代表関数 `parseId3v2.ts` と、サブルーチンの `parseHeader.ts`、`parseFrame.ts`、`parseTextFrame.ts` などをコロケーション配置する (CLAUDE.md「実装ルール / コード スタイル」に準拠)。書き込み側も `buildId3v2/buildId3v2.ts` を代表として同じ構成を取る。
 
 ### MP3 オーディオ ヘッダ (`src/formats/mp3/`)
 
@@ -84,13 +84,15 @@ src/
       writeId3v2.ts
       writeId3v2.test.ts
       parseId3v2/
-        parseHeader.ts
+        parseId3v2.ts            # 代表関数
+        parseHeader.ts           # サブルーチン
         parseFrame.ts
         parseTextFrame.ts
         parseCommentFrame.ts
         ...
       buildId3v2/
-        buildHeader.ts
+        buildId3v2.ts            # 代表関数
+        buildHeader.ts           # サブルーチン
         buildFrame.ts
         ...
       types.ts

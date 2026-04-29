@@ -65,7 +65,8 @@ src/
       writeWav.ts
       detectWav.ts
       parseWav/
-        parseFmt.ts
+        parseWav.ts              # 代表関数
+        parseFmt.ts              # サブルーチン
         parseListInfo.ts
         ...
     aiff/
