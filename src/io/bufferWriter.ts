@@ -12,30 +12,68 @@ import { encodeSyncSafeInt32 } from "../utils/syncSafeInt.js";
 export type BufferWriter = {
   /** Number of bytes written so far. */
   readonly length: number;
-  /** Append one unsigned byte. */
+  /**
+   * Append one unsigned byte.
+   *
+   * @param value - Byte value in the range `[0, 255]`.
+   */
   writeUInt8: (value: number) => void;
-  /** Append a 16-bit unsigned integer in big-endian order. */
+  /**
+   * Append a 16-bit unsigned integer in big-endian order.
+   *
+   * @param value - Value in the range `[0, 0xFFFF]`.
+   */
   writeUInt16BE: (value: number) => void;
-  /** Append a 16-bit unsigned integer in little-endian order. */
+  /**
+   * Append a 16-bit unsigned integer in little-endian order.
+   *
+   * @param value - Value in the range `[0, 0xFFFF]`.
+   */
   writeUInt16LE: (value: number) => void;
-  /** Append a 24-bit unsigned integer in big-endian order. */
+  /**
+   * Append a 24-bit unsigned integer in big-endian order.
+   *
+   * @param value - Value in the range `[0, 0xFFFFFF]`.
+   */
   writeUInt24BE: (value: number) => void;
-  /** Append a 32-bit unsigned integer in big-endian order. */
+  /**
+   * Append a 32-bit unsigned integer in big-endian order.
+   *
+   * @param value - Value in the range `[0, 0xFFFFFFFF]`.
+   */
   writeUInt32BE: (value: number) => void;
-  /** Append a 32-bit unsigned integer in little-endian order. */
+  /**
+   * Append a 32-bit unsigned integer in little-endian order.
+   *
+   * @param value - Value in the range `[0, 0xFFFFFFFF]`.
+   */
   writeUInt32LE: (value: number) => void;
-  /** Append an ID3v2 syncsafe 32-bit unsigned integer (4 bytes). */
+  /**
+   * Append an ID3v2 syncsafe 32-bit unsigned integer (4 bytes).
+   *
+   * @param value - Value in the range `[0, SYNC_SAFE_INT32_MAX]`.
+   */
   writeSyncSafeInt32: (value: number) => void;
-  /** Append the given bytes. */
+  /**
+   * Append the given bytes.
+   *
+   * @param bytes - Bytes to append; copied into the internal buffer.
+   */
   writeBytes: (bytes: Uint8Array) => void;
   /**
    * Append a string in the given encoding (no length prefix, no terminator).
    * Returns the number of bytes written.
+   *
+   * @param value - String to encode.
+   * @param encoding - Target text encoding.
    */
   writeString: (value: string, encoding: TextEncoding) => number;
   /**
    * Append a string followed by its null terminator (`0x00` or `0x0000` for UTF-16).
    * Returns the total number of bytes written including the terminator.
+   *
+   * @param value - String to encode.
+   * @param encoding - Target text encoding.
    */
   writeNullTerminated: (value: string, encoding: TextEncoding) => number;
   /**
@@ -46,6 +84,12 @@ export type BufferWriter = {
   concat: () => Buffer;
 };
 
+/**
+ * Initial size in bytes of the writer's backing buffer.
+ *
+ * Chosen to fit a typical small tag (a handful of frames) in one allocation
+ * while keeping idle writers cheap. The buffer doubles on each overflow.
+ */
 const INITIAL_CAPACITY = 256;
 
 /**
@@ -57,6 +101,12 @@ const INITIAL_CAPACITY = 256;
 export const createBufferWriter = (): BufferWriter => {
   const state = { buffer: Buffer.alloc(INITIAL_CAPACITY), length: 0 };
 
+  /**
+   * Make sure the backing buffer can hold `need` more bytes, doubling it as
+   * many times as required. No-op when the existing capacity already fits.
+   *
+   * @param need - Number of additional bytes that must fit after `state.length`.
+   */
   const ensureCapacity = (need: number): void => {
     const required = state.length + need;
     if (required <= state.buffer.length) {

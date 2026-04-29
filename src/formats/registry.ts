@@ -4,6 +4,9 @@ import type { AudioFormat, MetadataReadResult, ReadOptions, WriteOptions } from 
  * Read implementation for a given format.
  *
  * Implementations consume the entire input buffer and return the parsed metadata.
+ *
+ * @param input - Whole-file bytes to parse.
+ * @param options - Optional reader hints forwarded from {@link readMetadata}.
  */
 export type FormatReader = (
   input: Uint8Array,
@@ -14,6 +17,9 @@ export type FormatReader = (
  * Write implementation for a given format.
  *
  * Implementations rebuild the file with `options.tag` merged in and return the result.
+ *
+ * @param input - Original file bytes; must not be mutated.
+ * @param options - Tag fields to write plus optional writer hints.
  */
 export type FormatWriter = (input: Uint8Array, options: WriteOptions) => Promise<Uint8Array>;
 
@@ -31,6 +37,8 @@ export type FormatRegistration = {
   /**
    * Inspect the leading bytes of a file and report whether they match this format's
    * signature. Implementations may peek up to 64 bytes.
+   *
+   * @param header - Leading bytes of the file to inspect.
    */
   detectSignature: (header: Uint8Array) => boolean;
   /** Reader implementation, when available. */
@@ -39,6 +47,12 @@ export type FormatRegistration = {
   write?: FormatWriter;
 };
 
+/**
+ * Module-level registry mapping each {@link AudioFormat} to its implementation.
+ *
+ * Insertion order is preserved by `Map`, which {@link getAllRegistrations} relies
+ * on so that earlier-registered formats win on signature ties.
+ */
 const registrations = new Map<AudioFormat, FormatRegistration>();
 
 /**
@@ -53,6 +67,9 @@ export const registerFormat = (registration: FormatRegistration): void => {
 
 /**
  * Return the registration for a format, or `undefined` if none is registered.
+ *
+ * @param format - Format identifier to look up.
+ * @returns The matching registration, or `undefined` when nothing is registered for `format`.
  */
 export const getRegistration = (format: AudioFormat): FormatRegistration | undefined =>
   registrations.get(format);

@@ -12,8 +12,8 @@ export const SYNC_SAFE_INT32_MAX = 0x0fffffff;
  * each byte (the high bit is always zero). This avoids accidental MPEG sync patterns
  * appearing inside ID3v2 size fields.
  *
- * @param bytes Source bytes; the four bytes starting at `offset` are read.
- * @param offset Offset within `bytes` where the syncsafe integer begins. Defaults to `0`.
+ * @param bytes - Source bytes; the four bytes starting at `offset` are read.
+ * @param offset - Offset within `bytes` where the syncsafe integer begins. Defaults to `0`.
  * @returns The decoded 28-bit value as a regular `number`.
  * @throws when fewer than `offset + 4` bytes are available, or when any of the four
  *   bytes has its high bit set (which would not be a valid syncsafe encoding).
@@ -37,7 +37,7 @@ export const decodeSyncSafeInt32 = (bytes: Uint8Array, offset = 0): number => {
 /**
  * Encode an unsigned integer as an ID3v2 syncsafe 32-bit value.
  *
- * @param value Integer in the range `[0, SYNC_SAFE_INT32_MAX]`.
+ * @param value - Integer in the range `[0, SYNC_SAFE_INT32_MAX]`.
  * @returns A 4-byte `Uint8Array` containing the syncsafe encoding (big-endian).
  * @throws when `value` is negative, non-integer, or exceeds `SYNC_SAFE_INT32_MAX`.
  */

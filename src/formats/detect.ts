@@ -13,6 +13,7 @@ export const SIGNATURE_PROBE_BYTES = 64;
 /**
  * Detect the format from a file path's extension.
  *
+ * @param filePath - Path or filename whose extension drives the lookup.
  * @returns The matching format, or `undefined` when the extension is unknown or
  *   when no registered format claims it.
  */
@@ -37,6 +38,9 @@ export const detectFormatByExtension = (filePath: string): AudioFormat | undefin
  * The first registered format whose `detectSignature` returns `true` wins. Registration
  * order therefore matters when two formats could both match — the first phase to
  * register a format claims its signature.
+ *
+ * @param header - Leading bytes of the file (the first {@link SIGNATURE_PROBE_BYTES} are inspected).
+ * @returns The matching format, or `undefined` when no signature matches.
  */
 export const detectFormatBySignature = (header: Uint8Array): AudioFormat | undefined => {
   const probe = header.subarray(0, Math.min(header.length, SIGNATURE_PROBE_BYTES));

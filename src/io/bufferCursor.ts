@@ -34,9 +34,16 @@ export type BufferCursor = {
    * Read `length` bytes as a zero-copy `Uint8Array` view onto the underlying buffer.
    *
    * The returned view shares memory with the source — do not mutate it.
+   *
+   * @param length - Number of bytes to read.
    */
   readBytes: (length: number) => Uint8Array;
-  /** Read a fixed-length string in the given encoding. */
+  /**
+   * Read a fixed-length string in the given encoding.
+   *
+   * @param length - Number of bytes to consume from the cursor.
+   * @param encoding - Text encoding to interpret the bytes with.
+   */
   readString: (length: number, encoding: TextEncoding) => string;
   /**
    * Read a null-terminated string. The terminator is consumed but not included in the
@@ -44,14 +51,26 @@ export type BufferCursor = {
    *
    * UTF-16 variants use a 2-byte (`0x0000`) terminator and align reads to even byte
    * counts; all other encodings use a single-byte (`0x00`) terminator.
+   *
+   * @param encoding - Text encoding to interpret the bytes with.
    */
   readNullTerminated: (encoding: TextEncoding) => string;
-  /** Move the cursor to an absolute offset (must be in `[0, length]`). */
+  /**
+   * Move the cursor to an absolute offset (must be in `[0, length]`).
+   *
+   * @param offset - New absolute position.
+   */
   seek: (offset: number) => void;
-  /** Move the cursor forward by `n` bytes (must keep position in `[0, length]`). */
+  /**
+   * Move the cursor forward by `n` bytes (must keep position in `[0, length]`).
+   *
+   * @param n - Number of bytes to advance (negative values move backwards).
+   */
   skip: (n: number) => void;
   /**
    * Return a zero-copy view of the next `n` bytes without advancing the cursor.
+   *
+   * @param n - Number of bytes to peek ahead.
    */
   peek: (n: number) => Uint8Array;
 };
@@ -61,11 +80,20 @@ export type BufferCursor = {
  *
  * Both `Uint8Array` and `Buffer` inputs are accepted; the returned cursor reads via a
  * Node.js `Buffer` view onto the same memory for fast multi-byte access.
+ *
+ * @param source - Bytes the cursor will read from. The buffer is not copied.
+ * @returns A cursor positioned at offset `0` of `source`.
  */
 export const createBufferCursor = (source: Uint8Array): BufferCursor => {
   const buffer = Buffer.from(source.buffer, source.byteOffset, source.byteLength);
   const state = { position: 0 };
 
+  /**
+   * Throw a `RangeError` when the next `need` bytes would extend past the end of
+   * the buffer. Centralised so every read method shares the same message format.
+   *
+   * @param need - Number of bytes the caller is about to read.
+   */
   const ensure = (need: number): void => {
     if (state.position + need > buffer.length) {
       throw new RangeError(

@@ -12,7 +12,9 @@ import { Buffer } from "node:buffer";
  */
 export type TextEncoding = "latin1" | "utf8" | "utf16le" | "utf16be" | "utf16" | "ascii";
 
+/** Shared `TextDecoder` for UTF-16BE bytes (the WHATWG label `Buffer` does not accept). */
 const utf16beDecoder = new TextDecoder("utf-16be");
+/** Shared `TextDecoder` for UTF-16LE bytes; reused for BOM-less decoding. */
 const utf16leDecoder = new TextDecoder("utf-16le");
 
 /**
@@ -20,6 +22,10 @@ const utf16leDecoder = new TextDecoder("utf-16le");
  *
  * For `"utf16"`, a leading BOM (`0xFFFE` or `0xFEFF`) selects endianness; if no BOM
  * is present the input is treated as little-endian (matching the ID3v2 default).
+ *
+ * @param bytes - Source bytes to decode.
+ * @param encoding - Text encoding to interpret `bytes` with.
+ * @returns The decoded string.
  */
 export const decodeText = (bytes: Uint8Array, encoding: TextEncoding): string => {
   if (encoding === "utf16be") {
@@ -39,6 +45,10 @@ export const decodeText = (bytes: Uint8Array, encoding: TextEncoding): string =>
  *
  * `"utf16"` emits a `0xFFFE` little-endian BOM followed by the UTF-16LE payload.
  * `"utf16be"` emits raw UTF-16BE bytes with no BOM.
+ *
+ * @param value - String to encode.
+ * @param encoding - Target text encoding.
+ * @returns Encoded bytes (no length prefix, no terminator).
  */
 export const encodeText = (value: string, encoding: TextEncoding): Uint8Array => {
   if (encoding === "utf16be") {
@@ -58,6 +68,16 @@ export const encodeText = (value: string, encoding: TextEncoding): Uint8Array =>
   return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
 };
 
+/**
+ * Decode a UTF-16 byte slice that may carry a leading BOM.
+ *
+ * `0xFFFE` selects little-endian, `0xFEFF` selects big-endian. When no BOM is
+ * present the bytes are decoded as little-endian, which matches the de facto
+ * convention used by most ID3v2.3 writers.
+ *
+ * @param bytes - UTF-16 bytes, optionally prefixed with a BOM.
+ * @returns The decoded string.
+ */
 const decodeUtf16WithBom = (bytes: Uint8Array): string => {
   if (bytes.length >= 2) {
     const lo = bytes[0] as number;
@@ -75,6 +95,15 @@ const decodeUtf16WithBom = (bytes: Uint8Array): string => {
   return utf16leDecoder.decode(bytes);
 };
 
+/**
+ * Encode a string as UTF-16BE bytes (no BOM).
+ *
+ * Implemented manually because Node.js `Buffer` only knows UTF-16LE; for the
+ * BE case we emit the high byte first, low byte second, per code unit.
+ *
+ * @param value - String to encode.
+ * @returns UTF-16BE bytes (`value.length * 2` bytes).
+ */
 const encodeUtf16Be = (value: string): Uint8Array => {
   const out = new Uint8Array(value.length * 2);
   for (let i = 0; i < value.length; i += 1) {

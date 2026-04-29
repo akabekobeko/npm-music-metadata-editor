@@ -20,8 +20,8 @@ export { PictureKind } from "./types.js";
 /**
  * Read metadata from an audio file.
  *
- * @param input File path (`string`) or in-memory bytes (`Uint8Array`).
- * @param options Optional reader hints (e.g. force a specific format).
+ * @param input - File path (`string`) or in-memory bytes (`Uint8Array`).
+ * @param options - Optional reader hints (e.g. force a specific format).
  * @returns The parsed metadata, including detected format, common tag fields,
  *   pictures, chapters, and lyrics.
  * @throws when the format cannot be detected, or when no reader is registered for
@@ -45,8 +45,8 @@ export const readMetadata = async (
 /**
  * Write metadata back to an audio file.
  *
- * @param input File path (`string`) or in-memory bytes (`Uint8Array`).
- * @param options Tag fields to write plus optional writer hints (e.g. force a
+ * @param input - File path (`string`) or in-memory bytes (`Uint8Array`).
+ * @param options - Tag fields to write plus optional writer hints (e.g. force a
  *   specific format). The `tag` property is required.
  * @returns The rebuilt file bytes. Callers are responsible for persisting them.
  * @throws when the format cannot be detected, or when no writer is registered for
@@ -66,6 +66,16 @@ export const writeMetadata = async (
   return registration.write(bytes, options);
 };
 
+/**
+ * Normalize the public-API input into raw bytes plus an optional file path.
+ *
+ * String inputs are read from disk (the path is preserved so that downstream
+ * extension-based detection still works); buffer inputs are passed through
+ * with `filePath` left as `undefined`.
+ *
+ * @param input - File path (`string`) to read from disk, or pre-loaded bytes.
+ * @returns The bytes ready for parsing, plus the originating path (if any).
+ */
 const loadInput = async (
   input: string | Uint8Array,
 ): Promise<{ bytes: Uint8Array; filePath: string | undefined }> => {
@@ -76,6 +86,7 @@ const loadInput = async (
   return { bytes: input, filePath: undefined };
 };
 
+/** Arguments for {@link resolveFormat}. */
 type ResolveFormatArgs = {
   /** Raw bytes of the input. Only the first {@link SIGNATURE_PROBE_BYTES} are inspected. */
   bytes: Uint8Array;
@@ -85,6 +96,15 @@ type ResolveFormatArgs = {
   override: AudioFormat | undefined;
 };
 
+/**
+ * Decide which {@link AudioFormat} to use for the current operation.
+ *
+ * The explicit `override` short-circuits detection. Otherwise the leading bytes
+ * are run through {@link detectFormat}, which combines signature and extension
+ * checks (signature wins on conflict).
+ *
+ * @throws when the format cannot be determined and no override was supplied.
+ */
 const resolveFormat = (args: ResolveFormatArgs): AudioFormat => {
   if (args.override !== undefined) {
     return args.override;
