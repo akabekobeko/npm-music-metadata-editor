@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from "vitest";
 
-describe('placeholder', () => {
-  it('should pass', () => {
+describe("placeholder", () => {
+  it("should pass", () => {
     expect(true).toBe(true);
   });
 });
