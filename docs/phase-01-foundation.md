@@ -14,7 +14,9 @@
 
 ## スコープ
 
-### 共通 type 定義 (`src/types/`)
+### 共通 type 定義 (`src/types.ts`)
+
+全モジュール共用の `type` は **`src/types.ts` 1 ファイル** に集約する (CLAUDE.md「実装ルール / 型定義、定数」の方針)。
 
 - `TagData` — 主要メタデータの集合 (title, artist, album, year, genre, trackNumber, ...)
 - `AudioFormat` — コンテナ種別 + コーデック種別 (`'mp3' | 'flac' | 'mp4' | ...`) の as const + Union 型
@@ -25,6 +27,7 @@
 - `MetadataReadResult` — 読み取り結果 (`tag`, `audioFormat`, `pictures`, `chapters`, `lyrics`)
 
 すべての `type` には TSDoc を付ける。
+グローバル定数が必要になった場合は `src/constants.ts` を新設する (Phase 1 時点では不要)。
 
 ### バイナリ I/O (`src/io/`)
 
@@ -119,6 +122,7 @@ export const readMetadata: (
 ```
 src/
   index.ts
+  types.ts             # 全モジュール共用の type 定義 (TagData, AudioFormat, PictureInfo, ...)
   io/
     bufferCursor.ts
     bufferWriter.ts
@@ -126,18 +130,12 @@ src/
   formats/
     detect.ts
     registry.ts        # format -> { detectSignature, read, write } のマッピング
-  types/
-    audioFormat.ts
-    tagData.ts
-    pictureInfo.ts
-    chapterInfo.ts
-    lyricsInfo.ts
-    readWriteOptions.ts
-    metadataReadResult.ts
   utils/
     encoding.ts        # TextDecoder ラッパー
     syncSafeInt.ts
 ```
+
+> グローバルな定数が必要になった時点で `src/constants.ts` を新設する。サブモジュール (例: `tags/id3v2/`) 内で複数ファイルが共有する型/定数も、それぞれの階層に `types.ts` / `constants.ts` を置く方針 (CLAUDE.md「実装ルール / 型定義、定数」)。
 
 ## 依存
 
