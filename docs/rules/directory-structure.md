@@ -2,7 +2,8 @@
 
 ```
 src/
-  index.ts              # 公開 API のエントリ ポイント (readMetadata / writeMetadata)
+  mme.ts                # 公開 API のエントリ ポイント (readMetadata / writeMetadata)
+                        # ※ `index` は Barrel File と混同するため命名に使わない
   types.ts              # 全モジュール共用の type 定義 (TagData, AudioFormat, PictureInfo, ...)
   constants.ts          # 全モジュール共用の定数 (必要が生じたタイミングで作成)
   io/                   # バイナリ I/O ユーティリティ
@@ -32,6 +33,11 @@ docs/
 ```
 
 サブディレクトリ (`tags/id3v2/` など) 内でも、複数ファイルで共有する型は同階層の `types.ts`、定数は `constants.ts` に集約します ([`types-and-constants.md`](types-and-constants.md) を参照)。
+
+## ファイル命名
+
+- **`index.ts` は使わない**。Barrel File (再 export 専用ファイル) と混同しやすいため、エントリ ポイントは中身を表すファイル名 (例: 公開 API は `mme.ts`、サブモジュールは `parseId3v2.ts` など) を付けます。
+- サブモジュールを束ねる「サブモジュールの名称」のファイル名 (例: `formats/mp3/mp3.ts`) を採用し、コロケーションした補助関数を同階層に並べます ([`code-style.md`](code-style.md) のサブルーチン分割方針を参照)。
 
 `tags/` 配下は Phase 2 以降 (ID3v1/v2、APE、Vorbis Comment など) で各タグ形式の実装が追加された時点で作成します。Phase 1 完了時点では未配置です。
 

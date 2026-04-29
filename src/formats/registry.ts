@@ -44,7 +44,7 @@ const registrations = new Map<AudioFormat, FormatRegistration>();
 /**
  * Register (or replace) a format implementation.
  *
- * Subsequent phases call this from format-specific entry points (e.g. `formats/mp3/index.ts`)
+ * Subsequent phases call this from format-specific entry points (e.g. `formats/mp3/mp3.ts`)
  * so that {@link getRegistration} / {@link getAllRegistrations} can locate them.
  */
 export const registerFormat = (registration: FormatRegistration): void => {

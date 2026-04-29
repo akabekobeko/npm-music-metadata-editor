@@ -10,12 +10,12 @@
     "node": ">=24"
   },
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/mme.js",
+  "types": "./dist/mme.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./dist/mme.d.ts",
+      "default": "./dist/mme.js"
     }
   },
   "files": [

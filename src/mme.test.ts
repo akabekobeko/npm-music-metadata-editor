@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { clearRegistrations, registerFormat } from "./formats/registry.js";
-import { readMetadata, writeMetadata } from "./index.js";
+import { readMetadata, writeMetadata } from "./mme.js";
 
 beforeEach(() => {
   clearRegistrations();
