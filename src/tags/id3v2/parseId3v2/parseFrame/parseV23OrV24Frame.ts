@@ -1,9 +1,9 @@
 import { Buffer } from "node:buffer";
 import { decodeSyncSafeInt32 } from "../../../../utils/syncSafeInt/decodeSyncSafeInt32.js";
-import { removeUnsynchronization } from "../../removeUnsynchronization.js";
 import { decodeFrameFlags } from "./decodeFrameFlags.js";
 import { readUInt32BE } from "./readUInt32BE.js";
 import type { ParseFrameArgs, ParseFrameResult } from "./types.js";
+import { unwrapV24FrameData } from "./unwrapV24FrameData.js";
 
 /**
  * ID3v2.3 / ID3v2.4 frame layout: 4-byte ID + 4-byte size + 2-byte flags + body.
@@ -32,17 +32,11 @@ export const parseV23OrV24Frame = (args: ParseFrameArgs): ParseFrameResult => {
   }
 
   const flags = decodeFrameFlags({ statusFlags, formatFlags, majorVersion });
-  let data = body.subarray(dataStart, dataStart + size);
-
-  // ID3v2.4: when the frame uses its own unsynchronisation, undo it before exposing the body.
-  if (majorVersion === 4 && flags.unsynchronization) {
-    data = removeUnsynchronization(data);
-  }
-
-  // ID3v2.4: optional 4-byte data length indicator precedes the actual body.
-  if (majorVersion === 4 && flags.dataLengthIndicator && data.length >= 4) {
-    data = data.subarray(4);
-  }
+  const data = unwrapV24FrameData({
+    raw: body.subarray(dataStart, dataStart + size),
+    flags,
+    majorVersion,
+  });
 
   return {
     kind: "frame",

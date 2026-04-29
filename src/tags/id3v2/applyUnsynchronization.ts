@@ -9,21 +9,14 @@
  * @returns A new buffer with `0xFF` bytes followed by `0x00`.
  */
 export const applyUnsynchronization = (bytes: Uint8Array): Uint8Array => {
-  let extras = 0;
-  for (let i = 0; i < bytes.length; i += 1) {
-    if (bytes[i] === 0xff) {
-      extras += 1;
-    }
-  }
-
+  const extras = bytes.reduce((count, byte) => (byte === 0xff ? count + 1 : count), 0);
   if (extras === 0) {
     return bytes;
   }
 
   const out = new Uint8Array(bytes.length + extras);
   let writePos = 0;
-  for (let i = 0; i < bytes.length; i += 1) {
-    const byte = bytes[i] as number;
+  for (const byte of bytes) {
     out[writePos] = byte;
     writePos += 1;
     if (byte === 0xff) {

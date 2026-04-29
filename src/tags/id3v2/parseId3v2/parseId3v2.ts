@@ -27,20 +27,19 @@ export const parseId3v2 = (buffer: Uint8Array): Id3v2Tag | undefined => {
     return undefined;
   }
 
-  let body = buffer.subarray(ID3V2_HEADER_SIZE, tagEnd);
-  if (header.flags.unsynchronization) {
-    body = removeUnsynchronization(body);
-  }
+  const rawBody = buffer.subarray(ID3V2_HEADER_SIZE, tagEnd);
+  const body = header.flags.unsynchronization ? removeUnsynchronization(rawBody) : rawBody;
 
   // Skip the v2.3+ extended header when present. We do not interpret CRC /
   // restrictions; preserving the rest is enough for round-tripping in Phase 2.
-  let cursor = 0;
-  if (header.flags.extendedHeader) {
-    cursor = skipExtendedHeader({ body, syncSafe: header.majorVersion === 4 });
-    if (cursor === -1) {
-      return undefined;
-    }
+  const startOffset = header.flags.extendedHeader
+    ? skipExtendedHeader({ body, syncSafe: header.majorVersion === 4 })
+    : 0;
+  if (startOffset === -1) {
+    return undefined;
   }
+
+  let cursor = startOffset;
 
   const frames: Id3v2Frame[] = [];
   while (cursor < body.length) {

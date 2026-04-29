@@ -19,3 +19,9 @@ it("emits Latin-1 bytes for the latin1 encoding", () => {
   // c=0x63 a=0x61 f=0x66 é=0xE9
   expect(Array.from(bytes)).toEqual([0x63, 0x61, 0x66, 0xe9]);
 });
+
+it("emits both halves of a UTF-16BE surrogate pair", () => {
+  // 😀 (U+1F600) → high surrogate 0xD83D, low surrogate 0xDE00
+  const bytes = encodeText("😀", "utf16be");
+  expect(Array.from(bytes)).toEqual([0xd8, 0x3d, 0xde, 0x00]);
+});

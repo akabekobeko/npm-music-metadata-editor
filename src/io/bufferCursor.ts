@@ -204,28 +204,14 @@ export const createBufferCursor = (source: Uint8Array): BufferCursor => {
     readNullTerminated: (encoding: TextEncoding) => {
       const isUtf16 = encoding === "utf16" || encoding === "utf16le" || encoding === "utf16be";
       const start = state.position;
-      let end = start;
-      if (isUtf16) {
-        while (end + 1 < source.length) {
-          if (source[end] === 0 && source[end + 1] === 0) {
-            break;
-          }
-
-          end += 2;
-        }
-
-        const value = decodeText(source.subarray(start, end), encoding);
-        // Advance past the payload plus the 2-byte terminator when one is present.
-        state.position = end + 1 < source.length ? end + 2 : source.length;
-        return value;
-      }
-
-      while (end < source.length && source[end] !== 0) {
-        end += 1;
-      }
-
+      const end = isUtf16
+        ? findUtf16Terminator(source, start)
+        : findSingleByteTerminator(source, start);
       const value = decodeText(source.subarray(start, end), encoding);
-      state.position = end < source.length ? end + 1 : source.length;
+      // Advance past the payload plus the terminator when one is present.
+      const terminatorSize = isUtf16 ? 2 : 1;
+      state.position =
+        end + terminatorSize - 1 < source.length ? end + terminatorSize : source.length;
       return value;
     },
     seek: (offset: number) => {
@@ -262,4 +248,42 @@ export const createBufferCursor = (source: Uint8Array): BufferCursor => {
   };
 
   return cursor;
+};
+
+/**
+ * Walk forward over `source` looking for the first single-byte `0x00` terminator.
+ *
+ * @param source - Bytes to scan.
+ * @param start - Offset to start scanning from.
+ * @returns The offset of the terminator, or `source.length` when no terminator exists.
+ */
+const findSingleByteTerminator = (source: Uint8Array, start: number): number => {
+  let end = start;
+  while (end < source.length && source[end] !== 0) {
+    end += 1;
+  }
+
+  return end;
+};
+
+/**
+ * Walk forward over `source` looking for the first aligned 2-byte `0x00 0x00`
+ * terminator (UTF-16 family).
+ *
+ * @param source - Bytes to scan.
+ * @param start - Offset to start scanning from. Should be aligned with the UTF-16 code-unit grid.
+ * @returns The offset of the terminator, or the position at which scanning stopped
+ *   (just past the last full code unit) when no terminator exists.
+ */
+const findUtf16Terminator = (source: Uint8Array, start: number): number => {
+  let end = start;
+  while (end + 1 < source.length) {
+    if (source[end] === 0 && source[end + 1] === 0) {
+      return end;
+    }
+
+    end += 2;
+  }
+
+  return end;
 };
