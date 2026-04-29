@@ -59,12 +59,15 @@ Node.js `Buffer` を直接扱うのは煩雑なため、薄いラッパーを定
 
 各検出器は **Phase 2 以降で対応形式を増やすたびに追記**できるよう、フォーマット → 検出関数のマッピング Object を介して登録する。
 
-### 公開 API 骨格 (`src/index.ts`)
+### 公開 API 骨格 (`src/mme.ts`)
 
 - `readMetadata(input: string | Uint8Array, options?: ReadOptions): Promise<MetadataReadResult>`
-- `writeMetadata(input: string | Uint8Array, tag: Partial<TagData>, options?: WriteOptions): Promise<Uint8Array>`
+- `writeMetadata(input: string | Uint8Array, options: WriteOptions): Promise<Uint8Array>`
+  - `WriteOptions` に書き込みたい `tag: Partial<TagData>` を含める (Biome の `useMaxParams: 2` に合わせて positional 引数を 2 つに統合)
 
 Phase 1 ではどちらも `'unsupported format'` 相当のエラーを投げるスタブ実装で構わないが、シグネチャは確定する。
+
+> エントリ ポイントのファイル名は `index` を避けて `mme.ts` とする (Barrel File との混同を防ぐため)。`package.json` の `main` / `types` / `exports` も `dist/mme.js` / `dist/mme.d.ts` を指す。
 
 ## 設計方針
 
@@ -121,7 +124,7 @@ export const readMetadata: (
 
 ```
 src/
-  index.ts
+  mme.ts               # 公開 API のエントリ ポイント (旧 index.ts 相当)
   types.ts             # 全モジュール共用の type 定義 (TagData, AudioFormat, PictureInfo, ...)
   io/
     bufferCursor.ts

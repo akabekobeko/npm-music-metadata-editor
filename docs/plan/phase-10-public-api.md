@@ -75,17 +75,19 @@ export const saveTrack: (track: Track, options?: SaveTrackOptions) => Promise<Ui
 
 ```
 src/
-  index.ts            # readMetadata / writeMetadata / loadTrack / saveTrack を再 export
+  mme.ts              # readMetadata / writeMetadata / loadTrack / saveTrack を再 export
   api/
     loadTrack.ts
     saveTrack.ts
-    readMetadata.ts   # 旧 src/index.ts のエントリ
+    readMetadata.ts   # 旧 src/mme.ts の readMetadata 実装をここへ移譲
     writeMetadata.ts
   errors/
     mmeError.ts
 docs/
   field-mapping.md
 ```
+
+> エントリ ポイントのファイル名は Phase 1 で決定したとおり `mme.ts` (Barrel File と混同するため `index` は使わない)。
 
 ## 依存
 
