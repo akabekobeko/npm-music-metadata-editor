@@ -6,6 +6,9 @@
   "author": "akabeko (http://akabeko.me/)",
   "license": "MIT",
   "packageManager": "pnpm@10.33.2",
+  "engines": {
+    "node": ">=24"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
