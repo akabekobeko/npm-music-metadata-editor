@@ -13,7 +13,8 @@ src/
   formats/              # コンテナ形式ごとの read/write (mp3, flac, mp4, ogg, wav, ...)
     detect.ts           # 拡張子 / 署名によるフォーマット検出
     registry.ts         # format -> { detectSignature, read, write } のマッピング
-  tags/                 # タグ形式ごとの read/write (id3v1, id3v2, ape, vorbisComment, ...)
+  tags/                 # **複数 container で再利用される** タグ形式の純粋実装
+                        # (id3v1, id3v2, ape, vorbisComment, ...)
   utils/                # 汎用ユーティリティ
     encoding.ts         # TextDecoder / Buffer を組み合わせた文字エンコーディング
     syncSafeInt.ts      # ID3v2 同期安全整数の encode / decode
@@ -40,6 +41,40 @@ docs/
 ```
 
 サブディレクトリ (`tags/id3v2/` など) 内でも、複数ファイルで共有する型は同階層の `types.ts`、定数は `constants.ts` に集約します ([`types-and-constants.md`](types-and-constants.md) を参照)。
+
+## `formats/` と `tags/` の住み分け
+
+タグ形式の実装は、**そのタグが複数のコンテナで再利用されるか否か**で配置先を決めます。
+
+### `src/tags/<tagName>/` に置く (= 複数 container で共有されるタグ)
+
+| Tag | 利用 container | 根拠 |
+| --- | --- | --- |
+| `id3v1` | MP3 (主)、WAV / AIFF (一部) | [phase-02](../plan/phase-02-id3-mp3.md) 設計方針 |
+| `id3v2` | MP3 + WAV + AIFF | [phase-02](../plan/phase-02-id3-mp3.md) / [phase-07](../plan/phase-07-riff-aiff.md) (`id3 ` chunk 経由で再利用) |
+| `vorbisComment` | FLAC + OGG Vorbis + Opus | [phase-03](../plan/phase-03-flac-vorbis.md) / [phase-05](../plan/phase-05-ogg.md) |
+| `ape` | APE + MP3 (+ FLAC / MPC / WV) | [phase-06](../plan/phase-06-ape.md) |
+
+これらは **純粋なバイナリ ↔ オブジェクト変換のみ** を担い、ファイル位置の決定 (head / tail / chunk 内など) は呼び出し元のコンテナに委ねます。
+
+### `src/formats/<container>/` 内に直接置く (= そのコンテナ専用のタグ)
+
+| Tag / 構造 | 配置 | 根拠 |
+| --- | --- | --- |
+| MP4 atoms (iTunes アトム等) | `formats/mp4/` 配下 | [phase-04](../plan/phase-04-mp4.md) (MP4/M4A 専用) |
+| WMA / ASF プロパティ | `formats/wma/` 配下 | [phase-08](../plan/phase-08-wma-asf.md) (WMA 専用) |
+| RIFF `LIST INFO` / `BEXT` chunk | `formats/wav/` 配下 | [phase-07](../plan/phase-07-riff-aiff.md) (WAV 専用) |
+| AIFF native annotation 等 | `formats/aiff/` 配下 | [phase-07](../plan/phase-07-riff-aiff.md) (AIFF 専用) |
+
+### 判断フロー
+
+新しいタグ実装を追加するときは:
+
+1. **2 つ以上のコンテナがそのタグを使うか?** → Yes なら `src/tags/<tagName>/`
+2. 1 つのコンテナでしか使わないか? → Yes なら `src/formats/<container>/` 配下にコロケート
+3. **横方向 import (例: `formats/wav/` から `formats/mp3/` へ) は禁止**。共通化が必要になった時点で `src/tags/` へ昇格させる。
+
+クロス フォーマットで動く拡張メタデータ (`PictureInfo` / `LyricsInfo` / `ChapterInfo`) のマッピング ロジックも、複数 tag 形式から `src/types.ts` の共通中間表現へ写像する位置に置きます ([phase-09](../plan/phase-09-extras.md) で本格化)。
 
 ## ファイル命名
 
