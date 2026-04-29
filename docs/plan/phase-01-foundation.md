@@ -153,7 +153,7 @@ src/
 - 上記 type 定義、I/O ヘルパー、検出器、公開 API 骨格が `src/` に配置されている
 - すべての追加コードに対応する `*.test.ts` がある
 - `pnpm typecheck`、`pnpm test`、`pnpm exec biome check .` が通る
-- `CLAUDE.md` の「ディレクトリ規約」と本フェーズで決めた構成が一致している (ずれたら CLAUDE.md を更新)
+- `docs/rules/directory-structure.md` と本フェーズで決めた構成が一致している (ずれたら `directory-structure.md` を更新)
 
 ## 参考資料
 
