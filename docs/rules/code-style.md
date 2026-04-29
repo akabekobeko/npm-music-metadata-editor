@@ -8,13 +8,20 @@
 - コード内コメントは **英語で書く** (TSDoc も含む)。識別子も英語。
 - 関数の引数が 3 以上になったら **`type Args = {}`** として型に括り出す (Biome の `useMaxParams` で 3 引数以上は警告される)
   - 引数の TSDoc コメントは省略して、代わりにこちらのプロパティーにコメントをつける
-- **通常引数 (positional args) は TSDoc の `@param` で 1 つずつ説明を書く**。
-  - TSDoc 厳密構文に合わせ、`@param name - description` のように **名前と説明の間に `-` を入れる**。
-  - Args オブジェクト型 (1 引数 + プロパティで括り出した形) は `@param` を書かず、`type Args` のプロパティ TSDoc に説明を寄せる。
-  - 関数の戻り値が自明でない場合は `@returns` も付ける。
+- **通常引数 (positional args) と戻り値は常に TSDoc で説明を書く**。
+  - 引数: `@param name - description`。TSDoc 厳密構文に合わせ、名前と説明の間に必ず `-` を入れる。
+  - 戻り値: 非 `void` の関数には `@returns description` を必ず付ける (`void` の関数は省略可)。
+  - **`@param` を省略できる唯一の例外**: 引数が 3 以上で**関数専用の `type Args = {}` に括り出した**ケース。この場合は引数 1 つだけになるため `@param` を書かず、説明は `type Args` のプロパティ TSDoc 側に寄せる。
+  - 1 引数しか取らないが既存の domain type (例: `FormatRegistration`) を受ける関数は **`@param` を省略しない** (Args オブジェクト パターンとは別物)。
+- **関数専用の Args 型はファイル内に閉じて `type Args = {}` と命名する**。
+  - 名前を関数固有 (`type ResolveFormatArgs` など) にしない。冗長な命名は「他関数からも参照されうる」誤った印象を与える。
+  - **export しない**。当該ファイル外で参照される場合は再利用される共有型なので、`types.ts` に移すか、その関数を呼び出す関数から離れた配置を再検討する。
+  - 同一サブモジュール内の複数ファイルで型を共有する必要がある場合だけ、共有型を `parseFrame/types.ts` のように **同階層の `types.ts`** に置き、固有名で export する ([`types-and-constants.md`](types-and-constants.md))。
 - 1 関数の本体はおよそ **100 行を上限**。これを超えそうならサブルーチンに分割する。
-- 関数は **なるべく 1 ファイル 1 関数** とし、関心を細かく分割する。
-- 大きな関数をサブルーチンへ分けてファイル分割する場合、**代表となる関数名のサブディレクトリを掘り、サブルーチンをコロケーション**として並べる (例: `parseId3v2/` 配下に `parseId3v2.ts` とサブルーチンの `parseHeader.ts`、`parseFrame.ts` を置く)。
+- 関数は **なるべく 1 ファイル 1 関数** とし、関心を細かく分割する。具体的には次の 2 パターンに分ける:
+  - **メイン関数 + private helper** が同居する場合 → **代表となる関数名のサブディレクトリ**を掘り、メイン関数を同名ファイル (例: `parseId3v2/parseId3v2.ts`) に置き、helper を兄弟ファイル (`parseHeader.ts`、`parseFrame.ts`) としてコロケーションする。
+  - **対等な複数関数 (peer)** が並ぶ場合 (例: `decodeText` と `encodeText`) → サブディレクトリを掘らず、それぞれを **同階層の独立ファイル** に分割する。再エクスポート用の barrel ファイル (`index.ts` 相当) は作らない。
+  - サブモジュール内で複数ファイルから参照する型 / 定数は、同階層の `types.ts` / `constants.ts` に集約する ([`types-and-constants.md`](types-and-constants.md))。
 - **意図が `Array` の高階関数で表現できるループは、`for` を使わず高階関数で書く**。
   - 「最初に一致する要素を返す」→ `Array.prototype.find`
   - 「条件に合う要素だけ抜き出す」→ `Array.prototype.filter`

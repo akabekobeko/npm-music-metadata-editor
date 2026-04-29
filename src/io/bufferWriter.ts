@@ -1,6 +1,7 @@
 import { Buffer } from "node:buffer";
-import { encodeText, type TextEncoding } from "../utils/encoding.js";
-import { encodeSyncSafeInt32 } from "../utils/syncSafeInt.js";
+import { encodeText } from "../utils/encoding/encodeText.js";
+import type { TextEncoding } from "../utils/encoding/types.js";
+import { encodeSyncSafeInt32 } from "../utils/syncSafeInt/encodeSyncSafeInt32.js";
 
 /**
  * Append-only writer that grows its backing buffer on demand.
@@ -62,24 +63,26 @@ export type BufferWriter = {
   writeBytes: (bytes: Uint8Array) => void;
   /**
    * Append a string in the given encoding (no length prefix, no terminator).
-   * Returns the number of bytes written.
    *
    * @param value - String to encode.
    * @param encoding - Target text encoding.
+   * @returns The number of bytes appended.
    */
   writeString: (value: string, encoding: TextEncoding) => number;
   /**
    * Append a string followed by its null terminator (`0x00` or `0x0000` for UTF-16).
-   * Returns the total number of bytes written including the terminator.
    *
    * @param value - String to encode.
    * @param encoding - Target text encoding.
+   * @returns The total number of bytes appended including the terminator.
    */
   writeNullTerminated: (value: string, encoding: TextEncoding) => number;
   /**
    * Return a `Buffer` view over the bytes written so far (zero-copy).
    *
    * Mutating the returned buffer mutates the writer's internal state.
+   *
+   * @returns A `Buffer` slice that aliases the writer's internal storage.
    */
   concat: () => Buffer;
 };
@@ -97,6 +100,8 @@ const INITIAL_CAPACITY = 256;
  *
  * The internal buffer starts at {@link INITIAL_CAPACITY} bytes and doubles whenever a
  * write would overflow it.
+ *
+ * @returns A new {@link BufferWriter} positioned at length 0.
  */
 export const createBufferWriter = (): BufferWriter => {
   const state = { buffer: Buffer.alloc(INITIAL_CAPACITY), length: 0 };
@@ -113,12 +118,7 @@ export const createBufferWriter = (): BufferWriter => {
       return;
     }
 
-    let next = state.buffer.length;
-    while (next < required) {
-      next *= 2;
-    }
-
-    const grown = Buffer.alloc(next);
+    const grown = Buffer.alloc(nextCapacity({ current: state.buffer.length, required }));
     state.buffer.copy(grown, 0, 0, state.length);
     state.buffer = grown;
   };
@@ -185,4 +185,30 @@ export const createBufferWriter = (): BufferWriter => {
   };
 
   return writer;
+};
+
+/** Arguments for {@link nextCapacity}. */
+type Args = {
+  /** Current capacity in bytes (must be `>= 1`). */
+  current: number;
+  /** Required capacity in bytes (must be `> current`). */
+  required: number;
+};
+
+/**
+ * Compute the smallest doubling of `current` that fits `required` bytes.
+ *
+ * Used by the writer's grow strategy: each overflow doubles capacity, so a
+ * single allocation handles the new bytes without repeated reallocation when
+ * subsequent writes stay below the new size.
+ *
+ * @returns The new capacity (always `>= required`).
+ */
+const nextCapacity = (args: Args): number => {
+  let next = args.current;
+  while (next < args.required) {
+    next *= 2;
+  }
+
+  return next;
 };

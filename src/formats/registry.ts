@@ -7,6 +7,7 @@ import type { AudioFormat, MetadataReadResult, ReadOptions, WriteOptions } from 
  *
  * @param input - Whole-file bytes to parse.
  * @param options - Optional reader hints forwarded from {@link readMetadata}.
+ * @returns A promise resolving to the parsed metadata.
  */
 export type FormatReader = (
   input: Uint8Array,
@@ -20,6 +21,7 @@ export type FormatReader = (
  *
  * @param input - Original file bytes; must not be mutated.
  * @param options - Tag fields to write plus optional writer hints.
+ * @returns A promise resolving to the rebuilt file bytes.
  */
 export type FormatWriter = (input: Uint8Array, options: WriteOptions) => Promise<Uint8Array>;
 
@@ -39,6 +41,7 @@ export type FormatRegistration = {
    * signature. Implementations may peek up to 64 bytes.
    *
    * @param header - Leading bytes of the file to inspect.
+   * @returns `true` when `header` matches this format's signature.
    */
   detectSignature: (header: Uint8Array) => boolean;
   /** Reader implementation, when available. */
@@ -60,6 +63,8 @@ const registrations = new Map<AudioFormat, FormatRegistration>();
  *
  * Subsequent phases call this from format-specific entry points (e.g. `formats/mp3/mp3.ts`)
  * so that {@link getRegistration} / {@link getAllRegistrations} can locate them.
+ *
+ * @param registration - The format record to insert; replaces any existing entry with the same `format`.
  */
 export const registerFormat = (registration: FormatRegistration): void => {
   registrations.set(registration.format, registration);
@@ -76,6 +81,8 @@ export const getRegistration = (format: AudioFormat): FormatRegistration | undef
 
 /**
  * Return all currently registered formats.
+ *
+ * @returns Registrations in insertion order (the order earlier callers registered them).
  */
 export const getAllRegistrations = (): readonly FormatRegistration[] =>
   Array.from(registrations.values());

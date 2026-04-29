@@ -1,6 +1,7 @@
 import { Buffer } from "node:buffer";
-import { decodeText, type TextEncoding } from "../utils/encoding.js";
-import { decodeSyncSafeInt32 } from "../utils/syncSafeInt.js";
+import { decodeText } from "../utils/encoding/decodeText.js";
+import type { TextEncoding } from "../utils/encoding/types.js";
+import { decodeSyncSafeInt32 } from "../utils/syncSafeInt/decodeSyncSafeInt32.js";
 
 /**
  * Read-only cursor over a `Uint8Array` that tracks the current position.
@@ -16,19 +17,47 @@ export type BufferCursor = {
   readonly position: number;
   /** Number of bytes remaining ahead of the cursor. */
   readonly remaining: number;
-  /** Read one unsigned byte. */
+  /**
+   * Read one unsigned byte.
+   *
+   * @returns The byte value in `[0, 255]`.
+   */
   readUInt8: () => number;
-  /** Read a 16-bit unsigned integer in big-endian order. */
+  /**
+   * Read a 16-bit unsigned integer in big-endian order.
+   *
+   * @returns The value in `[0, 0xFFFF]`.
+   */
   readUInt16BE: () => number;
-  /** Read a 16-bit unsigned integer in little-endian order. */
+  /**
+   * Read a 16-bit unsigned integer in little-endian order.
+   *
+   * @returns The value in `[0, 0xFFFF]`.
+   */
   readUInt16LE: () => number;
-  /** Read a 24-bit unsigned integer in big-endian order. */
+  /**
+   * Read a 24-bit unsigned integer in big-endian order.
+   *
+   * @returns The value in `[0, 0xFFFFFF]`.
+   */
   readUInt24BE: () => number;
-  /** Read a 32-bit unsigned integer in big-endian order. */
+  /**
+   * Read a 32-bit unsigned integer in big-endian order.
+   *
+   * @returns The value in `[0, 0xFFFFFFFF]`.
+   */
   readUInt32BE: () => number;
-  /** Read a 32-bit unsigned integer in little-endian order. */
+  /**
+   * Read a 32-bit unsigned integer in little-endian order.
+   *
+   * @returns The value in `[0, 0xFFFFFFFF]`.
+   */
   readUInt32LE: () => number;
-  /** Read an ID3v2 syncsafe 32-bit unsigned integer (4 bytes consumed). */
+  /**
+   * Read an ID3v2 syncsafe 32-bit unsigned integer (4 bytes consumed).
+   *
+   * @returns The decoded 28-bit value.
+   */
   readSyncSafeInt32: () => number;
   /**
    * Read `length` bytes as a zero-copy `Uint8Array` view onto the underlying buffer.
@@ -36,6 +65,7 @@ export type BufferCursor = {
    * The returned view shares memory with the source — do not mutate it.
    *
    * @param length - Number of bytes to read.
+   * @returns A zero-copy view of the next `length` bytes.
    */
   readBytes: (length: number) => Uint8Array;
   /**
@@ -43,6 +73,7 @@ export type BufferCursor = {
    *
    * @param length - Number of bytes to consume from the cursor.
    * @param encoding - Text encoding to interpret the bytes with.
+   * @returns The decoded string.
    */
   readString: (length: number, encoding: TextEncoding) => string;
   /**
@@ -53,6 +84,7 @@ export type BufferCursor = {
    * counts; all other encodings use a single-byte (`0x00`) terminator.
    *
    * @param encoding - Text encoding to interpret the bytes with.
+   * @returns The decoded string up to (but excluding) the terminator.
    */
   readNullTerminated: (encoding: TextEncoding) => string;
   /**
@@ -71,6 +103,7 @@ export type BufferCursor = {
    * Return a zero-copy view of the next `n` bytes without advancing the cursor.
    *
    * @param n - Number of bytes to peek ahead.
+   * @returns A view sharing memory with the underlying buffer.
    */
   peek: (n: number) => Uint8Array;
 };
@@ -171,28 +204,14 @@ export const createBufferCursor = (source: Uint8Array): BufferCursor => {
     readNullTerminated: (encoding: TextEncoding) => {
       const isUtf16 = encoding === "utf16" || encoding === "utf16le" || encoding === "utf16be";
       const start = state.position;
-      let end = start;
-      if (isUtf16) {
-        while (end + 1 < source.length) {
-          if (source[end] === 0 && source[end + 1] === 0) {
-            break;
-          }
-
-          end += 2;
-        }
-
-        const value = decodeText(source.subarray(start, end), encoding);
-        // Advance past the payload plus the 2-byte terminator when one is present.
-        state.position = end + 1 < source.length ? end + 2 : source.length;
-        return value;
-      }
-
-      while (end < source.length && source[end] !== 0) {
-        end += 1;
-      }
-
+      const end = isUtf16
+        ? findUtf16Terminator(source, start)
+        : findSingleByteTerminator(source, start);
       const value = decodeText(source.subarray(start, end), encoding);
-      state.position = end < source.length ? end + 1 : source.length;
+      // Advance past the payload plus the terminator when one is present.
+      const terminatorSize = isUtf16 ? 2 : 1;
+      state.position =
+        end + terminatorSize - 1 < source.length ? end + terminatorSize : source.length;
       return value;
     },
     seek: (offset: number) => {
@@ -229,4 +248,42 @@ export const createBufferCursor = (source: Uint8Array): BufferCursor => {
   };
 
   return cursor;
+};
+
+/**
+ * Walk forward over `source` looking for the first single-byte `0x00` terminator.
+ *
+ * @param source - Bytes to scan.
+ * @param start - Offset to start scanning from.
+ * @returns The offset of the terminator, or `source.length` when no terminator exists.
+ */
+const findSingleByteTerminator = (source: Uint8Array, start: number): number => {
+  let end = start;
+  while (end < source.length && source[end] !== 0) {
+    end += 1;
+  }
+
+  return end;
+};
+
+/**
+ * Walk forward over `source` looking for the first aligned 2-byte `0x00 0x00`
+ * terminator (UTF-16 family).
+ *
+ * @param source - Bytes to scan.
+ * @param start - Offset to start scanning from. Should be aligned with the UTF-16 code-unit grid.
+ * @returns The offset of the terminator, or the position at which scanning stopped
+ *   (just past the last full code unit) when no terminator exists.
+ */
+const findUtf16Terminator = (source: Uint8Array, start: number): number => {
+  let end = start;
+  while (end + 1 < source.length) {
+    if (source[end] === 0 && source[end + 1] === 0) {
+      return end;
+    }
+
+    end += 2;
+  }
+
+  return end;
 };

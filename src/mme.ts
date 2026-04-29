@@ -1,7 +1,11 @@
 import { detectFormat, SIGNATURE_PROBE_BYTES } from "./formats/detect.js";
+import { registerMp3Format } from "./formats/mp3/mp3.js";
 import { getRegistration } from "./formats/registry.js";
 import { readFileBuffer } from "./io/file.js";
 import type { AudioFormat, MetadataReadResult, ReadOptions, WriteOptions } from "./types.js";
+
+// Register all built-in formats on module load. Subsequent phases append more.
+registerMp3Format();
 
 export type {
   AudioFormat,
@@ -87,7 +91,7 @@ const loadInput = async (
 };
 
 /** Arguments for {@link resolveFormat}. */
-type ResolveFormatArgs = {
+type Args = {
   /** Raw bytes of the input. Only the first {@link SIGNATURE_PROBE_BYTES} are inspected. */
   bytes: Uint8Array;
   /** Original file path, when the caller passed one. Used for extension-based fallback. */
@@ -103,9 +107,10 @@ type ResolveFormatArgs = {
  * are run through {@link detectFormat}, which combines signature and extension
  * checks (signature wins on conflict).
  *
+ * @returns The resolved {@link AudioFormat}.
  * @throws when the format cannot be determined and no override was supplied.
  */
-const resolveFormat = (args: ResolveFormatArgs): AudioFormat => {
+const resolveFormat = (args: Args): AudioFormat => {
   if (args.override !== undefined) {
     return args.override;
   }

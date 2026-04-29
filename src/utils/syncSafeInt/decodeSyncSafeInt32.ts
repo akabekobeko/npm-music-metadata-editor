@@ -1,11 +1,4 @@
 /**
- * Maximum value representable as an ID3v2 syncsafe 32-bit integer.
- *
- * Each of the four bytes uses only its low 7 bits, so the upper bound is `0x0FFFFFFF`.
- */
-export const SYNC_SAFE_INT32_MAX = 0x0fffffff;
-
-/**
  * Decode an ID3v2 syncsafe 32-bit unsigned integer.
  *
  * Syncsafe integers spread their value across four bytes using only the low 7 bits of
@@ -32,26 +25,4 @@ export const decodeSyncSafeInt32 = (bytes: Uint8Array, offset = 0): number => {
   }
 
   return (b0 << 21) | (b1 << 14) | (b2 << 7) | b3;
-};
-
-/**
- * Encode an unsigned integer as an ID3v2 syncsafe 32-bit value.
- *
- * @param value - Integer in the range `[0, SYNC_SAFE_INT32_MAX]`.
- * @returns A 4-byte `Uint8Array` containing the syncsafe encoding (big-endian).
- * @throws when `value` is negative, non-integer, or exceeds `SYNC_SAFE_INT32_MAX`.
- */
-export const encodeSyncSafeInt32 = (value: number): Uint8Array => {
-  if (!Number.isInteger(value) || value < 0 || value > SYNC_SAFE_INT32_MAX) {
-    throw new RangeError(
-      `encodeSyncSafeInt32: value out of range [0, ${SYNC_SAFE_INT32_MAX}]: ${value}`,
-    );
-  }
-
-  return new Uint8Array([
-    (value >>> 21) & 0x7f,
-    (value >>> 14) & 0x7f,
-    (value >>> 7) & 0x7f,
-    value & 0x7f,
-  ]);
 };
