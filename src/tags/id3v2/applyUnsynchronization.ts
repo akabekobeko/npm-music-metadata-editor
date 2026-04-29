@@ -14,16 +14,8 @@ export const applyUnsynchronization = (bytes: Uint8Array): Uint8Array => {
     return bytes;
   }
 
-  const out = new Uint8Array(bytes.length + extras);
-  let writePos = 0;
-  for (const byte of bytes) {
-    out[writePos] = byte;
-    writePos += 1;
-    if (byte === 0xff) {
-      out[writePos] = 0x00;
-      writePos += 1;
-    }
-  }
-
-  return out;
+  // Each 0xFF is followed by an inserted 0x00; every other byte is emitted as-is.
+  return Uint8Array.from(
+    Array.from(bytes).flatMap((byte) => (byte === 0xff ? [byte, 0x00] : [byte])),
+  );
 };

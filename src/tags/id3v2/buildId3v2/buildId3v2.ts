@@ -37,14 +37,7 @@ export const buildId3v2 = (args: BuildId3v2Args): Uint8Array => {
   const bodySize = framesBytes + padding;
   const header = buildHeader({ majorVersion: args.majorVersion, bodySize });
 
-  const out = Buffer.alloc(header.length + bodySize);
-  out.set(header, 0);
-  let pos = header.length;
-  for (const buf of frameBuffers) {
-    out.set(buf, pos);
-    pos += buf.length;
-  }
-
-  // Padding bytes are already zero from `Buffer.alloc`.
-  return new Uint8Array(out.buffer, out.byteOffset, out.byteLength);
+  // `Buffer.alloc(padding)` gives us a zero-filled tail when caller asked for padding.
+  const concatenated = Buffer.concat([header, ...frameBuffers, Buffer.alloc(padding)]);
+  return new Uint8Array(concatenated.buffer, concatenated.byteOffset, concatenated.byteLength);
 };

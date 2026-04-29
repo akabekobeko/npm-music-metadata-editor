@@ -44,16 +44,6 @@ export const buildCommentFrameBody = (args: BuildCommentFrameBodyArgs): Uint8Arr
     args.encoding === "utf16" || args.encoding === "utf16be" || args.encoding === "utf16le";
   const terminator = isUtf16 ? new Uint8Array([0x00, 0x00]) : new Uint8Array([0x00]);
 
-  const out = Buffer.alloc(1 + 3 + description.length + terminator.length + text.length);
-  let pos = 0;
-  out[pos] = encByte;
-  pos += 1;
-  out.set(lang, pos);
-  pos += 3;
-  out.set(description, pos);
-  pos += description.length;
-  out.set(terminator, pos);
-  pos += terminator.length;
-  out.set(text, pos);
-  return new Uint8Array(out.buffer, out.byteOffset, out.byteLength);
+  const concatenated = Buffer.concat([Uint8Array.of(encByte), lang, description, terminator, text]);
+  return new Uint8Array(concatenated.buffer, concatenated.byteOffset, concatenated.byteLength);
 };

@@ -14,17 +14,9 @@ export const removeUnsynchronization = (bytes: Uint8Array): Uint8Array => {
     return bytes;
   }
 
-  const out = new Uint8Array(bytes.length - pairs);
-  let writePos = 0;
-  for (let i = 0; i < bytes.length; i += 1) {
-    out[writePos] = bytes[i] as number;
-    writePos += 1;
-    if (bytes[i] === 0xff && i + 1 < bytes.length && bytes[i + 1] === 0x00) {
-      i += 1; // Skip the inserted 0x00.
-    }
-  }
-
-  return out;
+  // Drop every `0x00` that immediately follows a `0xFF` — that is the unsync
+  // escape we are undoing. Every other byte is kept.
+  return bytes.filter((byte, i) => !(i > 0 && bytes[i - 1] === 0xff && byte === 0x00));
 };
 
 /**
