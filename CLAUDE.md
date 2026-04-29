@@ -10,7 +10,7 @@ C# 実装の [ATL.NET (Zeugma440/atldotnet)](https://github.com/Zeugma440/atldot
 
 ATL.NET のソースを参照する作業 (仕様確認、フィクスチャの所在確認など) が発生した場合は、**ローカルに clone 済みであれば そのパスをユーザーに確認**してください。clone されていない場合はリポジトリ URL から `git clone` するか、関連ファイルだけ取得する方針をユーザーと合意してから進めます。
 
-実装計画はフェーズ単位で `docs/` 配下に分割しています。詳細は `docs/README.md` を参照してください。
+実装計画はフェーズ単位で `docs/plan/` 配下に分割しています。詳細は `docs/plan/README.md` を参照してください。
 
 ## 環境とコマンド
 
@@ -81,16 +81,19 @@ src/
   tags/                 # タグ形式ごとの read/write (id3v1, id3v2, ape, vorbisComment, ...)
   utils/                # 汎用ユーティリティ
 docs/
-  README.md             # 実装計画の目次
-  phase-XX-*.md         # フェーズ別計画書
+  README.md             # docs/ 配下のサブディレクトリ案内
+  plan/                 # 実装計画 (フェーズ別)
+    README.md
+    phase-XX-*.md
 ```
 
 サブディレクトリ (`tags/id3v2/` など) 内でも、複数ファイルで共有する型は同階層の `types.ts`、定数は `constants.ts` に集約します (実装ルール「型定義、定数」を参照)。
 
-ディレクトリ構成は Phase 1 でファイナライズします。`docs/phase-01-foundation.md` の決定事項を正とし、本ファイルとずれが生じた場合は CLAUDE.md を更新します。
+ディレクトリ構成は Phase 1 でファイナライズします。`docs/plan/phase-01-foundation.md` の決定事項を正とし、本ファイルとずれが生じた場合は CLAUDE.md を更新します。
 
 ## ドキュメント参照
 
-- 実装計画 (フェーズ別): `docs/README.md`
+- ドキュメント目次: `docs/README.md`
+- 実装計画 (フェーズ別): `docs/plan/README.md`
 - ATL.NET ソース (参考実装): <https://github.com/Zeugma440/atldotnet> — ローカル clone がある場合はそのパスをユーザーに確認してから参照する
 - ATL.NET フォーマット互換性表: <https://docs.google.com/spreadsheets/d/1Wo9ifsKbBloofdWCsoXziAtaS-QVjqci5aavAV8dt2U/>
