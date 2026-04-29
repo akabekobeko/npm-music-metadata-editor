@@ -74,6 +74,7 @@ const CHANNEL_BY_INDEX: Readonly<Record<number, MpegChannelMode>> = {
  *
  * @param bytes - Bytes containing the audio frame header at `offset`.
  * @param offset - Offset where the 4-byte header begins.
+ * @returns The decoded {@link Mp3AudioInfo}, or `undefined` for unrecognised headers.
  */
 export const parseMp3AudioHeader = (
   bytes: Uint8Array,

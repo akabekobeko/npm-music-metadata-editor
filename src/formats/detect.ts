@@ -60,6 +60,8 @@ export type DetectFormatInput = {
  *
  * Signature matches take precedence over extension matches: the extension is only
  * trusted when no registered signature matches. This protects against renamed files.
+ *
+ * @returns The detected format, or `undefined` when neither check succeeds.
  */
 export const detectFormat = (input: DetectFormatInput): AudioFormat | undefined => {
   const bySignature = detectFormatBySignature(input.header);

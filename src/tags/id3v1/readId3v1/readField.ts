@@ -12,6 +12,8 @@ export type ReadFieldArgs = {
 
 /**
  * Decode a fixed-length Latin-1 field, trimming trailing null and space padding.
+ *
+ * @returns The decoded string with trailing padding stripped.
  */
 export const readField = (args: ReadFieldArgs): string => {
   const { trailer, offset, length } = args;

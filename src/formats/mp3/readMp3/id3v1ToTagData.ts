@@ -1,7 +1,12 @@
 import type { Id3v1Tag } from "../../../tags/id3v1/types.js";
 import type { TagData } from "../../../types.js";
 
-/** Convert {@link Id3v1Tag} into the high-level {@link TagData} shape. */
+/**
+ * Convert {@link Id3v1Tag} into the high-level {@link TagData} shape.
+ *
+ * @param id3v1 - Parsed ID3v1 tag, or `undefined` when no trailer was present.
+ * @returns A `TagData` populated with the non-empty ID3v1 fields. Empty when `id3v1` is `undefined`.
+ */
 export const id3v1ToTagData = (id3v1: Id3v1Tag | undefined): TagData => {
   if (id3v1 === undefined) {
     return {};

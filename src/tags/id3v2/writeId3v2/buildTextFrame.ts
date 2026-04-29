@@ -13,7 +13,11 @@ export type BuildTextFrameArgs = {
   encoding: TextEncoding;
 };
 
-/** Wrap {@link buildTextFrameBody} into a fully-formed {@link Id3v2Frame}. */
+/**
+ * Wrap {@link buildTextFrameBody} into a fully-formed {@link Id3v2Frame}.
+ *
+ * @returns A frame record with empty flags and the encoded body.
+ */
 export const buildTextFrame = (args: BuildTextFrameArgs): Id3v2Frame => ({
   id: args.id,
   flags: NO_FRAME_FLAGS,

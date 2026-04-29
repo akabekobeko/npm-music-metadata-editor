@@ -16,6 +16,8 @@ type BuildHeaderArgs = {
  *
  * The size field uses a syncsafe 32-bit integer regardless of major version
  * (this is true for both v2.3 and v2.4 — only frame sizes differ between them).
+ *
+ * @returns The 10-byte header ready to prepend to the body.
  */
 export const buildHeader = (args: BuildHeaderArgs): Uint8Array => {
   const out = Buffer.alloc(ID3V2_HEADER_SIZE);

@@ -7,6 +7,9 @@ import type { Id3v1Tag } from "../types.js";
  * Prefers `tag.genreCode` when it is a valid `[0, 255]` integer; otherwise looks
  * up `tag.genre` in {@link ID3V1_GENRES} (case-insensitive). Falls back to
  * {@link ID3V1_NO_GENRE} when nothing resolves.
+ *
+ * @param tag - Tag carrying the genre code / genre name to resolve.
+ * @returns A byte in `[0, 255]`; `0xFF` means "no genre".
  */
 export const resolveGenreByte = (tag: Id3v1Tag): number => {
   if (Number.isInteger(tag.genreCode) && tag.genreCode >= 0 && tag.genreCode <= 0xff) {

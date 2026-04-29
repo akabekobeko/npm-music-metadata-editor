@@ -17,7 +17,9 @@ export type FindMp3AudioHeaderArgs = {
  * Locate the first valid MPEG audio frame header starting at `startOffset`.
  *
  * Scans forward up to `maxScan` bytes looking for `0xFF 0xEx`/`0xFx` followed
- * by a parseable header. Returns the offset where the header begins, or `-1`.
+ * by a parseable header.
+ *
+ * @returns The offset where the header begins, or `-1` when no header is found.
  */
 export const findMp3AudioHeader = (args: FindMp3AudioHeaderArgs): number => {
   const { bytes, startOffset } = args;

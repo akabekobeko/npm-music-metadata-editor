@@ -21,6 +21,8 @@ type BuildId3v2Args = {
  * Phase 2 only emits ID3v2.3 and ID3v2.4. Tag-level unsynchronisation is not
  * applied; per-frame flags are zeroed; padding defaults to `0` bytes (caller
  * may opt in by setting `padding`).
+ *
+ * @returns Header + frames + padding bytes ready to prepend to the audio payload.
  */
 export const buildId3v2 = (args: BuildId3v2Args): Uint8Array => {
   const padding = args.padding ?? 0;

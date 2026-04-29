@@ -2,7 +2,13 @@ import { Buffer } from "node:buffer";
 import { ID3V2_2_TO_2_3_FRAME_ID } from "../../constants.js";
 import { NO_FLAGS, type ParseFrameResult } from "./types.js";
 
-/** ID3v2.2 frame layout: 3-byte ID + 3-byte size + body (no flags, no unsync flag). */
+/**
+ * ID3v2.2 frame layout: 3-byte ID + 3-byte size + body (no flags, no unsync flag).
+ *
+ * @param body - Tag-body bytes (already de-unsynchronised).
+ * @param offset - Offset within `body` where the frame header begins.
+ * @returns A {@link ParseFrameResult} describing the parsed frame, error, or padding.
+ */
 export const parseV22Frame = (body: Uint8Array, offset: number): ParseFrameResult => {
   if (offset + 6 > body.length) {
     return { kind: "error", consumed: body.length - offset, reason: "truncated v2.2 frame" };

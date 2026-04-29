@@ -6,6 +6,7 @@
  *
  * @param bytes - Source bytes.
  * @param offset - Offset where the 4-byte big-endian integer begins.
+ * @returns The decoded value in `[0, 0xFFFFFFFF]`.
  */
 export const readUInt32BE = (bytes: Uint8Array, offset: number): number => {
   return (

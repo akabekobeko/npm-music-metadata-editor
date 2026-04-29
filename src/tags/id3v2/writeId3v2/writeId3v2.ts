@@ -27,6 +27,8 @@ export type WriteId3v2Args = {
  * - `trackNumber` / `trackTotal` collapse into a single `TRCK` value (`"X/Y"`),
  *   `discNumber` / `discTotal` collapse into `TPOS` similarly.
  * - `preserveFrames` are emitted verbatim (used for unknown frames captured on read).
+ *
+ * @returns The encoded ID3v2 tag bytes ready to prepend to the audio payload.
  */
 export const writeId3v2 = (args: WriteId3v2Args): Uint8Array => {
   const frames = synthesizeFrames(args.tag, args.majorVersion);

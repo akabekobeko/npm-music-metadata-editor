@@ -28,6 +28,8 @@ const ENCODING_TO_BYTE: Readonly<Record<string, number>> = {
  *
  * Layout: `<encoding:1><language:3><description><term><text>` where `term` is
  * `0x00` for single-byte encodings or `0x00 0x00` for UTF-16 family.
+ *
+ * @returns The encoded body ready to wrap in a frame header.
  */
 export const buildCommentFrameBody = (args: BuildCommentFrameBodyArgs): Uint8Array => {
   const encByte = ENCODING_TO_BYTE[args.encoding];

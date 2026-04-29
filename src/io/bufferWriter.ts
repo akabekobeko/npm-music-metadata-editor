@@ -63,24 +63,26 @@ export type BufferWriter = {
   writeBytes: (bytes: Uint8Array) => void;
   /**
    * Append a string in the given encoding (no length prefix, no terminator).
-   * Returns the number of bytes written.
    *
    * @param value - String to encode.
    * @param encoding - Target text encoding.
+   * @returns The number of bytes appended.
    */
   writeString: (value: string, encoding: TextEncoding) => number;
   /**
    * Append a string followed by its null terminator (`0x00` or `0x0000` for UTF-16).
-   * Returns the total number of bytes written including the terminator.
    *
    * @param value - String to encode.
    * @param encoding - Target text encoding.
+   * @returns The total number of bytes appended including the terminator.
    */
   writeNullTerminated: (value: string, encoding: TextEncoding) => number;
   /**
    * Return a `Buffer` view over the bytes written so far (zero-copy).
    *
    * Mutating the returned buffer mutates the writer's internal state.
+   *
+   * @returns A `Buffer` slice that aliases the writer's internal storage.
    */
   concat: () => Buffer;
 };
@@ -98,6 +100,8 @@ const INITIAL_CAPACITY = 256;
  *
  * The internal buffer starts at {@link INITIAL_CAPACITY} bytes and doubles whenever a
  * write would overflow it.
+ *
+ * @returns A new {@link BufferWriter} positioned at length 0.
  */
 export const createBufferWriter = (): BufferWriter => {
   const state = { buffer: Buffer.alloc(INITIAL_CAPACITY), length: 0 };

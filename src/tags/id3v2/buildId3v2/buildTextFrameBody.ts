@@ -24,6 +24,8 @@ const ENCODING_TO_BYTE: Readonly<Record<string, number>> = {
  * The body is `<encoding-byte:1><text-bytes...>`. No null terminator is
  * appended (single-value frames in v2.3/v2.4 do not require one — most readers,
  * including ours, accept either form).
+ *
+ * @returns The encoded body ready to wrap in a frame header.
  */
 export const buildTextFrameBody = (args: BuildTextFrameBodyArgs): Uint8Array => {
   const encByte = ENCODING_TO_BYTE[args.encoding];

@@ -107,6 +107,7 @@ type ResolveFormatArgs = {
  * are run through {@link detectFormat}, which combines signature and extension
  * checks (signature wins on conflict).
  *
+ * @returns The resolved {@link AudioFormat}.
  * @throws when the format cannot be determined and no override was supplied.
  */
 const resolveFormat = (args: ResolveFormatArgs): AudioFormat => {

@@ -7,6 +7,10 @@ export type SplitParts = { first: Uint8Array; second: Uint8Array };
 /**
  * Split the bytes into the description and the text payload at the first
  * encoding-appropriate null terminator.
+ *
+ * @param bytes - Bytes after the encoding/language prefix.
+ * @param encoding - Encoding driving terminator size (1 byte vs 2 bytes for UTF-16).
+ * @returns The two halves, or `undefined` when the input is too short to split.
  */
 export const splitOnTerminator = (
   bytes: Uint8Array,

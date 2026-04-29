@@ -17,19 +17,47 @@ export type BufferCursor = {
   readonly position: number;
   /** Number of bytes remaining ahead of the cursor. */
   readonly remaining: number;
-  /** Read one unsigned byte. */
+  /**
+   * Read one unsigned byte.
+   *
+   * @returns The byte value in `[0, 255]`.
+   */
   readUInt8: () => number;
-  /** Read a 16-bit unsigned integer in big-endian order. */
+  /**
+   * Read a 16-bit unsigned integer in big-endian order.
+   *
+   * @returns The value in `[0, 0xFFFF]`.
+   */
   readUInt16BE: () => number;
-  /** Read a 16-bit unsigned integer in little-endian order. */
+  /**
+   * Read a 16-bit unsigned integer in little-endian order.
+   *
+   * @returns The value in `[0, 0xFFFF]`.
+   */
   readUInt16LE: () => number;
-  /** Read a 24-bit unsigned integer in big-endian order. */
+  /**
+   * Read a 24-bit unsigned integer in big-endian order.
+   *
+   * @returns The value in `[0, 0xFFFFFF]`.
+   */
   readUInt24BE: () => number;
-  /** Read a 32-bit unsigned integer in big-endian order. */
+  /**
+   * Read a 32-bit unsigned integer in big-endian order.
+   *
+   * @returns The value in `[0, 0xFFFFFFFF]`.
+   */
   readUInt32BE: () => number;
-  /** Read a 32-bit unsigned integer in little-endian order. */
+  /**
+   * Read a 32-bit unsigned integer in little-endian order.
+   *
+   * @returns The value in `[0, 0xFFFFFFFF]`.
+   */
   readUInt32LE: () => number;
-  /** Read an ID3v2 syncsafe 32-bit unsigned integer (4 bytes consumed). */
+  /**
+   * Read an ID3v2 syncsafe 32-bit unsigned integer (4 bytes consumed).
+   *
+   * @returns The decoded 28-bit value.
+   */
   readSyncSafeInt32: () => number;
   /**
    * Read `length` bytes as a zero-copy `Uint8Array` view onto the underlying buffer.
@@ -37,6 +65,7 @@ export type BufferCursor = {
    * The returned view shares memory with the source — do not mutate it.
    *
    * @param length - Number of bytes to read.
+   * @returns A zero-copy view of the next `length` bytes.
    */
   readBytes: (length: number) => Uint8Array;
   /**
@@ -44,6 +73,7 @@ export type BufferCursor = {
    *
    * @param length - Number of bytes to consume from the cursor.
    * @param encoding - Text encoding to interpret the bytes with.
+   * @returns The decoded string.
    */
   readString: (length: number, encoding: TextEncoding) => string;
   /**
@@ -54,6 +84,7 @@ export type BufferCursor = {
    * counts; all other encodings use a single-byte (`0x00`) terminator.
    *
    * @param encoding - Text encoding to interpret the bytes with.
+   * @returns The decoded string up to (but excluding) the terminator.
    */
   readNullTerminated: (encoding: TextEncoding) => string;
   /**
@@ -72,6 +103,7 @@ export type BufferCursor = {
    * Return a zero-copy view of the next `n` bytes without advancing the cursor.
    *
    * @param n - Number of bytes to peek ahead.
+   * @returns A view sharing memory with the underlying buffer.
    */
   peek: (n: number) => Uint8Array;
 };

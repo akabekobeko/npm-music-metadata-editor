@@ -23,6 +23,7 @@ import type { Mp3WriteOptions } from "./types.js";
  *
  * @param input - Original MP3 bytes.
  * @param options - {@link WriteOptions} (with optional MP3-specific extras).
+ * @returns Rebuilt file bytes ready to persist.
  */
 export const writeMp3 = async (input: Uint8Array, options: WriteOptions): Promise<Uint8Array> => {
   const mp3Options = options as WriteOptions & Mp3WriteOptions;

@@ -9,8 +9,8 @@ export type SkipExtendedHeaderArgs = {
 /**
  * Skip the v2.3 / v2.4 extended header.
  *
- * Returns the offset to start frame parsing from, or `-1` when the extended
- * header is malformed.
+ * @returns The offset (within `body`) where frame parsing should start, or `-1`
+ *   when the extended header is malformed.
  */
 export const skipExtendedHeader = (args: SkipExtendedHeaderArgs): number => {
   const { body, syncSafe } = args;

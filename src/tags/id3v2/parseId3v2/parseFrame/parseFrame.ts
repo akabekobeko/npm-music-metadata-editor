@@ -5,10 +5,12 @@ import type { ParseFrameArgs, ParseFrameResult } from "./types.js";
 /**
  * Read a single frame starting at `args.offset`.
  *
- * Returns `{ kind: "padding" }` when the next byte is `0x00` (padding marks the
- * end of the frame stream); `{ kind: "error" }` when the frame header is
- * malformed (size overflows the body, unknown layout); or `{ kind: "frame" }`
- * with the parsed frame and the number of bytes consumed.
+ * @returns A discriminated result:
+ *   - `{ kind: "padding" }` when the next byte is `0x00` (padding marks the end
+ *     of the frame stream).
+ *   - `{ kind: "error" }` when the frame header is malformed (size overflows
+ *     the body, unknown layout).
+ *   - `{ kind: "frame" }` with the parsed frame and the number of bytes consumed.
  */
 export const parseFrame = (args: ParseFrameArgs): ParseFrameResult => {
   const { body, offset, majorVersion } = args;

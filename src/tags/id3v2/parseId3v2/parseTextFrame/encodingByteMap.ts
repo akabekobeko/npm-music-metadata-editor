@@ -8,6 +8,11 @@ export const ENCODING_BY_BYTE: Readonly<Record<number, TextEncoding>> = {
   3: "utf8",
 };
 
-/** Detect whether the encoding uses 2-byte code units (UTF-16 family). */
+/**
+ * Detect whether the encoding uses 2-byte code units (UTF-16 family).
+ *
+ * @param encoding - Encoding name to classify.
+ * @returns `true` when each code unit is 2 bytes; `false` otherwise.
+ */
 export const isMultiByteEncoding = (encoding: TextEncoding): boolean =>
   encoding === "utf16" || encoding === "utf16be" || encoding === "utf16le";

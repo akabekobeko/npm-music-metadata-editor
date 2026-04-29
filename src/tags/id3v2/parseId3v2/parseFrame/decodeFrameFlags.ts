@@ -10,7 +10,11 @@ export type DecodeFrameFlagsArgs = {
   majorVersion: Id3v2MajorVersion;
 };
 
-/** Decode the two flag bytes into the typed {@link Id3v2FrameFlags} record. */
+/**
+ * Decode the two flag bytes into the typed {@link Id3v2FrameFlags} record.
+ *
+ * @returns The decoded frame flags.
+ */
 export const decodeFrameFlags = (args: DecodeFrameFlagsArgs): Id3v2FrameFlags => {
   const { statusFlags, formatFlags, majorVersion } = args;
   if (majorVersion === 4) {

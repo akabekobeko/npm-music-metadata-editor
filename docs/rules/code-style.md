@@ -8,10 +8,11 @@
 - コード内コメントは **英語で書く** (TSDoc も含む)。識別子も英語。
 - 関数の引数が 3 以上になったら **`type Args = {}`** として型に括り出す (Biome の `useMaxParams` で 3 引数以上は警告される)
   - 引数の TSDoc コメントは省略して、代わりにこちらのプロパティーにコメントをつける
-- **通常引数 (positional args) は TSDoc の `@param` で 1 つずつ説明を書く**。
-  - TSDoc 厳密構文に合わせ、`@param name - description` のように **名前と説明の間に `-` を入れる**。
-  - Args オブジェクト型 (1 引数 + プロパティで括り出した形) は `@param` を書かず、`type Args` のプロパティ TSDoc に説明を寄せる。
-  - 関数の戻り値が自明でない場合は `@returns` も付ける。
+- **通常引数 (positional args) と戻り値は常に TSDoc で説明を書く**。
+  - 引数: `@param name - description`。TSDoc 厳密構文に合わせ、名前と説明の間に必ず `-` を入れる。
+  - 戻り値: 非 `void` の関数には `@returns description` を必ず付ける (`void` の関数は省略可)。
+  - **`@param` を省略できる唯一の例外**: 引数が 3 以上で**関数専用の `type Args = {}` に括り出した**ケース。この場合は引数 1 つだけになるため `@param` を書かず、説明は `type Args` のプロパティ TSDoc 側に寄せる。
+  - 1 引数しか取らないが既存の domain type (例: `FormatRegistration`) を受ける関数は **`@param` を省略しない** (Args オブジェクト パターンとは別物)。
 - 1 関数の本体はおよそ **100 行を上限**。これを超えそうならサブルーチンに分割する。
 - 関数は **なるべく 1 ファイル 1 関数** とし、関心を細かく分割する。具体的には次の 2 パターンに分ける:
   - **メイン関数 + private helper** が同居する場合 → **代表となる関数名のサブディレクトリ**を掘り、メイン関数を同名ファイル (例: `parseId3v2/parseId3v2.ts`) に置き、helper を兄弟ファイル (`parseHeader.ts`、`parseFrame.ts`) としてコロケーションする。

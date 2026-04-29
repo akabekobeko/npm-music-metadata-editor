@@ -5,7 +5,11 @@ import { decodeFrameFlags } from "./decodeFrameFlags.js";
 import { readUInt32BE } from "./readUInt32BE.js";
 import type { ParseFrameArgs, ParseFrameResult } from "./types.js";
 
-/** ID3v2.3 / ID3v2.4 frame layout: 4-byte ID + 4-byte size + 2-byte flags + body. */
+/**
+ * ID3v2.3 / ID3v2.4 frame layout: 4-byte ID + 4-byte size + 2-byte flags + body.
+ *
+ * @returns A {@link ParseFrameResult} describing the parsed frame, error, or padding.
+ */
 export const parseV23OrV24Frame = (args: ParseFrameArgs): ParseFrameResult => {
   const { body, offset, majorVersion } = args;
   if (offset + 10 > body.length) {

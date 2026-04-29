@@ -15,6 +15,8 @@ type BuildFrameArgs = {
  * Frame body bytes are emitted as-is — callers are responsible for handling
  * encoding bytes, terminators, and unsync. Status / format flag bytes are zero
  * because Phase 2's writer never sets per-frame flags.
+ *
+ * @returns The complete frame bytes (header + body).
  */
 export const buildFrame = (args: BuildFrameArgs): Uint8Array => {
   const { frame, majorVersion } = args;
