@@ -17,6 +17,13 @@ src/
   utils/                # 汎用ユーティリティ
     encoding.ts         # TextDecoder / Buffer を組み合わせた文字エンコーディング
     syncSafeInt.ts      # ID3v2 同期安全整数の encode / decode
+scripts/
+  fixtures/             # フィクスチャ生成スクリプト (フォーマット単位で 1 ファイル)
+    README.md
+    mp3.ts              # tests/fixtures/mp3/ を生成 (`pnpm fixtures:mp3`)
+tests/
+  fixtures/
+    mp3/                # 生成された .mp3 (commit する。再生成は scripts/fixtures/ を実行)
 docs/
   README.md             # docs/ 配下のサブディレクトリ案内
   plan/                 # 実装計画 (フェーズ別)
@@ -38,6 +45,13 @@ docs/
 
 - **`index.ts` は使わない**。Barrel File (再 export 専用ファイル) と混同しやすいため、エントリ ポイントは中身を表すファイル名 (例: 公開 API は `mme.ts`、サブモジュールは `parseId3v2.ts` など) を付けます。
 - サブモジュールを束ねる「サブモジュールの名称」のファイル名 (例: `formats/mp3/mp3.ts`) を採用し、コロケーションした補助関数を同階層に並べます ([`code-style.md`](code-style.md) のサブルーチン分割方針を参照)。
+
+## テスト フィクスチャ
+
+- 音声ファイル系のテスト フィクスチャは **`tests/fixtures/<format>/`** に配置し、生成スクリプトを **`scripts/fixtures/<format>.ts`** として 1 ファイル/フォーマットで管理します。
+- スクリプトは無音 (またはそれに準ずる最小サイズ) の音声 + ダミー メタデータを書き出し、生成された **バイナリは commit** します。これにより CI でも生成器を実行する必要がありません。
+- 後続フェーズで新しいメタデータの本実装が入ったら、対応する生成スクリプトも更新してダミーを織り込み直します (例: Phase 9 で APIC/USLT/CHAP の構造化が入った時点で `scripts/fixtures/mp3.ts` を更新)。
+- 実行コマンドは `pnpm fixtures:<format>` (例: `pnpm fixtures:mp3`)。詳細は [`scripts/fixtures/README.md`](../../scripts/fixtures/README.md) を参照。
 
 `tags/` 配下は Phase 2 以降 (ID3v1/v2、APE、Vorbis Comment など) で各タグ形式の実装が追加された時点で作成します。Phase 1 完了時点では未配置です。
 

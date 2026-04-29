@@ -1,7 +1,11 @@
 import { detectFormat, SIGNATURE_PROBE_BYTES } from "./formats/detect.js";
+import { registerMp3Format } from "./formats/mp3/mp3.js";
 import { getRegistration } from "./formats/registry.js";
 import { readFileBuffer } from "./io/file.js";
 import type { AudioFormat, MetadataReadResult, ReadOptions, WriteOptions } from "./types.js";
+
+// Register all built-in formats on module load. Subsequent phases append more.
+registerMp3Format();
 
 export type {
   AudioFormat,
