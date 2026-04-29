@@ -62,10 +62,12 @@ export const createBufferWriter = (): BufferWriter => {
     if (required <= state.buffer.length) {
       return;
     }
+
     let next = state.buffer.length;
     while (next < required) {
       next *= 2;
     }
+
     const grown = Buffer.alloc(next);
     state.buffer.copy(grown, 0, 0, state.length);
     state.buffer = grown;
@@ -125,6 +127,7 @@ export const createBufferWriter = (): BufferWriter => {
         writer.writeUInt16BE(0);
         return written + 2;
       }
+
       writer.writeUInt8(0);
       return written + 1;
     },

@@ -22,6 +22,7 @@ export const decodeSyncSafeInt32 = (bytes: Uint8Array, offset = 0): number => {
   if (bytes.length < offset + 4) {
     throw new RangeError("decodeSyncSafeInt32: need at least 4 bytes");
   }
+
   const b0 = bytes[offset] as number;
   const b1 = bytes[offset + 1] as number;
   const b2 = bytes[offset + 2] as number;
@@ -29,6 +30,7 @@ export const decodeSyncSafeInt32 = (bytes: Uint8Array, offset = 0): number => {
   if ((b0 | b1 | b2 | b3) & 0x80) {
     throw new RangeError("decodeSyncSafeInt32: high bit set in syncsafe byte");
   }
+
   return (b0 << 21) | (b1 << 14) | (b2 << 7) | b3;
 };
 
@@ -45,6 +47,7 @@ export const encodeSyncSafeInt32 = (value: number): Uint8Array => {
       `encodeSyncSafeInt32: value out of range [0, ${SYNC_SAFE_INT32_MAX}]: ${value}`,
     );
   }
+
   return new Uint8Array([
     (value >>> 21) & 0x7f,
     (value >>> 14) & 0x7f,

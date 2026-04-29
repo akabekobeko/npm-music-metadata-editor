@@ -130,6 +130,7 @@ export const createBufferCursor = (source: Uint8Array): BufferCursor => {
       if (length < 0 || !Number.isInteger(length)) {
         throw new RangeError(`BufferCursor.readBytes: invalid length ${length}`);
       }
+
       ensure(length);
       const view = source.subarray(state.position, state.position + length);
       state.position += length;
@@ -148,16 +149,20 @@ export const createBufferCursor = (source: Uint8Array): BufferCursor => {
           if (source[end] === 0 && source[end + 1] === 0) {
             break;
           }
+
           end += 2;
         }
+
         const value = decodeText(source.subarray(start, end), encoding);
         // Advance past the payload plus the 2-byte terminator when one is present.
         state.position = end + 1 < source.length ? end + 2 : source.length;
         return value;
       }
+
       while (end < source.length && source[end] !== 0) {
         end += 1;
       }
+
       const value = decodeText(source.subarray(start, end), encoding);
       state.position = end < source.length ? end + 1 : source.length;
       return value;
@@ -168,24 +173,28 @@ export const createBufferCursor = (source: Uint8Array): BufferCursor => {
           `BufferCursor.seek: offset ${offset} out of range [0, ${buffer.length}]`,
         );
       }
+
       state.position = offset;
     },
     skip: (n: number) => {
       if (!Number.isInteger(n)) {
         throw new RangeError(`BufferCursor.skip: invalid step ${n}`);
       }
+
       const next = state.position + n;
       if (next < 0 || next > buffer.length) {
         throw new RangeError(
           `BufferCursor.skip: position ${next} out of range [0, ${buffer.length}]`,
         );
       }
+
       state.position = next;
     },
     peek: (n: number) => {
       if (n < 0 || !Number.isInteger(n)) {
         throw new RangeError(`BufferCursor.peek: invalid length ${n}`);
       }
+
       ensure(n);
       return source.subarray(state.position, state.position + n);
     },

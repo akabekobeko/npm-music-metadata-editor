@@ -38,6 +38,7 @@ export const readMetadata = async (
   if (registration?.read === undefined) {
     throw new Error(`unsupported format: no reader registered for "${format}"`);
   }
+
   return registration.read(bytes, options);
 };
 
@@ -61,6 +62,7 @@ export const writeMetadata = async (
   if (registration?.write === undefined) {
     throw new Error(`unsupported format: no writer registered for "${format}"`);
   }
+
   return registration.write(bytes, options);
 };
 
@@ -70,6 +72,7 @@ const loadInput = async (
   if (typeof input === "string") {
     return { bytes: await readFileBuffer(input), filePath: input };
   }
+
   return { bytes: input, filePath: undefined };
 };
 
@@ -86,10 +89,12 @@ const resolveFormat = (args: ResolveFormatArgs): AudioFormat => {
   if (args.override !== undefined) {
     return args.override;
   }
+
   const header = args.bytes.subarray(0, Math.min(args.bytes.length, SIGNATURE_PROBE_BYTES));
   const detected = detectFormat({ header, filePath: args.filePath });
   if (detected === undefined) {
     throw new Error("unsupported format: could not detect format from input");
   }
+
   return detected;
 };

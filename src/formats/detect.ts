@@ -21,11 +21,13 @@ export const detectFormatByExtension = (filePath: string): AudioFormat | undefin
   if (ext === "") {
     return undefined;
   }
+
   for (const reg of getAllRegistrations()) {
     if (reg.extensions.includes(ext)) {
       return reg.format;
     }
   }
+
   return undefined;
 };
 
@@ -43,6 +45,7 @@ export const detectFormatBySignature = (header: Uint8Array): AudioFormat | undef
       return reg.format;
     }
   }
+
   return undefined;
 };
 
@@ -71,6 +74,7 @@ export const detectFormat = (input: DetectFormatInput): AudioFormat | undefined 
   if (bySignature !== undefined) {
     return bySignature;
   }
+
   if (input.filePath !== undefined) {
     const byExt = detectFormatByExtension(input.filePath);
     // Only accept the extension hint when the format is actually registered.
@@ -78,5 +82,6 @@ export const detectFormat = (input: DetectFormatInput): AudioFormat | undefined 
       return byExt;
     }
   }
+
   return undefined;
 };

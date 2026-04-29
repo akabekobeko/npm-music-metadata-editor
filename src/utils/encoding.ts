@@ -25,9 +25,11 @@ export const decodeText = (bytes: Uint8Array, encoding: TextEncoding): string =>
   if (encoding === "utf16be") {
     return utf16beDecoder.decode(bytes);
   }
+
   if (encoding === "utf16") {
     return decodeUtf16WithBom(bytes);
   }
+
   // Buffer.from on a Uint8Array shares memory; .toString does the decoding.
   return Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength).toString(encoding);
 };
@@ -42,6 +44,7 @@ export const encodeText = (value: string, encoding: TextEncoding): Uint8Array =>
   if (encoding === "utf16be") {
     return encodeUtf16Be(value);
   }
+
   if (encoding === "utf16") {
     const payload = Buffer.from(value, "utf16le");
     const out = Buffer.alloc(payload.length + 2);
@@ -50,6 +53,7 @@ export const encodeText = (value: string, encoding: TextEncoding): Uint8Array =>
     payload.copy(out, 2);
     return new Uint8Array(out.buffer, out.byteOffset, out.byteLength);
   }
+
   const buf = Buffer.from(value, encoding);
   return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
 };
@@ -61,10 +65,12 @@ const decodeUtf16WithBom = (bytes: Uint8Array): string => {
     if (lo === 0xff && hi === 0xfe) {
       return utf16leDecoder.decode(bytes.subarray(2));
     }
+
     if (lo === 0xfe && hi === 0xff) {
       return utf16beDecoder.decode(bytes.subarray(2));
     }
   }
+
   // No BOM: assume little-endian (matches what ID3v2 writers tend to produce).
   return utf16leDecoder.decode(bytes);
 };
@@ -76,5 +82,6 @@ const encodeUtf16Be = (value: string): Uint8Array => {
     out[i * 2] = (code >>> 8) & 0xff;
     out[i * 2 + 1] = code & 0xff;
   }
+
   return out;
 };
