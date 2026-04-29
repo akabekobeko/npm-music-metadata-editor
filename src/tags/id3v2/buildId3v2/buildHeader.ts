@@ -1,5 +1,5 @@
 import { Buffer } from "node:buffer";
-import { encodeSyncSafeInt32 } from "../../../utils/syncSafeInt.js";
+import { encodeSyncSafeInt32 } from "../../../utils/syncSafeInt/encodeSyncSafeInt32.js";
 import { ID3V2_FLAG_UNSYNCH, ID3V2_HEADER_SIZE, ID3V2_MAGIC } from "../constants.js";
 
 type BuildHeaderArgs = {

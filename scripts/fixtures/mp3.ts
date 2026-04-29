@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 import { ID3V1_NO_GENRE, ID3V1_TAG_SIZE } from "../../src/tags/id3v1/constants.js";
 import type { Id3v1Tag } from "../../src/tags/id3v1/types.js";
-import { writeId3v1 } from "../../src/tags/id3v1/writeId3v1.js";
+import { writeId3v1 } from "../../src/tags/id3v1/writeId3v1/writeId3v1.js";
 import { buildCommentFrameBody } from "../../src/tags/id3v2/buildId3v2/buildCommentFrameBody.js";
 import { buildId3v2 } from "../../src/tags/id3v2/buildId3v2/buildId3v2.js";
 import { buildTextFrameBody } from "../../src/tags/id3v2/buildId3v2/buildTextFrameBody.js";

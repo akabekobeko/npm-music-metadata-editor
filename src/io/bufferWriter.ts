@@ -1,6 +1,7 @@
 import { Buffer } from "node:buffer";
-import { encodeText, type TextEncoding } from "../utils/encoding.js";
-import { encodeSyncSafeInt32 } from "../utils/syncSafeInt.js";
+import { encodeText } from "../utils/encoding/encodeText.js";
+import type { TextEncoding } from "../utils/encoding/types.js";
+import { encodeSyncSafeInt32 } from "../utils/syncSafeInt/encodeSyncSafeInt32.js";
 
 /**
  * Append-only writer that grows its backing buffer on demand.

@@ -1,5 +1,6 @@
 import { Buffer } from "node:buffer";
-import { encodeText, type TextEncoding } from "../../../utils/encoding.js";
+import { encodeText } from "../../../utils/encoding/encodeText.js";
+import type { TextEncoding } from "../../../utils/encoding/types.js";
 
 type BuildTextFrameBodyArgs = {
   /** Text payload to encode. */

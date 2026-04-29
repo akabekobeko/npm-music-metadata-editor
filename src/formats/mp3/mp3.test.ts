@@ -4,8 +4,8 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { readMetadata, writeMetadata } from "../../mme.js";
 import { ID3V1_TAG_SIZE } from "../../tags/id3v1/constants.js";
-import { readId3v1 } from "../../tags/id3v1/readId3v1.js";
-import { readId3v2 } from "../../tags/id3v2/readId3v2.js";
+import { readId3v1 } from "../../tags/id3v1/readId3v1/readId3v1.js";
+import { parseId3v2 } from "../../tags/id3v2/parseId3v2/parseId3v2.js";
 
 const FIXTURES_DIR = resolve(
   dirname(fileURLToPath(import.meta.url)),
@@ -80,7 +80,7 @@ describe("MP3 writeMetadata round-trip", () => {
   it("preserves unknown frames (APIC / USLT) across a write", async () => {
     const original = await loadFixture("v24-with-extras.mp3");
     const rewritten = await writeMetadata(original, { tag: { title: "Edited" } });
-    const tag = readId3v2(rewritten);
+    const tag = parseId3v2(rewritten);
     const ids = (tag?.frames ?? []).map((f) => f.id);
     expect(ids).toContain("APIC");
     expect(ids).toContain("USLT");

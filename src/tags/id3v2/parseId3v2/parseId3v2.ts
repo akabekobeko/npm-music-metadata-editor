@@ -1,8 +1,9 @@
 import { ID3V2_HEADER_SIZE } from "../constants.js";
+import { removeUnsynchronization } from "../removeUnsynchronization.js";
 import type { Id3v2Frame, Id3v2Tag } from "../types.js";
-import { removeUnsynchronization } from "../unsynchronization.js";
-import { parseFrame } from "./parseFrame.js";
+import { parseFrame } from "./parseFrame/parseFrame.js";
 import { parseHeader } from "./parseHeader.js";
+import { skipExtendedHeader } from "./skipExtendedHeader.js";
 
 /**
  * Parse an ID3v2 tag at the start of `buffer`.
@@ -35,7 +36,7 @@ export const parseId3v2 = (buffer: Uint8Array): Id3v2Tag | undefined => {
   // restrictions; preserving the rest is enough for round-tripping in Phase 2.
   let cursor = 0;
   if (header.flags.extendedHeader) {
-    cursor = skipExtendedHeader(body, header.majorVersion === 4);
+    cursor = skipExtendedHeader({ body, syncSafe: header.majorVersion === 4 });
     if (cursor === -1) {
       return undefined;
     }
@@ -65,38 +66,4 @@ export const parseId3v2 = (buffer: Uint8Array): Id3v2Tag | undefined => {
     totalSize,
     frames,
   };
-};
-
-/**
- * Skip the v2.3 / v2.4 extended header.
- *
- * Returns the offset to start frame parsing from, or `-1` when the extended
- * header is malformed.
- *
- * @param body - Tag body (already de-unsynchronised).
- * @param syncSafe - `true` for ID3v2.4 (extended header size is sync-safe), `false` for ID3v2.3.
- */
-const skipExtendedHeader = (body: Uint8Array, syncSafe: boolean): number => {
-  if (body.length < 4) {
-    return -1;
-  }
-
-  const size = syncSafe
-    ? ((body[0] as number) << 21) |
-      ((body[1] as number) << 14) |
-      ((body[2] as number) << 7) |
-      (body[3] as number)
-    : (body[0] as number) * 0x1000000 +
-      ((body[1] as number) << 16) +
-      ((body[2] as number) << 8) +
-      (body[3] as number);
-
-  // ID3v2.3: `size` excludes the 4-byte size field itself.
-  // ID3v2.4: `size` includes the 4-byte size field.
-  const consumed = syncSafe ? size : 4 + size;
-  if (consumed > body.length) {
-    return -1;
-  }
-
-  return consumed;
 };

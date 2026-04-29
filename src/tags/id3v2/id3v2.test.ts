@@ -1,10 +1,11 @@
 import { Buffer } from "node:buffer";
 import { describe, expect, it } from "vitest";
+import { applyUnsynchronization } from "./applyUnsynchronization.js";
 import { buildId3v2 } from "./buildId3v2/buildId3v2.js";
 import { buildTextFrameBody } from "./buildId3v2/buildTextFrameBody.js";
-import { id3v2TagToTagData, readId3v2 } from "./readId3v2.js";
-import { applyUnsynchronization } from "./unsynchronization.js";
-import { writeId3v2 } from "./writeId3v2.js";
+import { id3v2TagToTagData } from "./id3v2TagToTagData/id3v2TagToTagData.js";
+import { parseId3v2 } from "./parseId3v2/parseId3v2.js";
+import { writeId3v2 } from "./writeId3v2/writeId3v2.js";
 
 const FRAME_FLAGS = {
   tagAlterPreservation: false,
@@ -34,7 +35,7 @@ describe("ID3v2 round-trip", () => {
         genre: "Rock",
       },
     });
-    const tag = readId3v2(bytes);
+    const tag = parseId3v2(bytes);
     expect(tag).toBeDefined();
     expect(tag?.majorVersion).toBe(majorVersion);
     if (tag === undefined) throw new Error("tag should be defined");
@@ -64,7 +65,7 @@ describe("ID3v2 round-trip", () => {
       tag: { title: "Hi" },
       preserveFrames: [unknown],
     });
-    const tag = readId3v2(bytes);
+    const tag = parseId3v2(bytes);
     const ids = tag?.frames.map((f) => f.id);
     expect(ids).toEqual(["TIT2", "TENC"]);
   });
@@ -75,14 +76,14 @@ describe("ID3v2 round-trip", () => {
       tag: { title: "Title" },
       padding: 64,
     });
-    const tag = readId3v2(bytes);
+    const tag = parseId3v2(bytes);
     expect(tag).toBeDefined();
     // Header (10) + TIT2 frame ((10+1+5)=16) + 64 padding = 90 bytes
     expect(tag?.totalSize).toBe(bytes.length);
   });
 
   it("rejects buffers without the ID3 magic", () => {
-    expect(readId3v2(new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))).toBeUndefined();
+    expect(parseId3v2(new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))).toBeUndefined();
   });
 });
 
@@ -114,7 +115,7 @@ describe("ID3v2 unsynchronisation", () => {
     out[9] = size & 0x7f;
     out.set(escaped, 10);
 
-    const tag = readId3v2(out);
+    const tag = parseId3v2(out);
     expect(tag).toBeDefined();
     expect(tag?.flags.unsynchronization).toBe(true);
     expect(tag?.frames[0]?.id).toBe("TIT2");
@@ -145,7 +146,7 @@ describe("ID3v2.2 read", () => {
     out[9] = frame.length;
     out.set(frame, 10);
 
-    const tag = readId3v2(out);
+    const tag = parseId3v2(out);
     expect(tag?.majorVersion).toBe(2);
     expect(tag?.frames[0]?.id).toBe("TIT2");
     if (tag === undefined) throw new Error("tag should be defined");

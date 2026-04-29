@@ -1,7 +1,7 @@
 import { registerFormat } from "../registry.js";
 import { detectMp3Signature } from "./detectMp3.js";
-import { readMp3 } from "./readMp3.js";
-import { writeMp3 } from "./writeMp3.js";
+import { readMp3 } from "./readMp3/readMp3.js";
+import { writeMp3 } from "./writeMp3/writeMp3.js";
 
 /**
  * Register the MP3 format with the global registry.

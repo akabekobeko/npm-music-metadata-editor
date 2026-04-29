@@ -1,5 +1,5 @@
 import { ID3V2_MAGIC } from "../../tags/id3v2/constants.js";
-import { findMp3AudioHeader } from "./audioHeader.js";
+import { findMp3AudioHeader } from "./findMp3AudioHeader.js";
 
 /**
  * Return `true` when `header` looks like the start of an MP3 file.

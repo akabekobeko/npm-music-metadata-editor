@@ -1,6 +1,7 @@
 import { Buffer } from "node:buffer";
-import { decodeText, type TextEncoding } from "../utils/encoding.js";
-import { decodeSyncSafeInt32 } from "../utils/syncSafeInt.js";
+import { decodeText } from "../utils/encoding/decodeText.js";
+import type { TextEncoding } from "../utils/encoding/types.js";
+import { decodeSyncSafeInt32 } from "../utils/syncSafeInt/decodeSyncSafeInt32.js";
 
 /**
  * Read-only cursor over a `Uint8Array` that tracks the current position.

@@ -1,4 +1,4 @@
-import { decodeSyncSafeInt32 } from "../../../utils/syncSafeInt.js";
+import { decodeSyncSafeInt32 } from "../../../utils/syncSafeInt/decodeSyncSafeInt32.js";
 import {
   ID3V2_FLAG_EXPERIMENTAL,
   ID3V2_FLAG_EXTENDED,

@@ -1,5 +1,5 @@
 import { Buffer } from "node:buffer";
-import { encodeSyncSafeInt32 } from "../../../utils/syncSafeInt.js";
+import { encodeSyncSafeInt32 } from "../../../utils/syncSafeInt/encodeSyncSafeInt32.js";
 import type { Id3v2Frame } from "../types.js";
 
 type BuildFrameArgs = {
