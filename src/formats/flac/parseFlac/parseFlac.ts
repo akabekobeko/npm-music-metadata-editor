@@ -16,7 +16,7 @@ import { parseStreamInfo } from "./parseStreamInfo.js";
  * @param input - Whole-file bytes.
  * @throws Error when the signature does not match.
  */
-const ensureSignature = (input: Uint8Array): void => {
+const checkSignature = (input: Uint8Array): void => {
   const ok =
     input.length >= FLAC_SIGNATURE_SIZE &&
     input[0] === FLAC_SIGNATURE[0] &&
@@ -42,7 +42,7 @@ const ensureSignature = (input: Uint8Array): void => {
  *   misplaced, or a metadata block extends past the file.
  */
 export const parseFlac = (input: Uint8Array): ParsedFlac => {
-  ensureSignature(input);
+  checkSignature(input);
 
   const passThroughBlocks: FlacBlock[] = [];
   const pictures: FlacPicture[] = [];

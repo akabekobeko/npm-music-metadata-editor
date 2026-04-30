@@ -16,47 +16,47 @@ export const parsePictureBlock = (body: Uint8Array): FlacPicture => {
   const view = Buffer.from(body.buffer, body.byteOffset, body.byteLength);
   let pos = 0;
 
-  const need = (count: number, label: string): void => {
+  const checkAvailable = (count: number, label: string): void => {
     if (pos + count > view.length) {
       throw new RangeError(`parsePictureBlock: not enough bytes for ${label}`);
     }
   };
 
-  need(4, "picture type");
+  checkAvailable(4, "picture type");
   const pictureType = view.readUInt32BE(pos);
   pos += 4;
 
-  need(4, "mime length");
+  checkAvailable(4, "mime length");
   const mimeLen = view.readUInt32BE(pos);
   pos += 4;
-  need(mimeLen, "mime string");
+  checkAvailable(mimeLen, "mime string");
   const mimeType = view.toString("ascii", pos, pos + mimeLen);
   pos += mimeLen;
 
-  need(4, "description length");
+  checkAvailable(4, "description length");
   const descLen = view.readUInt32BE(pos);
   pos += 4;
-  need(descLen, "description string");
+  checkAvailable(descLen, "description string");
   const description = view.toString("utf8", pos, pos + descLen);
   pos += descLen;
 
-  need(4, "width");
+  checkAvailable(4, "width");
   const width = view.readUInt32BE(pos);
   pos += 4;
-  need(4, "height");
+  checkAvailable(4, "height");
   const height = view.readUInt32BE(pos);
   pos += 4;
-  need(4, "color depth");
+  checkAvailable(4, "color depth");
   const colorDepth = view.readUInt32BE(pos);
   pos += 4;
-  need(4, "color num");
+  checkAvailable(4, "color num");
   const colorNum = view.readUInt32BE(pos);
   pos += 4;
 
-  need(4, "data length");
+  checkAvailable(4, "data length");
   const dataLen = view.readUInt32BE(pos);
   pos += 4;
-  need(dataLen, "data");
+  checkAvailable(dataLen, "data");
   // Slice copies into a new Uint8Array so callers can safely retain the bytes
   // even if the source FLAC buffer is later mutated.
   const data = body.slice(pos, pos + dataLen);
