@@ -32,7 +32,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "fixtures:mp3": "tsx scripts/fixtures/mp3.ts"
+    "fixtures:mp3": "tsx scripts/fixtures/mp3.ts",
+    "fixtures:flac": "tsx scripts/fixtures/flac.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.13",
