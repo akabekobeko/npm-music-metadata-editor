@@ -1,5 +1,5 @@
 import { Buffer } from "node:buffer";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
 import { parseAtomTree } from "../atom/parseAtomTree.js";
 import { rewriteChunkOffsetAtom } from "./rewriteChunkOffsetAtom.js";
 
@@ -36,55 +36,53 @@ const co64Atom = (offsets: readonly bigint[]): Buffer => {
   return atom("co64", payload);
 };
 
-describe("rewriteChunkOffsetAtom", () => {
-  it("rewrites a 32-bit stco atom in place", () => {
-    const buf = stcoAtom([0x100, 0x200, 0x300]);
-    const tree = parseAtomTree(buf);
-    const root = tree[0];
-    if (root === undefined) throw new Error("missing root atom");
-    const out = rewriteChunkOffsetAtom({
+it("rewrites a 32-bit stco atom in place", () => {
+  const buf = stcoAtom([0x100, 0x200, 0x300]);
+  const tree = parseAtomTree(buf);
+  const root = tree[0];
+  if (root === undefined) throw new Error("missing root atom");
+  const out = rewriteChunkOffsetAtom({
+    source: buf,
+    atom: root,
+    remap: (offset) => offset + 0x10,
+  });
+
+  // Box header (size + type) preserved.
+  expect(out.length).toBe(buf.length);
+  expect(Array.from(out.subarray(0, 8))).toEqual(Array.from(buf.subarray(0, 8)));
+
+  // Decode entries from the rewritten payload.
+  const view = Buffer.from(out.buffer, out.byteOffset, out.byteLength);
+  expect(view.readUInt32BE(8 + 8 + 0)).toBe(0x110);
+  expect(view.readUInt32BE(8 + 8 + 4)).toBe(0x210);
+  expect(view.readUInt32BE(8 + 8 + 8)).toBe(0x310);
+});
+
+it("rewrites a 64-bit co64 atom", () => {
+  const buf = co64Atom([0x100n, 0x100000000n]);
+  const tree = parseAtomTree(buf);
+  const root = tree[0];
+  if (root === undefined) throw new Error("missing root atom");
+  const out = rewriteChunkOffsetAtom({
+    source: buf,
+    atom: root,
+    remap: (offset) => offset + 0x20,
+  });
+  const view = Buffer.from(out.buffer, out.byteOffset, out.byteLength);
+  expect(view.readBigUInt64BE(8 + 8 + 0)).toBe(0x120n);
+  expect(view.readBigUInt64BE(8 + 8 + 8)).toBe(0x100000020n);
+});
+
+it("rejects offsets that no longer fit in 32 bits for stco", () => {
+  const buf = stcoAtom([0xfffffff0]);
+  const tree = parseAtomTree(buf);
+  const root = tree[0];
+  if (root === undefined) throw new Error("missing root atom");
+  expect(() =>
+    rewriteChunkOffsetAtom({
       source: buf,
       atom: root,
-      remap: (offset) => offset + 0x10,
-    });
-
-    // Box header (size + type) preserved.
-    expect(out.length).toBe(buf.length);
-    expect(Array.from(out.subarray(0, 8))).toEqual(Array.from(buf.subarray(0, 8)));
-
-    // Decode entries from the rewritten payload.
-    const view = Buffer.from(out.buffer, out.byteOffset, out.byteLength);
-    expect(view.readUInt32BE(8 + 8 + 0)).toBe(0x110);
-    expect(view.readUInt32BE(8 + 8 + 4)).toBe(0x210);
-    expect(view.readUInt32BE(8 + 8 + 8)).toBe(0x310);
-  });
-
-  it("rewrites a 64-bit co64 atom", () => {
-    const buf = co64Atom([0x100n, 0x100000000n]);
-    const tree = parseAtomTree(buf);
-    const root = tree[0];
-    if (root === undefined) throw new Error("missing root atom");
-    const out = rewriteChunkOffsetAtom({
-      source: buf,
-      atom: root,
-      remap: (offset) => offset + 0x20,
-    });
-    const view = Buffer.from(out.buffer, out.byteOffset, out.byteLength);
-    expect(view.readBigUInt64BE(8 + 8 + 0)).toBe(0x120n);
-    expect(view.readBigUInt64BE(8 + 8 + 8)).toBe(0x100000020n);
-  });
-
-  it("rejects offsets that no longer fit in 32 bits for stco", () => {
-    const buf = stcoAtom([0xfffffff0]);
-    const tree = parseAtomTree(buf);
-    const root = tree[0];
-    if (root === undefined) throw new Error("missing root atom");
-    expect(() =>
-      rewriteChunkOffsetAtom({
-        source: buf,
-        atom: root,
-        remap: () => 0x100000000,
-      }),
-    ).toThrow(/does not fit in 32 bits/);
-  });
+      remap: () => 0x100000000,
+    }),
+  ).toThrow(/does not fit in 32 bits/);
 });

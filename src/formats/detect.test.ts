@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, expect, it } from "vitest";
 import { detectFormat, detectFormatByExtension, detectFormatBySignature } from "./detect.js";
 import { clearRegistrations, registerFormat } from "./registry.js";
 
@@ -30,62 +30,56 @@ afterEach(() => {
   clearRegistrations();
 });
 
-describe("detectFormatByExtension", () => {
-  it("matches a registered extension", () => {
-    expect(detectFormatByExtension("/tmp/song.mp3")).toBe("mp3");
-    expect(detectFormatByExtension("song.FLAC")).toBe("flac");
-  });
-
-  it("returns undefined for unknown extensions", () => {
-    expect(detectFormatByExtension("song.xyz")).toBeUndefined();
-  });
-
-  it("returns undefined when there is no extension", () => {
-    expect(detectFormatByExtension("README")).toBeUndefined();
-  });
+it("detectFormatByExtension matches a registered extension", () => {
+  expect(detectFormatByExtension("/tmp/song.mp3")).toBe("mp3");
+  expect(detectFormatByExtension("song.FLAC")).toBe("flac");
 });
 
-describe("detectFormatBySignature", () => {
-  it("matches the ID3 signature", () => {
-    const header = new Uint8Array([0x49, 0x44, 0x33, 0x03, 0x00, 0x00]);
-    expect(detectFormatBySignature(header)).toBe("mp3");
-  });
-
-  it("matches the fLaC signature", () => {
-    const header = new Uint8Array([0x66, 0x4c, 0x61, 0x43]);
-    expect(detectFormatBySignature(header)).toBe("flac");
-  });
-
-  it("rejects near-miss bytes", () => {
-    // Same first three bytes as fLaC but the last byte is wrong.
-    const header = new Uint8Array([0x66, 0x4c, 0x61, 0x44]);
-    expect(detectFormatBySignature(header)).toBeUndefined();
-  });
-
-  it("returns undefined on empty input", () => {
-    expect(detectFormatBySignature(new Uint8Array())).toBeUndefined();
-  });
+it("detectFormatByExtension returns undefined for unknown extensions", () => {
+  expect(detectFormatByExtension("song.xyz")).toBeUndefined();
 });
 
-describe("detectFormat", () => {
-  it("prefers signature over extension", () => {
-    // File is named .mp3 but actually carries an fLaC signature.
-    const header = new Uint8Array([0x66, 0x4c, 0x61, 0x43]);
-    expect(detectFormat({ filePath: "fake.mp3", header })).toBe("flac");
-  });
+it("detectFormatByExtension returns undefined when there is no extension", () => {
+  expect(detectFormatByExtension("README")).toBeUndefined();
+});
 
-  it("falls back to the extension when the signature does not match", () => {
-    const header = new Uint8Array([0x00, 0x00, 0x00, 0x00]);
-    expect(detectFormat({ filePath: "song.mp3", header })).toBe("mp3");
-  });
+it("detectFormatBySignature matches the ID3 signature", () => {
+  const header = new Uint8Array([0x49, 0x44, 0x33, 0x03, 0x00, 0x00]);
+  expect(detectFormatBySignature(header)).toBe("mp3");
+});
 
-  it("returns undefined when both checks fail", () => {
-    const header = new Uint8Array([0x00, 0x00, 0x00, 0x00]);
-    expect(detectFormat({ filePath: "song.xyz", header })).toBeUndefined();
-  });
+it("detectFormatBySignature matches the fLaC signature", () => {
+  const header = new Uint8Array([0x66, 0x4c, 0x61, 0x43]);
+  expect(detectFormatBySignature(header)).toBe("flac");
+});
 
-  it("works without a file path", () => {
-    const header = new Uint8Array([0x49, 0x44, 0x33]);
-    expect(detectFormat({ header })).toBe("mp3");
-  });
+it("detectFormatBySignature rejects near-miss bytes", () => {
+  // Same first three bytes as fLaC but the last byte is wrong.
+  const header = new Uint8Array([0x66, 0x4c, 0x61, 0x44]);
+  expect(detectFormatBySignature(header)).toBeUndefined();
+});
+
+it("detectFormatBySignature returns undefined on empty input", () => {
+  expect(detectFormatBySignature(new Uint8Array())).toBeUndefined();
+});
+
+it("detectFormat prefers signature over extension", () => {
+  // File is named .mp3 but actually carries an fLaC signature.
+  const header = new Uint8Array([0x66, 0x4c, 0x61, 0x43]);
+  expect(detectFormat({ filePath: "fake.mp3", header })).toBe("flac");
+});
+
+it("detectFormat falls back to the extension when the signature does not match", () => {
+  const header = new Uint8Array([0x00, 0x00, 0x00, 0x00]);
+  expect(detectFormat({ filePath: "song.mp3", header })).toBe("mp3");
+});
+
+it("detectFormat returns undefined when both checks fail", () => {
+  const header = new Uint8Array([0x00, 0x00, 0x00, 0x00]);
+  expect(detectFormat({ filePath: "song.xyz", header })).toBeUndefined();
+});
+
+it("detectFormat works without a file path", () => {
+  const header = new Uint8Array([0x49, 0x44, 0x33]);
+  expect(detectFormat({ header })).toBe("mp3");
 });
