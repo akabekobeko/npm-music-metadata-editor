@@ -9,7 +9,7 @@ import { writeMp3 } from "./writeMp3/writeMp3.js";
  * Idempotent: calling it twice replaces the existing registration with the same
  * record, so importing this module from multiple locations is safe.
  */
-export const registerMp3Format = (): void => {
+export const registerMp3Format = (): void =>
   registerFormat({
     format: "mp3",
     extensions: [".mp3"],
@@ -17,4 +17,3 @@ export const registerMp3Format = (): void => {
     read: readMp3,
     write: writeMp3,
   });
-};

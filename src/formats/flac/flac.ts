@@ -9,7 +9,7 @@ import { writeFlac } from "./writeFlac.js";
  * Idempotent: calling it twice replaces the existing registration with the same
  * record, so importing this module from multiple locations is safe.
  */
-export const registerFlacFormat = (): void => {
+export const registerFlacFormat = (): void =>
   registerFormat({
     format: "flac",
     extensions: [".flac"],
@@ -17,4 +17,3 @@ export const registerFlacFormat = (): void => {
     read: readFlac,
     write: writeFlac,
   });
-};

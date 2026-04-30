@@ -28,6 +28,10 @@
   - 「各要素を別の値へ変換」→ `Array.prototype.map`
   - 「全要素を 1 つの値に畳む」→ `Array.prototype.reduce`
   - 例外: バイナリ パース等で **早期 return / 副作用 / インデックス操作** が必要なケースは `for` を残す。
+- **アロー関数で右辺を式にできる場合は式本体 (expression body) で書く**。block body (`{ ... }`) は副作用を伴う複数ステートメントが入りうるシグナルとなる。式本体にすることで「このスコープでは式 1 つしか評価されない (それ以上の副作用は無い)」ことを論理的・視覚的に明示できる。
+  - `() => x` / `() => fn()` / `(): void => sideEffectFn()` のように書く。block body にする必要があるのは、複数ステートメント、early return、ローカル変数の導入が必要なときだけ。
+  - **Biome の `useConsistentArrowReturn` (`asNeeded`) で `{ return x; }` → `x` の置換は機械検出される**。ただし `{ sideEffectFn(); }` (return 文ではない単一ステートメント) は機械検出対象外なので、コードレビューで担保する。
+  - 例外: 戻り値が `void` ではないのに呼び先が値を返すケース (例: `Map.set` は `Map` を返す) は型不整合になるため block body を維持する。
 - **変数の定義は最初の参照位置のなるべく近くに置く**。定義から参照までの距離が離れるほど、読者はその値を「いつ使われるか」意識し続けることになり、認知負荷が高まる。
   - 早期 return で条件分岐するケースでは、return パスでは使わない値を関数頭で定義しない。実際に必要な分岐の直前に降ろす。
   - 例: `const x = ...; if (a) return; if (b) return; return f(x);` ではなく `if (a) return; if (b) return; const x = ...; return f(x);` とする。

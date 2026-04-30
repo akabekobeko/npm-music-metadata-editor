@@ -22,6 +22,7 @@
       },
       "style": {
         "noEnum": "error",
+        "useConsistentArrowReturn": "error",
         "useConsistentTypeDefinitions": {
           "level": "error",
           "options": { "style": "type" }
