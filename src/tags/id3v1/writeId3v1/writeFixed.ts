@@ -17,12 +17,12 @@ type Args = {
  * Latin-1 encode `value`, truncate to `length` bytes, and copy into `out` at `offset`.
  * Remaining bytes in the field are left as the buffer's existing zero padding.
  */
-export const writeFixed = (args: Args): void => {
-  if (args.value === "") {
+export const writeFixed = ({ out, offset, length, value }: Args): void => {
+  if (value === "") {
     return;
   }
 
-  const encoded = encodeText(args.value, "latin1");
-  const copyLength = Math.min(encoded.length, args.length);
-  args.out.set(encoded.subarray(0, copyLength), args.offset);
+  const encoded = encodeText(value, "latin1");
+  const copyLength = Math.min(encoded.length, length);
+  out.set(encoded.subarray(0, copyLength), offset);
 };

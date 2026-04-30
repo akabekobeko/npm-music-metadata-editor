@@ -204,9 +204,9 @@ type Args = {
  *
  * @returns The new capacity (always `>= required`).
  */
-const nextCapacity = (args: Args): number => {
-  let next = args.current;
-  while (next < args.required) {
+const nextCapacity = ({ current, required }: Args): number => {
+  let next = current;
+  while (next < required) {
     next *= 2;
   }
 

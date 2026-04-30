@@ -19,12 +19,12 @@ type Args = {
  *
  * @returns The 10-byte header ready to prepend to the body.
  */
-export const buildHeader = (args: Args): Uint8Array => {
+export const buildHeader = ({ majorVersion, bodySize, unsynchronization }: Args): Uint8Array => {
   const out = Buffer.alloc(ID3V2_HEADER_SIZE);
   out.set(ID3V2_MAGIC, 0);
-  out[3] = args.majorVersion;
+  out[3] = majorVersion;
   out[4] = 0;
-  out[5] = args.unsynchronization ? ID3V2_FLAG_UNSYNCH : 0;
-  out.set(encodeSyncSafeInt32(args.bodySize), 6);
+  out[5] = unsynchronization ? ID3V2_FLAG_UNSYNCH : 0;
+  out.set(encodeSyncSafeInt32(bodySize), 6);
   return new Uint8Array(out.buffer, out.byteOffset, out.byteLength);
 };

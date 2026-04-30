@@ -18,8 +18,7 @@ type Args = {
  *
  * @returns The complete frame bytes (header + body).
  */
-export const buildFrame = (args: Args): Uint8Array => {
-  const { frame, majorVersion } = args;
+export const buildFrame = ({ frame, majorVersion }: Args): Uint8Array => {
   if (frame.id.length !== 4) {
     throw new Error(`buildFrame: frame ID must be 4 chars (got "${frame.id}")`);
   }

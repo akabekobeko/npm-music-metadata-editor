@@ -86,13 +86,13 @@ const stringifyValue = (value: string | number | undefined): string | undefined 
  *
  * @returns A {@link VorbisComment} ready to encode with `writeVorbisComment`.
  */
-export const tagDataToVorbisComment = (args: Args): VorbisComment => {
+export const tagDataToVorbisComment = ({ tag, vendor, preserveEntries }: Args): VorbisComment => {
   const comments: VorbisCommentEntry[] = [];
   const managedKeys = new Set<string>();
 
   // Walk in declaration order so the output is deterministic.
   for (const [field, keys] of Object.entries(FIELD_KEYS) as [keyof TagData, readonly string[]][]) {
-    const raw = args.tag[field];
+    const raw = tag[field];
     if (raw === undefined) {
       continue;
     }
@@ -114,16 +114,16 @@ export const tagDataToVorbisComment = (args: Args): VorbisComment => {
 
   // `year` shares the `DATE` key with `recordingDate`. Only fall back to
   // `year` when the caller did not provide `recordingDate`.
-  if (args.tag.year !== undefined && args.tag.recordingDate === undefined) {
+  if (tag.year !== undefined && tag.recordingDate === undefined) {
     managedKeys.add("DATE");
-    const yearText = stringifyValue(args.tag.year);
+    const yearText = stringifyValue(tag.year);
     if (yearText !== undefined) {
       comments.push({ key: "DATE", value: yearText });
     }
   }
 
-  if (args.preserveEntries !== undefined) {
-    for (const entry of args.preserveEntries) {
+  if (preserveEntries !== undefined) {
+    for (const entry of preserveEntries) {
       if (managedKeys.has(entry.key.toUpperCase())) {
         continue;
       }
@@ -132,5 +132,5 @@ export const tagDataToVorbisComment = (args: Args): VorbisComment => {
     }
   }
 
-  return { vendor: args.vendor, comments };
+  return { vendor, comments };
 };

@@ -22,30 +22,30 @@ type Args = {
 };
 
 /** Look up the public field for `frameId` and assign the parsed text to it. */
-export const assignTextFrame = (args: Args): void => {
-  const field = ID3V2_TEXT_FRAME_MAP[args.frameId];
+export const assignTextFrame = ({ target, frameId, body }: Args): void => {
+  const field = ID3V2_TEXT_FRAME_MAP[frameId];
   if (field === undefined) {
     return;
   }
 
-  const text = parseTextFrame(args.body);
+  const text = parseTextFrame(body);
   if (text === undefined || text === "") {
     return;
   }
 
   if (field === "trackNumber" || field === "discNumber") {
-    assignSlashPair({ target: args.target, field, text });
+    assignSlashPair({ target, field, text });
     return;
   }
 
   if (NUMERIC_TAG_FIELDS.has(field as keyof TagData)) {
     const parsed = Number.parseInt(text, 10);
     if (Number.isFinite(parsed)) {
-      (args.target as Record<string, unknown>)[field] = parsed;
+      (target as Record<string, unknown>)[field] = parsed;
     }
 
     return;
   }
 
-  (args.target as Record<string, unknown>)[field] = text;
+  (target as Record<string, unknown>)[field] = text;
 };

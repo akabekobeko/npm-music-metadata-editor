@@ -25,11 +25,10 @@ type Args = {
  *
  * @returns The unwrapped frame body ready to hand to a body-specific parser.
  */
-export const unwrapV24FrameData = (args: Args): Uint8Array => {
-  const isV24 = args.majorVersion === 4;
-  const unsynced =
-    isV24 && args.flags.unsynchronization ? removeUnsynchronization(args.raw) : args.raw;
-  return isV24 && args.flags.dataLengthIndicator && unsynced.length >= 4
+export const unwrapV24FrameData = ({ raw, flags, majorVersion }: Args): Uint8Array => {
+  const isV24 = majorVersion === 4;
+  const unsynced = isV24 && flags.unsynchronization ? removeUnsynchronization(raw) : raw;
+  return isV24 && flags.dataLengthIndicator && unsynced.length >= 4
     ? unsynced.subarray(4)
     : unsynced;
 };

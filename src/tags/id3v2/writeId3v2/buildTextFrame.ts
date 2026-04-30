@@ -18,8 +18,8 @@ type Args = {
  *
  * @returns A frame record with empty flags and the encoded body.
  */
-export const buildTextFrame = (args: Args): Id3v2Frame => ({
-  id: args.id,
+export const buildTextFrame = ({ id, text, encoding }: Args): Id3v2Frame => ({
+  id,
   flags: NO_FRAME_FLAGS,
-  data: buildTextFrameBody({ text: args.text, encoding: args.encoding }),
+  data: buildTextFrameBody({ text, encoding }),
 });

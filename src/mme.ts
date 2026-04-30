@@ -112,13 +112,13 @@ type Args = {
  * @returns The resolved {@link AudioFormat}.
  * @throws when the format cannot be determined and no override was supplied.
  */
-const resolveFormat = (args: Args): AudioFormat => {
-  if (args.override !== undefined) {
-    return args.override;
+const resolveFormat = ({ bytes, filePath, override }: Args): AudioFormat => {
+  if (override !== undefined) {
+    return override;
   }
 
-  const header = args.bytes.subarray(0, Math.min(args.bytes.length, SIGNATURE_PROBE_BYTES));
-  const detected = detectFormat({ header, filePath: args.filePath });
+  const header = bytes.subarray(0, Math.min(bytes.length, SIGNATURE_PROBE_BYTES));
+  const detected = detectFormat({ header, filePath });
   if (detected === undefined) {
     throw new Error("unsupported format: could not detect format from input");
   }

@@ -36,16 +36,22 @@ type Args = {
  *
  * @returns The rebuilt FLAC file bytes.
  */
-export const buildFlac = (args: Args): Uint8Array => {
-  const vorbisBody = writeVorbisComment(args.vorbisComment);
-  const pictureBodies = (args.pictures ?? []).map(buildPictureBlock);
+export const buildFlac = ({
+  parsed,
+  source,
+  vorbisComment,
+  pictures,
+  defaultPaddingBytes,
+}: Args): Uint8Array => {
+  const vorbisBody = writeVorbisComment(vorbisComment);
+  const pictureBodies = (pictures ?? []).map(buildPictureBlock);
 
   // Pass-through blocks come from the parser (STREAMINFO included). We emit
   // them in the same order, then append the synthesized VORBIS_COMMENT and
   // PICTURE blocks. The `isLast` flag is patched in once we know which block
   // is actually last (it depends on whether padding ends up being emitted).
   const blocks: { type: number; data: Uint8Array }[] = [
-    ...args.parsed.passThroughBlocks.map((block: FlacBlock) => ({
+    ...parsed.passThroughBlocks.map((block: FlacBlock) => ({
       type: block.type,
       data: block.data,
     })),
@@ -61,11 +67,11 @@ export const buildFlac = (args: Args): Uint8Array => {
   // The "metadata region" excludes the 4-byte `"fLaC"` magic. `audioOffset`
   // sits just past the last metadata block, so subtracting the signature
   // size yields the byte budget we have to work with.
-  const existingMetadataSize = args.parsed.audioOffset - FLAC_SIGNATURE.length;
+  const existingMetadataSize = parsed.audioOffset - FLAC_SIGNATURE.length;
   const padding = rebalancePadding({
     existingMetadataSize,
     nonPaddingSize,
-    defaultPaddingBytes: args.defaultPaddingBytes,
+    defaultPaddingBytes,
   });
 
   const lastNonPaddingIndex = blocks.length - 1;
@@ -85,7 +91,7 @@ export const buildFlac = (args: Args): Uint8Array => {
       })
     : new Uint8Array(0);
 
-  const audio = args.source.subarray(args.parsed.audioOffset);
+  const audio = source.subarray(parsed.audioOffset);
   const total = Buffer.concat([FLAC_SIGNATURE, ...blockBuffers, paddingBuffer, audio]);
   return new Uint8Array(total.buffer, total.byteOffset, total.byteLength);
 };

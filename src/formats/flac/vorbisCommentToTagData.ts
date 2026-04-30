@@ -67,17 +67,17 @@ type SlashPairArgs = {
  * Parse a free-form `"X"` or `"X/Y"` numeric string and assign the components
  * to `numberField` / `totalField` on `target`.
  */
-const assignSlashPair = (args: SlashPairArgs): void => {
-  const [numberPart, totalPart] = args.text.split("/");
+const assignSlashPair = ({ target, text, numberField, totalField }: SlashPairArgs): void => {
+  const [numberPart, totalPart] = text.split("/");
   const num = Number.parseInt(numberPart ?? "", 10);
   if (Number.isFinite(num)) {
-    (args.target as Record<string, unknown>)[args.numberField] = num;
+    (target as Record<string, unknown>)[numberField] = num;
   }
 
   if (totalPart !== undefined) {
     const total = Number.parseInt(totalPart, 10);
     if (Number.isFinite(total)) {
-      (args.target as Record<string, unknown>)[args.totalField] = total;
+      (target as Record<string, unknown>)[totalField] = total;
     }
   }
 };

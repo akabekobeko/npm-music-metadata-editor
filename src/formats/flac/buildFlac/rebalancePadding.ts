@@ -39,12 +39,16 @@ type Result = {
  * so we fall back to the "grow" branch — the audio shifts but the file stays
  * valid.
  */
-export const rebalancePadding = (args: Args): Result => {
-  if (args.nonPaddingSize === args.existingMetadataSize) {
+export const rebalancePadding = ({
+  existingMetadataSize,
+  nonPaddingSize,
+  defaultPaddingBytes,
+}: Args): Result => {
+  if (nonPaddingSize === existingMetadataSize) {
     return { emitPadding: false, paddingBodyLen: 0 };
   }
 
-  const headroom = args.existingMetadataSize - args.nonPaddingSize;
+  const headroom = existingMetadataSize - nonPaddingSize;
   if (headroom >= FLAC_METADATA_BLOCK_HEADER_SIZE) {
     return {
       emitPadding: true,
@@ -52,6 +56,8 @@ export const rebalancePadding = (args: Args): Result => {
     };
   }
 
-  const defaultPaddingBytes = args.defaultPaddingBytes ?? FLAC_DEFAULT_NEW_PADDING_BYTES;
-  return { emitPadding: true, paddingBodyLen: defaultPaddingBytes };
+  return {
+    emitPadding: true,
+    paddingBodyLen: defaultPaddingBytes ?? FLAC_DEFAULT_NEW_PADDING_BYTES,
+  };
 };

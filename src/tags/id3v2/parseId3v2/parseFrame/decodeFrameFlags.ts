@@ -15,8 +15,11 @@ type Args = {
  *
  * @returns The decoded frame flags.
  */
-export const decodeFrameFlags = (args: Args): Id3v2FrameFlags => {
-  const { statusFlags, formatFlags, majorVersion } = args;
+export const decodeFrameFlags = ({
+  statusFlags,
+  formatFlags,
+  majorVersion,
+}: Args): Id3v2FrameFlags => {
   if (majorVersion === 4) {
     return {
       tagAlterPreservation: (statusFlags & 0x40) !== 0,

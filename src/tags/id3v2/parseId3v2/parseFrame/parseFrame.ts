@@ -12,11 +12,12 @@ import type { ParseFrameArgs, ParseFrameResult } from "./types.js";
  *     the body, unknown layout).
  *   - `{ kind: "frame" }` with the parsed frame and the number of bytes consumed.
  */
-export const parseFrame = (args: ParseFrameArgs): ParseFrameResult => {
-  const { body, offset, majorVersion } = args;
+export const parseFrame = ({ body, offset, majorVersion }: ParseFrameArgs): ParseFrameResult => {
   if (offset >= body.length || body[offset] === 0x00) {
     return { kind: "padding" };
   }
 
-  return majorVersion === 2 ? parseV22Frame(body, offset) : parseV23OrV24Frame(args);
+  return majorVersion === 2
+    ? parseV22Frame(body, offset)
+    : parseV23OrV24Frame({ body, offset, majorVersion });
 };

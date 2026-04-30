@@ -31,19 +31,29 @@ const ENCODING_TO_BYTE: Readonly<Record<string, number>> = {
  *
  * @returns The encoded body ready to wrap in a frame header.
  */
-export const buildCommentFrameBody = (args: Args): Uint8Array => {
-  const encByte = ENCODING_TO_BYTE[args.encoding];
+export const buildCommentFrameBody = ({
+  language,
+  description,
+  text,
+  encoding,
+}: Args): Uint8Array => {
+  const encByte = ENCODING_TO_BYTE[encoding];
   if (encByte === undefined) {
-    throw new Error(`buildCommentFrameBody: unsupported encoding "${args.encoding}"`);
+    throw new Error(`buildCommentFrameBody: unsupported encoding "${encoding}"`);
   }
 
-  const lang = padLanguage(args.language);
-  const description = encodeText(args.description, args.encoding);
-  const text = encodeText(args.text, args.encoding);
-  const isUtf16 =
-    args.encoding === "utf16" || args.encoding === "utf16be" || args.encoding === "utf16le";
+  const lang = padLanguage(language);
+  const descriptionBytes = encodeText(description, encoding);
+  const textBytes = encodeText(text, encoding);
+  const isUtf16 = encoding === "utf16" || encoding === "utf16be" || encoding === "utf16le";
   const terminator = isUtf16 ? new Uint8Array([0x00, 0x00]) : new Uint8Array([0x00]);
 
-  const concatenated = Buffer.concat([Uint8Array.of(encByte), lang, description, terminator, text]);
+  const concatenated = Buffer.concat([
+    Uint8Array.of(encByte),
+    lang,
+    descriptionBytes,
+    terminator,
+    textBytes,
+  ]);
   return new Uint8Array(concatenated.buffer, concatenated.byteOffset, concatenated.byteLength);
 };
