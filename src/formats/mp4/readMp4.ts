@@ -1,6 +1,7 @@
 import { Buffer } from "node:buffer";
 import type { AudioFormat, MetadataReadResult } from "../../types.js";
-import { findAllAtoms, findAtom } from "./atom/findAtom.js";
+import { findAllAtoms } from "./atom/findAllAtoms.js";
+import { findAtom } from "./atom/findAtom.js";
 import { parseAtomTree } from "./atom/parseAtomTree.js";
 import type { Atom } from "./atom/types.js";
 import { atomsToTagFields } from "./itunes/atomToTagField.js";

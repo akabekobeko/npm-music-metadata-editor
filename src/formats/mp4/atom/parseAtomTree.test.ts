@@ -1,6 +1,7 @@
 import { Buffer } from "node:buffer";
 import { describe, expect, it } from "vitest";
-import { findAllAtoms, findAtom } from "./findAtom.js";
+import { findAllAtoms } from "./findAllAtoms.js";
+import { findAtom } from "./findAtom.js";
 import { parseAtomTree } from "./parseAtomTree.js";
 
 /**
