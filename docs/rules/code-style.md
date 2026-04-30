@@ -28,6 +28,10 @@
   - 「各要素を別の値へ変換」→ `Array.prototype.map`
   - 「全要素を 1 つの値に畳む」→ `Array.prototype.reduce`
   - 例外: バイナリ パース等で **早期 return / 副作用 / インデックス操作** が必要なケースは `for` を残す。
+- **変数の定義は最初の参照位置のなるべく近くに置く**。定義から参照までの距離が離れるほど、読者はその値を「いつ使われるか」意識し続けることになり、認知負荷が高まる。
+  - 早期 return で条件分岐するケースでは、return パスでは使わない値を関数頭で定義しない。実際に必要な分岐の直前に降ろす。
+  - 例: `const x = ...; if (a) return; if (b) return; return f(x);` ではなく `if (a) return; if (b) return; const x = ...; return f(x);` とする。
+  - 関数引数のデフォルト値解決 (`?? DEFAULT`) も同様。デフォルト値を使う分岐の直前で評価する。
 - **防御的に例外を投げるだけのヘルパーは `check*` で始める**。前提条件の検証 (シグネチャ判定、境界チェックなど) を行い、失敗時に `throw` する関数の命名規約。
   - 例: `checkSignature(input)` / `checkAvailable(need)` / `checkBounds(...)`。
   - **`ensure*` は副作用 (state を mutate して postcondition を満たすパターン) 専用**として区別する (例: `bufferWriter.ts` の `ensureCapacity` は throw せずに buffer を grow する)。`ensure*` と `check*` の動詞を分けることで、grep だけで「ガード関数」と「拡張関数」を区別できる。

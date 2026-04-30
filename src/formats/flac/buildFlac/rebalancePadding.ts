@@ -40,8 +40,6 @@ type Result = {
  * valid.
  */
 export const rebalancePadding = (args: Args): Result => {
-  const defaultPaddingBytes = args.defaultPaddingBytes ?? FLAC_DEFAULT_NEW_PADDING_BYTES;
-
   if (args.nonPaddingSize === args.existingMetadataSize) {
     return { emitPadding: false, paddingBodyLen: 0 };
   }
@@ -54,5 +52,6 @@ export const rebalancePadding = (args: Args): Result => {
     };
   }
 
+  const defaultPaddingBytes = args.defaultPaddingBytes ?? FLAC_DEFAULT_NEW_PADDING_BYTES;
   return { emitPadding: true, paddingBodyLen: defaultPaddingBytes };
 };
