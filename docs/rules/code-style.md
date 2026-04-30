@@ -28,6 +28,10 @@
   - 「各要素を別の値へ変換」→ `Array.prototype.map`
   - 「全要素を 1 つの値に畳む」→ `Array.prototype.reduce`
   - 例外: バイナリ パース等で **早期 return / 副作用 / インデックス操作** が必要なケースは `for` を残す。
+- **防御的に例外を投げるだけのヘルパーは `check*` で始める**。前提条件の検証 (シグネチャ判定、境界チェックなど) を行い、失敗時に `throw` する関数の命名規約。
+  - 例: `checkSignature(input)` / `checkAvailable(need)` / `checkBounds(...)`。
+  - **`ensure*` は副作用 (state を mutate して postcondition を満たすパターン) 専用**として区別する (例: `bufferWriter.ts` の `ensureCapacity` は throw せずに buffer を grow する)。`ensure*` と `check*` の動詞を分けることで、grep だけで「ガード関数」と「拡張関数」を区別できる。
+  - `assert*` / `need` などの代替動詞は使わない (`check*` に統一)。
 - **`if` / `for` / `while` / `switch` のブロック終端直後には空行を入れる**。次のステートメントとの境目を視覚的に区切るため。
   - 例外: ブロックの直後が外側ブロックの閉じ波括弧 (`}`) や `else` / `catch` / `finally` など同じ制御構文の継続の場合は空行を入れない。
   - Biome 2.4 にはこのルールに相当するチェックがない (`padding-line-between-statements` 相当の機能が未実装) ため、コードレビューで担保する。新しい Biome バージョンで対応ルールが追加された場合は `biome.json` に追記して機械化する。
