@@ -25,7 +25,7 @@ export const findMp3AudioHeader = (args: Args): number => {
   const { bytes, startOffset } = args;
   const maxScan = args.maxScan ?? 0x10000;
   const end = Math.min(bytes.length - 4, startOffset + maxScan);
-  for (let i = startOffset; i <= end; i += 1) {
+  for (let i = startOffset; i <= end; i++) {
     if (bytes[i] !== 0xff) {
       continue;
     }

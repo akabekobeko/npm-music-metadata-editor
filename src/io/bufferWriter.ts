@@ -130,7 +130,7 @@ export const createBufferWriter = (): BufferWriter => {
     writeUInt8: (value: number) => {
       ensureCapacity(1);
       state.buffer.writeUInt8(value, state.length);
-      state.length += 1;
+      state.length++;
     },
     writeUInt16BE: (value: number) => {
       ensureCapacity(2);

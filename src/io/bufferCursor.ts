@@ -148,7 +148,7 @@ export const createBufferCursor = (source: Uint8Array): BufferCursor => {
     readUInt8: () => {
       ensure(1);
       const value = buffer.readUInt8(state.position);
-      state.position += 1;
+      state.position++;
       return value;
     },
     readUInt16BE: () => {
@@ -260,7 +260,7 @@ export const createBufferCursor = (source: Uint8Array): BufferCursor => {
 const findSingleByteTerminator = (source: Uint8Array, start: number): number => {
   let end = start;
   while (end < source.length && source[end] !== 0) {
-    end += 1;
+    end++;
   }
 
   return end;
