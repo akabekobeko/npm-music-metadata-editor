@@ -10,7 +10,13 @@ import { writeIlstPayload } from "./itunes/writeIlst.js";
 import { parseMp4 } from "./readMp4.js";
 import type { ItunesAtom, ParsedMp4 } from "./types.js";
 
-/** Build a single atom (`size + type + payload`). */
+/**
+ * Build a single atom (`size + type + payload`).
+ *
+ * @param type - 4-character atom type (Latin-1).
+ * @param payload - Atom payload bytes.
+ * @returns The encoded box including its 8-byte header.
+ */
 const buildAtom = (type: string, payload: Uint8Array): Uint8Array => {
   const out = Buffer.alloc(BOX_HEADER_SIZE + payload.length);
   out.writeUInt32BE(out.length, 0);
@@ -19,7 +25,12 @@ const buildAtom = (type: string, payload: Uint8Array): Uint8Array => {
   return new Uint8Array(out);
 };
 
-/** Concatenate one or more `Uint8Array` chunks into a single buffer. */
+/**
+ * Concatenate one or more `Uint8Array` chunks into a single buffer.
+ *
+ * @param parts - Chunks to concatenate, in order.
+ * @returns A new buffer holding the concatenated bytes.
+ */
 const concat = (parts: readonly Uint8Array[]): Uint8Array => {
   const buf = Buffer.concat(parts.map((p) => Buffer.from(p.buffer, p.byteOffset, p.byteLength)));
   return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
@@ -130,16 +141,23 @@ const buildMoovAtom = ({ source, moov, newUdta }: BuildMoovArgs): Uint8Array => 
   return buildAtom("moov", concat([...otherChildren, newUdta]));
 };
 
+/** Arguments for {@link reassembleFile}. */
+type ReassembleArgs = {
+  /** Whole-file bytes. */
+  source: Uint8Array;
+  /** Original top-level atoms. */
+  tree: readonly Atom[];
+  /** Offset of the atom being replaced (typically the `moov` original offset). */
+  replacedOffset: number;
+  /** Bytes to splice in at `replacedOffset`. */
+  replacement: Uint8Array;
+};
+
 /**
  * Reassemble the file with each top-level atom either kept verbatim, replaced
  * (when its `offset` matches `replacedOffset`), or shifted into its new
  * position.
  *
- * @param source - Whole-file bytes.
- * @param tree - Original top-level atoms.
- * @param replacedOffset - Offset of the atom being replaced (typically the
- *   `moov` original offset).
- * @param replacement - Bytes to splice in at `replacedOffset`.
  * @returns The reassembled file bytes (excluding any chunk-offset rewrites).
  */
 const reassembleFile = ({
@@ -147,12 +165,7 @@ const reassembleFile = ({
   tree,
   replacedOffset,
   replacement,
-}: {
-  source: Uint8Array;
-  tree: readonly Atom[];
-  replacedOffset: number;
-  replacement: Uint8Array;
-}): Uint8Array => {
+}: ReassembleArgs): Uint8Array => {
   const parts: Uint8Array[] = [];
   for (const atom of tree) {
     if (atom.offset === replacedOffset) {

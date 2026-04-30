@@ -19,6 +19,9 @@ const utf8Value = (text: string): ItunesDataValue => ({
  * Encode a 1-, 2-, or 4-byte big-endian signed integer (iTunes type 21). The
  * smallest representation that fits the value is chosen, matching iTunes'
  * own behaviour.
+ *
+ * @param value - Signed integer to encode.
+ * @returns A {@link ItunesDataValue} of type 21 (BE signed int).
  */
 const beSignedIntValue = (value: number): ItunesDataValue => {
   const buf = encodeSignedBe(value);
@@ -53,25 +56,27 @@ const encodeSignedBe = (value: number): Uint8Array => {
   return new Uint8Array(out);
 };
 
+/** Arguments for {@link numberAndTotalValue}. */
+type NumberAndTotalArgs = {
+  /** Track / disc number (`0` when unset). */
+  number: number;
+  /** Track / disc total (`0` when unset). */
+  total: number;
+  /** Whether to append the 2-byte trailing pad iTunes includes for `trkn` only. */
+  trailingPad: boolean;
+};
+
 /**
  * Build the `trkn` / `disk` data payload (8 bytes for `trkn`, 6 bytes for
  * `disk` — both encode `0 + number + total + 0`).
  *
- * @param number - Track / disc number (`0` when unset).
- * @param total - Track / disc total (`0` when unset).
- * @param trailingPad - Whether to append the 2-byte trailing pad iTunes
- *   includes for `trkn` only.
  * @returns A {@link ItunesDataValue} of type 0 (implicit).
  */
 const numberAndTotalValue = ({
   number,
   total,
   trailingPad,
-}: {
-  number: number;
-  total: number;
-  trailingPad: boolean;
-}): ItunesDataValue => {
+}: NumberAndTotalArgs): ItunesDataValue => {
   const length = trailingPad ? 8 : 6;
   const buf = Buffer.alloc(length);
   buf.writeUInt16BE(0, 0);
@@ -84,7 +89,12 @@ const numberAndTotalValue = ({
   };
 };
 
-/** Resolve the iTunes data type for an embedded picture's MIME type. */
+/**
+ * Resolve the iTunes data type for an embedded picture's MIME type.
+ *
+ * @param mimeType - Picture MIME type (`"image/png"`, `"image/jpeg"`, ...).
+ * @returns The matching iTunes data type indicator (defaults to JPEG).
+ */
 const pictureTypeIndicator = (mimeType: string): ItunesDataTypeValue => {
   if (mimeType === "image/png") {
     return ItunesDataType.Png;

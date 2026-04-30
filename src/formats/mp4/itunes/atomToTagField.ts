@@ -29,6 +29,7 @@ const readUtf8 = (value: ItunesDataValue): string =>
  * 21). The sibling type 22 (unsigned) is not currently consumed by any
  * field this module handles, so only the signed path is implemented.
  *
+ * @param value - The value whose `data` bytes hold the integer.
  * @returns The decoded number, or `undefined` when the byte length is invalid.
  */
 const readBeSignedInt = (value: ItunesDataValue): number | undefined => {
@@ -149,6 +150,7 @@ const ID3V1_GENRES: readonly string[] = [
 /**
  * Resolve a `gnre` index (1-based) to the matching ID3v1 genre name.
  *
+ * @param index - 1-based ID3v1 genre index.
  * @returns The genre string, or `undefined` when the index is out of range.
  */
 const resolveGnreIndex = (index: number): string | undefined => {
@@ -164,6 +166,7 @@ const resolveGnreIndex = (index: number): string | undefined => {
  * Try to interpret one `©day` value (often `"YYYY"` or `"YYYY-MM-DD..."`) as
  * a 4-digit year for `tag.year`.
  *
+ * @param value - The `©day` text value to parse.
  * @returns Parsed year, or `undefined` when the prefix isn't 4 digits.
  */
 const parseYearPrefix = (value: string): number | undefined => {
