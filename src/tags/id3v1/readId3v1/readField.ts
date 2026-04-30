@@ -15,8 +15,7 @@ type Args = {
  *
  * @returns The decoded string with trailing padding stripped.
  */
-export const readField = (args: Args): string => {
-  const { trailer, offset, length } = args;
+export const readField = ({ trailer, offset, length }: Args): string => {
   const slice = trailer.subarray(offset, offset + length);
   const end = trimTrailingPadding(slice);
   return decodeText(slice.subarray(0, end), "latin1");

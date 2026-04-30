@@ -16,18 +16,18 @@ type Args = {
  * Splits on `/` and writes the leading number into `trackNumber` / `discNumber`,
  * the trailing number (when present) into `trackTotal` / `discTotal`.
  */
-export const assignSlashPair = (args: Args): void => {
-  const [head, tail] = args.text.split("/", 2);
+export const assignSlashPair = ({ target, field, text }: Args): void => {
+  const [head, tail] = text.split("/", 2);
   const headNum = Number.parseInt(head ?? "", 10);
   if (Number.isFinite(headNum)) {
-    args.target[args.field] = headNum;
+    target[field] = headNum;
   }
 
   if (tail !== undefined) {
     const tailNum = Number.parseInt(tail, 10);
     if (Number.isFinite(tailNum)) {
-      const totalField = args.field === "trackNumber" ? "trackTotal" : "discTotal";
-      args.target[totalField] = tailNum;
+      const totalField = field === "trackNumber" ? "trackTotal" : "discTotal";
+      target[totalField] = tailNum;
     }
   }
 };

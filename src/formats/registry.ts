@@ -90,6 +90,4 @@ export const getAllRegistrations = (): readonly FormatRegistration[] =>
 /**
  * Remove every registration. Intended for tests; production code should not call this.
  */
-export const clearRegistrations = (): void => {
-  registrations.clear();
-};
+export const clearRegistrations = (): void => registrations.clear();

@@ -95,11 +95,11 @@ const apicFrame = (): Id3v2Frame => {
   const out = Buffer.alloc(1 + mime.length + 1 + description.length + BLUE_PNG.length);
   let pos = 0;
   out[pos] = 0x00; // Latin-1 encoding for the description.
-  pos += 1;
+  pos++;
   out.set(mime, pos);
   pos += mime.length;
   out[pos] = 0x03; // Picture type: cover (front)
-  pos += 1;
+  pos++;
   out.set(description, pos);
   pos += description.length;
   out.set(BLUE_PNG, pos);

@@ -31,9 +31,9 @@ export const removeUnsynchronization = (bytes: Uint8Array): Uint8Array => {
  */
 const countUnsyncPairs = (bytes: Uint8Array): number => {
   let count = 0;
-  for (let i = 0; i + 1 < bytes.length; i += 1) {
+  for (let i = 0; i + 1 < bytes.length; i++) {
     if (bytes[i] === 0xff && bytes[i + 1] === 0x00) {
-      count += 1;
+      count++;
     }
   }
 

@@ -27,15 +27,15 @@ const ENCODING_TO_BYTE: Readonly<Record<string, number>> = {
  *
  * @returns The encoded body ready to wrap in a frame header.
  */
-export const buildTextFrameBody = (args: Args): Uint8Array => {
-  const encByte = ENCODING_TO_BYTE[args.encoding];
+export const buildTextFrameBody = ({ text, encoding }: Args): Uint8Array => {
+  const encByte = ENCODING_TO_BYTE[encoding];
   if (encByte === undefined) {
-    throw new Error(`buildTextFrameBody: unsupported encoding "${args.encoding}"`);
+    throw new Error(`buildTextFrameBody: unsupported encoding "${encoding}"`);
   }
 
-  const text = encodeText(args.text, args.encoding);
-  const out = Buffer.alloc(1 + text.length);
+  const textBytes = encodeText(text, encoding);
+  const out = Buffer.alloc(1 + textBytes.length);
   out[0] = encByte;
-  out.set(text, 1);
+  out.set(textBytes, 1);
   return new Uint8Array(out.buffer, out.byteOffset, out.byteLength);
 };

@@ -130,7 +130,7 @@ export const createBufferWriter = (): BufferWriter => {
     writeUInt8: (value: number) => {
       ensureCapacity(1);
       state.buffer.writeUInt8(value, state.length);
-      state.length += 1;
+      state.length++;
     },
     writeUInt16BE: (value: number) => {
       ensureCapacity(2);
@@ -204,9 +204,9 @@ type Args = {
  *
  * @returns The new capacity (always `>= required`).
  */
-const nextCapacity = (args: Args): number => {
-  let next = args.current;
-  while (next < args.required) {
+const nextCapacity = ({ current, required }: Args): number => {
+  let next = current;
+  while (next < required) {
     next *= 2;
   }
 

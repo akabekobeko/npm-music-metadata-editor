@@ -10,8 +10,11 @@ import { unwrapV24FrameData } from "./unwrapV24FrameData.js";
  *
  * @returns A {@link ParseFrameResult} describing the parsed frame, error, or padding.
  */
-export const parseV23OrV24Frame = (args: ParseFrameArgs): ParseFrameResult => {
-  const { body, offset, majorVersion } = args;
+export const parseV23OrV24Frame = ({
+  body,
+  offset,
+  majorVersion,
+}: ParseFrameArgs): ParseFrameResult => {
   if (offset + 10 > body.length) {
     return { kind: "error", consumed: body.length - offset, reason: "truncated v2.3+ frame" };
   }

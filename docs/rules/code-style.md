@@ -17,6 +17,7 @@
   - 名前を関数固有 (`type ResolveFormatArgs` など) にしない。冗長な命名は「他関数からも参照されうる」誤った印象を与える。
   - **export しない**。当該ファイル外で参照される場合は再利用される共有型なので、`types.ts` に移すか、その関数を呼び出す関数から離れた配置を再検討する。
   - 同一サブモジュール内の複数ファイルで型を共有する必要がある場合だけ、共有型を `parseFrame/types.ts` のように **同階層の `types.ts`** に置き、固有名で export する ([`types-and-constants.md`](types-and-constants.md))。
+  - **`type Args = {}` で受ける引数は関数シグネチャで destructuring する** (`(args: Args)` ではなく `({ a, b, c }: Args)`)。本体内で `args.x` の参照が混じると、引数オブジェクトが「常に追加プロパティを参照しうる」シグナルになり、可読性が落ちる。展開しておけば「この関数が読むのは `a`, `b`, `c` だけ」と一目で分かる。デフォルト値は `({ x = 10 }: Args)` で同時に書ける。
 - 1 関数の本体はおよそ **100 行を上限**。これを超えそうならサブルーチンに分割する。
 - 関数は **なるべく 1 ファイル 1 関数** とし、関心を細かく分割する。具体的には次の 2 パターンに分ける:
   - **メイン関数 + private helper** が同居する場合 → **代表となる関数名のサブディレクトリ**を掘り、メイン関数を同名ファイル (例: `parseId3v2/parseId3v2.ts`) に置き、helper を兄弟ファイル (`parseHeader.ts`、`parseFrame.ts`) としてコロケーションする。
@@ -28,6 +29,18 @@
   - 「各要素を別の値へ変換」→ `Array.prototype.map`
   - 「全要素を 1 つの値に畳む」→ `Array.prototype.reduce`
   - 例外: バイナリ パース等で **早期 return / 副作用 / インデックス操作** が必要なケースは `for` を残す。
+- **アロー関数で右辺を式にできる場合は式本体 (expression body) で書く**。block body (`{ ... }`) は副作用を伴う複数ステートメントが入りうるシグナルとなる。式本体にすることで「このスコープでは式 1 つしか評価されない (それ以上の副作用は無い)」ことを論理的・視覚的に明示できる。
+  - `() => x` / `() => fn()` / `(): void => sideEffectFn()` のように書く。block body にする必要があるのは、複数ステートメント、early return、ローカル変数の導入が必要なときだけ。
+  - **Biome の `useConsistentArrowReturn` (`asNeeded`) で `{ return x; }` → `x` の置換は機械検出される**。ただし `{ sideEffectFn(); }` (return 文ではない単一ステートメント) は機械検出対象外なので、コードレビューで担保する。
+  - 例外: 戻り値が `void` ではないのに呼び先が値を返すケース (例: `Map.set` は `Map` を返す) は型不整合になるため block body を維持する。
+- **変数の定義は最初の参照位置のなるべく近くに置く**。定義から参照までの距離が離れるほど、読者はその値を「いつ使われるか」意識し続けることになり、認知負荷が高まる。
+  - 早期 return で条件分岐するケースでは、return パスでは使わない値を関数頭で定義しない。実際に必要な分岐の直前に降ろす。
+  - 例: `const x = ...; if (a) return; if (b) return; return f(x);` ではなく `if (a) return; if (b) return; const x = ...; return f(x);` とする。
+  - 関数引数のデフォルト値解決 (`?? DEFAULT`) も同様。デフォルト値を使う分岐の直前で評価する。
+- **防御的に例外を投げるだけのヘルパーは `check*` で始める**。前提条件の検証 (シグネチャ判定、境界チェックなど) を行い、失敗時に `throw` する関数の命名規約。
+  - 例: `checkSignature(input)` / `checkAvailable(need)` / `checkBounds(...)`。
+  - **`ensure*` は副作用 (state を mutate して postcondition を満たすパターン) 専用**として区別する (例: `bufferWriter.ts` の `ensureCapacity` は throw せずに buffer を grow する)。`ensure*` と `check*` の動詞を分けることで、grep だけで「ガード関数」と「拡張関数」を区別できる。
+  - `assert*` / `need` などの代替動詞は使わない (`check*` に統一)。
 - **`if` / `for` / `while` / `switch` のブロック終端直後には空行を入れる**。次のステートメントとの境目を視覚的に区切るため。
   - 例外: ブロックの直後が外側ブロックの閉じ波括弧 (`}`) や `else` / `catch` / `finally` など同じ制御構文の継続の場合は空行を入れない。
   - Biome 2.4 にはこのルールに相当するチェックがない (`padding-line-between-statements` 相当の機能が未実装) ため、コードレビューで担保する。新しい Biome バージョンで対応ルールが追加された場合は `biome.json` に追記して機械化する。

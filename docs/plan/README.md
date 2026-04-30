@@ -9,7 +9,7 @@
 | -- | ----------------------------- | ----------------------------------------------------- | ----- |
 | 01 | [Foundation](phase-01-foundation.md)            | 共通型、バイナリ I/O、フォーマット検出、公開 API 骨格   | DONE |
 | 02 | [ID3v1 / ID3v2 + MP3](phase-02-id3-mp3.md)     | ID3v1/v2 read & write、MP3 ヘッダ最低限解析             | DONE |
-| 03 | [FLAC + Vorbis Comment](phase-03-flac-vorbis.md)| FLAC メタデータ ブロック、Vorbis Comment 共通実装        | TODO |
+| 03 | [FLAC + Vorbis Comment](phase-03-flac-vorbis.md)| FLAC メタデータ ブロック、Vorbis Comment 共通実装        | DONE |
 | 04 | [MP4 / M4A Atoms](phase-04-mp4.md)              | atom ツリー パース、iTunes アトム、read/write           | TODO |
 | 05 | [OGG Container](phase-05-ogg.md)                | OGG ページ、Vorbis/Opus、Phase 3 との連携                | TODO |
 | 06 | [APE Tag + Monkey's Audio](phase-06-ape.md)     | APE Tag v1/v2、APE オーディオ ヘッダ                    | TODO |

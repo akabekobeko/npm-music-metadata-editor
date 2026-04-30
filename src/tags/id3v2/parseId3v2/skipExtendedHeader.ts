@@ -12,8 +12,7 @@ type Args = {
  * @returns The offset (within `body`) where frame parsing should start, or `-1`
  *   when the extended header is malformed.
  */
-export const skipExtendedHeader = (args: Args): number => {
-  const { body, syncSafe } = args;
+export const skipExtendedHeader = ({ body, syncSafe }: Args): number => {
   if (body.length < 4) {
     return -1;
   }

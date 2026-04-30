@@ -127,7 +127,7 @@ export const createBufferCursor = (source: Uint8Array): BufferCursor => {
    *
    * @param need - Number of bytes the caller is about to read.
    */
-  const ensure = (need: number): void => {
+  const checkAvailable = (need: number): void => {
     if (state.position + need > buffer.length) {
       throw new RangeError(
         `BufferCursor: read of ${need} bytes at ${state.position} exceeds length ${buffer.length}`,
@@ -146,43 +146,43 @@ export const createBufferCursor = (source: Uint8Array): BufferCursor => {
       return buffer.length - state.position;
     },
     readUInt8: () => {
-      ensure(1);
+      checkAvailable(1);
       const value = buffer.readUInt8(state.position);
-      state.position += 1;
+      state.position++;
       return value;
     },
     readUInt16BE: () => {
-      ensure(2);
+      checkAvailable(2);
       const value = buffer.readUInt16BE(state.position);
       state.position += 2;
       return value;
     },
     readUInt16LE: () => {
-      ensure(2);
+      checkAvailable(2);
       const value = buffer.readUInt16LE(state.position);
       state.position += 2;
       return value;
     },
     readUInt24BE: () => {
-      ensure(3);
+      checkAvailable(3);
       const value = buffer.readUIntBE(state.position, 3);
       state.position += 3;
       return value;
     },
     readUInt32BE: () => {
-      ensure(4);
+      checkAvailable(4);
       const value = buffer.readUInt32BE(state.position);
       state.position += 4;
       return value;
     },
     readUInt32LE: () => {
-      ensure(4);
+      checkAvailable(4);
       const value = buffer.readUInt32LE(state.position);
       state.position += 4;
       return value;
     },
     readSyncSafeInt32: () => {
-      ensure(4);
+      checkAvailable(4);
       const value = decodeSyncSafeInt32(source, state.position);
       state.position += 4;
       return value;
@@ -192,7 +192,7 @@ export const createBufferCursor = (source: Uint8Array): BufferCursor => {
         throw new RangeError(`BufferCursor.readBytes: invalid length ${length}`);
       }
 
-      ensure(length);
+      checkAvailable(length);
       const view = source.subarray(state.position, state.position + length);
       state.position += length;
       return view;
@@ -242,7 +242,7 @@ export const createBufferCursor = (source: Uint8Array): BufferCursor => {
         throw new RangeError(`BufferCursor.peek: invalid length ${n}`);
       }
 
-      ensure(n);
+      checkAvailable(n);
       return source.subarray(state.position, state.position + n);
     },
   };
@@ -260,7 +260,7 @@ export const createBufferCursor = (source: Uint8Array): BufferCursor => {
 const findSingleByteTerminator = (source: Uint8Array, start: number): number => {
   let end = start;
   while (end < source.length && source[end] !== 0) {
-    end += 1;
+    end++;
   }
 
   return end;

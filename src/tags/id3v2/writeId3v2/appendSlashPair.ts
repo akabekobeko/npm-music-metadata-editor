@@ -20,13 +20,20 @@ type Args = {
 };
 
 /** Emit a `TRCK` / `TPOS`-style `"X/Y"` (or `"X"` when no total) frame. */
-export const appendSlashPair = (args: Args): void => {
-  const number = args.tag[args.numberField];
+export const appendSlashPair = ({
+  frames,
+  tag,
+  numberField,
+  totalField,
+  frameId,
+  encoding,
+}: Args): void => {
+  const number = tag[numberField];
   if (number === undefined) {
     return;
   }
 
-  const total = args.tag[args.totalField];
+  const total = tag[totalField];
   const text = total === undefined ? `${number}` : `${number}/${total}`;
-  args.frames.push(buildTextFrame({ id: args.frameId, text, encoding: args.encoding }));
+  frames.push(buildTextFrame({ id: frameId, text, encoding }));
 };
