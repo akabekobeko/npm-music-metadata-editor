@@ -163,6 +163,12 @@ export type ChapterInfo = {
   url?: string;
   /** Optional picture associated with the chapter. */
   picture?: PictureInfo;
+  /**
+   * Nested chapters projected from an ID3v2 `CTOC` table-of-contents frame.
+   * Present only when the source described a hierarchy (otherwise the file's
+   * chapters appear as a flat list at the top level).
+   */
+  subChapters?: readonly ChapterInfo[];
 };
 
 /**
@@ -229,6 +235,22 @@ export type ReadOptions = {
 export type WriteOptions = {
   /** Metadata fields to merge into the file. Fields left `undefined` are preserved as-is. */
   tag: Partial<TagData>;
+  /**
+   * Embedded pictures to write. When omitted the existing pictures are
+   * preserved; when present (even an empty array), the existing pictures are
+   * replaced wholesale.
+   */
+  pictures?: readonly PictureInfo[];
+  /**
+   * Chapters to write. When omitted the existing chapters are preserved; when
+   * present, the existing chapters are replaced wholesale.
+   */
+  chapters?: readonly ChapterInfo[];
+  /**
+   * Lyrics to write. When omitted the existing lyrics are preserved; when
+   * present, the existing lyrics are replaced wholesale.
+   */
+  lyrics?: LyricsInfo;
   /** Override format detection (write as the given format). */
   format?: AudioFormat;
 };

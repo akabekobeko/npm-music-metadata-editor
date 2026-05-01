@@ -70,7 +70,13 @@ export const writeAiff = async (input: Uint8Array, options: WriteOptions): Promi
   }
 
   const nativeBytes = buildNativeChunks(options.tag);
-  const id3Bytes = buildId3Chunk({ tag: options.tag, existing: existingId3Payload });
+  const id3Bytes = buildId3Chunk({
+    tag: options.tag,
+    existing: existingId3Payload,
+    pictures: options.pictures,
+    chapters: options.chapters,
+    lyrics: options.lyrics,
+  });
 
   const totalBodySize =
     formType.length +

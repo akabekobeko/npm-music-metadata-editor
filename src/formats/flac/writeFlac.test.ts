@@ -79,6 +79,36 @@ it("preserves embedded pictures across a write", async () => {
   expect(result.pictures[0]?.mimeType).toBe("image/png");
 });
 
+it("replaces pictures when the caller supplies an explicit list", async () => {
+  const original = await loadFixture("with-picture.flac");
+  const newPicture = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46]);
+  const updated = await writeMetadata(original, {
+    tag: {},
+    pictures: [{ mimeType: "image/jpeg", kind: 3, description: "New Cover", data: newPicture }],
+  });
+  const result = await readMetadata(updated);
+  expect(result.pictures).toHaveLength(1);
+  expect(result.pictures[0]?.mimeType).toBe("image/jpeg");
+  expect(result.pictures[0]?.description).toBe("New Cover");
+});
+
+it("drops embedded pictures when the caller supplies an empty list", async () => {
+  const original = await loadFixture("with-picture.flac");
+  const updated = await writeMetadata(original, { tag: {}, pictures: [] });
+  const result = await readMetadata(updated);
+  expect(result.pictures).toEqual([]);
+});
+
+it("encodes lyrics via a Vorbis Comment LYRICS entry", async () => {
+  const original = await loadFixture("basic.flac");
+  const updated = await writeMetadata(original, {
+    tag: {},
+    lyrics: { synchronized: [{ timeMs: 1000, text: "Hello" }] },
+  });
+  const result = await readMetadata(updated);
+  expect(result.lyrics?.synchronized).toEqual([{ timeMs: 1000, text: "Hello" }]);
+});
+
 it("preserves unmanaged Vorbis Comment entries (e.g. multi-value ARTIST)", async () => {
   const original = await loadFixture("with-picture.flac");
   // Round-trip without changing tag fields. The fixture includes two ARTIST

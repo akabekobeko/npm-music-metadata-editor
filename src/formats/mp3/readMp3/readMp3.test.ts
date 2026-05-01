@@ -45,9 +45,10 @@ it("reads an ID3v2.4 fixture with extras", async () => {
     bpm: 120,
     comment: "ID3v2.4 sample",
   });
-  // APIC / USLT structuring is Phase 9; pictures / lyrics stay empty here.
-  expect(result.pictures).toEqual([]);
-  expect(result.lyrics).toBeUndefined();
+  // Phase 9 surfaces APIC / USLT through the public API.
+  expect(result.pictures).toHaveLength(1);
+  expect(result.pictures[0]?.mimeType).toBe("image/png");
+  expect(result.lyrics?.unsynchronized).toBe("the quick brown fox jumps over the lazy dog");
 });
 
 it("reads ID3v2 head while ID3v1 trailer is also present", async () => {

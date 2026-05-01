@@ -1,3 +1,4 @@
+import { readApeExtras } from "../../../extras/apeExtras/readApeExtras.js";
 import { apeTagToTagData } from "../../../tags/ape/apeTagToTagData/apeTagToTagData.js";
 import { readApeTag } from "../../../tags/ape/readApeTag/readApeTag.js";
 import type { MetadataReadResult } from "../../../types.js";
@@ -18,10 +19,11 @@ import type { MetadataReadResult } from "../../../types.js";
 export const readApe = async (input: Uint8Array): Promise<MetadataReadResult> => {
   const apeTag = readApeTag(input);
   const tag = apeTag === undefined ? {} : apeTagToTagData(apeTag);
+  const pictures = apeTag === undefined ? [] : readApeExtras(apeTag).pictures;
   return {
     audioFormat: "ape",
     tag,
-    pictures: [],
+    pictures,
     chapters: [],
   };
 };
