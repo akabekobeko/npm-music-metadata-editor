@@ -284,30 +284,42 @@ export type Warning = {
 /**
  * Result of reading metadata from an audio source.
  *
+ * Every field is `readonly`. Audio-side facts like {@link MetadataReadResult.durationMs}
+ * are derived from the underlying audio data and must not flow back through
+ * the writer; the rest of the fields stay immutable for consistency. Edits
+ * are made by destructuring into a fresh object before passing the result
+ * onward to {@link writeMetadata} / {@link saveTrack}.
+ *
  * The optional `warnings` / `additionalFields` / `durationMs` fields are populated
  * by readers as they support them; older readers may leave them `undefined`.
  * The high-level {@link Track} surface normalizes the absence to empty values.
  */
 export type MetadataReadResult = {
   /** Detected container / codec. */
-  audioFormat: AudioFormat;
+  readonly audioFormat: AudioFormat;
   /** Common metadata fields. */
-  tag: TagData;
+  readonly tag: TagData;
   /** Embedded pictures (cover art, etc.). Empty array when none. */
-  pictures: readonly PictureInfo[];
+  readonly pictures: readonly PictureInfo[];
   /** Chapter marks. Empty array when none. */
-  chapters: readonly ChapterInfo[];
+  readonly chapters: readonly ChapterInfo[];
   /** Lyrics, when the source contains any. */
-  lyrics?: LyricsInfo;
-  /** Audio duration in milliseconds, when the reader can determine it. */
-  durationMs?: number;
+  readonly lyrics?: LyricsInfo;
+  /**
+   * Audio duration in milliseconds, when the reader can determine it.
+   *
+   * Derived from the underlying audio data (sample rate × total samples,
+   * bitrate × audio size, etc.). Read-only — `writeMetadata` / `saveTrack`
+   * never write this value back, since it is recomputed on the next read.
+   */
+  readonly durationMs?: number;
   /**
    * Format-native fields that did not map to a {@link TagData} property.
    * Keys are reader-defined; values are stringified.
    */
-  additionalFields?: Readonly<Record<string, string>>;
+  readonly additionalFields?: Readonly<Record<string, string>>;
   /** Non-fatal diagnostics emitted during the read. */
-  warnings?: readonly Warning[];
+  readonly warnings?: readonly Warning[];
 };
 
 /**

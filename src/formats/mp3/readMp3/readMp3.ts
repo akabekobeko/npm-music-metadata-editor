@@ -14,6 +14,7 @@ import type {
   TagData,
   TagSource,
 } from "../../../types.js";
+import { computeDurationMs } from "./computeDurationMs.js";
 import { id3v1ToTagData } from "./id3v1ToTagData.js";
 import { mergeTags } from "./mergeTags.js";
 
@@ -52,12 +53,15 @@ export const readMp3 = async (
   const chapters: ChapterInfo[] = [...(id3Extras?.chapters ?? [])];
   const lyrics: LyricsInfo | undefined = id3Extras?.lyrics;
 
+  const durationMs = computeDurationMs(input);
+
   return {
     audioFormat: "mp3",
     tag,
     pictures,
     chapters,
     ...(lyrics === undefined ? {} : { lyrics }),
+    ...(durationMs === undefined ? {} : { durationMs }),
   };
 };
 

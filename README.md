@@ -39,10 +39,13 @@ const track = await loadTrack("./song.mp3");
 console.log(track.audioFormat);   // "mp3"
 console.log(track.tag.title);     // "Hello"
 console.log(track.tag.artist);    // "akabeko"
+console.log(track.durationMs);    // 215000 (or `undefined` when not derivable)
 console.log(track.pictures.length);
 ```
 
 `loadTrack` accepts either a file path (`string`) or pre-loaded bytes (`Uint8Array`). The returned `Track` is a Plain Object — every consumer mutation is done by spreading.
+
+`durationMs` is a read-only audio-derived field: the reader computes it from sample-count / sample-rate / bitrate fields, and `saveTrack` never writes it back to the file (the writer recomputes it on the next read). It is `undefined` when the source does not carry the values needed (e.g. a stripped-down fixture or a streaming MP3 with no Xing/VBRI header).
 
 ### Save a modified track
 

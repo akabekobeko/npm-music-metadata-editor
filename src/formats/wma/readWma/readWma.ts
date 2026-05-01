@@ -8,6 +8,7 @@ import { readContentDescription } from "../metadata/readContentDescription.js";
 import { readExtendedContentDescription } from "../metadata/readExtendedContentDescription.js";
 import type { ContentDescription, ExtendedDescriptor } from "../metadata/types.js";
 import type { AsfObject } from "../types.js";
+import { computeDurationMs } from "./computeDurationMs.js";
 
 /**
  * Read WMA / ASF metadata.
@@ -35,6 +36,7 @@ export const readWma = async (input: Uint8Array): Promise<MetadataReadResult> =>
 
   let content: ContentDescription | undefined;
   let extended: readonly ExtendedDescriptor[] = [];
+  let durationMs: number | undefined;
   for (const child of children) {
     if (child.guid === ASF_GUID.ContentDescriptionObject) {
       content = readContentDescription(payloadOf(input, child));
@@ -43,6 +45,11 @@ export const readWma = async (input: Uint8Array): Promise<MetadataReadResult> =>
 
     if (child.guid === ASF_GUID.ExtendedContentDescriptionObject) {
       extended = readExtendedContentDescription(payloadOf(input, child));
+      continue;
+    }
+
+    if (child.guid === ASF_GUID.FilePropertiesObject) {
+      durationMs = computeDurationMs(payloadOf(input, child));
     }
   }
 
@@ -51,6 +58,7 @@ export const readWma = async (input: Uint8Array): Promise<MetadataReadResult> =>
     tag: descriptorsToTagData({ content, extended }),
     pictures: readWmaPictures(extended),
     chapters: [],
+    ...(durationMs === undefined ? {} : { durationMs }),
   };
 };
 

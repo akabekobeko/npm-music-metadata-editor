@@ -19,5 +19,8 @@ export const WAV_CHUNK_DATA = "data";
 /** Chunk ID of the embedded ID3v2 chunk (`"id3 "`, with trailing space). */
 export const WAV_CHUNK_ID3 = "id3 ";
 
+/** Chunk ID of the format-description chunk (`"fmt "`, with trailing space). */
+export const WAV_CHUNK_FMT = "fmt ";
+
 /** `LIST` chunk purpose marker for the `INFO` flavour. */
 export const WAV_LIST_PURPOSE_INFO = "INFO";

@@ -39,10 +39,13 @@ const track = await loadTrack("./song.mp3");
 console.log(track.audioFormat);   // "mp3"
 console.log(track.tag.title);     // "Hello"
 console.log(track.tag.artist);    // "akabeko"
+console.log(track.durationMs);    // 215000 (取得できない場合は `undefined`)
 console.log(track.pictures.length);
 ```
 
 `loadTrack` はファイル パス (`string`) と読み込み済みのバイト列 (`Uint8Array`) の両方を受け取れます。返される `Track` は Plain Object なので、編集はすべてスプレッド構文で行います。
+
+`durationMs` は音声データから算出される読み取り専用フィールドです。reader が sample 数 / サンプル レート / bitrate などから計算し、`saveTrack` でファイルへ書き戻されることはありません (次回読み込み時に再計算されます)。フォーマットや内容により取得不能な場合 (Xing/VBRI ヘッダの無い MP3 や、サンプル数情報を欠いたフィクスチャなど) は `undefined` になります。
 
 ### 編集したトラックの保存
 

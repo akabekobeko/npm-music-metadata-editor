@@ -30,6 +30,8 @@ export type ParsedOggHeaders = {
   serialNumber: number;
   /** Codec + sample rate + channels decoded from the BOS packet. */
   codecInfo: OggCodecInfo;
+  /** Identification packet bytes (BOS packet payload, with codec magic intact). */
+  idPacket: Uint8Array;
   /** Vorbis Comment payload extracted from the comment packet. */
   vorbisComment: VorbisComment;
   /**
@@ -106,6 +108,7 @@ export const parseOggHeaders = (input: Uint8Array): ParsedOggHeaders => {
     pages,
     serialNumber,
     codecInfo,
+    idPacket,
     vorbisComment,
     headerPageIndices,
     vorbisSetupPacket: setupPacket?.data,
