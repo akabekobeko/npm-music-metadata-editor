@@ -14,6 +14,9 @@ pnpm fixtures:mp3
 pnpm fixtures:flac
 pnpm fixtures:mp4
 pnpm fixtures:ogg
+pnpm fixtures:ape
+pnpm fixtures:wav
+pnpm fixtures:aiff
 ```
 
 Each generator prints a one-line summary per file produced. Files are

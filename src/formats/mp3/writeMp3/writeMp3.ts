@@ -5,12 +5,12 @@ import { writeApeTag } from "../../../tags/ape/writeApeTag/writeApeTag.js";
 import { readId3v1 } from "../../../tags/id3v1/readId3v1/readId3v1.js";
 import { writeId3v1 } from "../../../tags/id3v1/writeId3v1/writeId3v1.js";
 import { parseId3v2 } from "../../../tags/id3v2/parseId3v2/parseId3v2.js";
+import { KNOWN_FRAME_IDS } from "../../../tags/id3v2/writeId3v2/knownFrameIds.js";
 import { writeId3v2 } from "../../../tags/id3v2/writeId3v2/writeId3v2.js";
 import type { WriteOptions } from "../../../types.js";
 import { findMp3AudioEnd } from "../readMp3/findMp3AudioEnd.js";
 import { findMp3AudioStart } from "../readMp3/findMp3AudioStart.js";
 import { buildId3v1FromTag } from "./buildId3v1FromTag.js";
-import { KNOWN_FRAME_IDS } from "./knownFrameIds.js";
 import type { Mp3WriteOptions } from "./types.js";
 
 /**

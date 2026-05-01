@@ -36,7 +36,9 @@
     "fixtures:flac": "tsx scripts/fixtures/flac.ts",
     "fixtures:mp4": "tsx scripts/fixtures/mp4.ts",
     "fixtures:ogg": "tsx scripts/fixtures/ogg.ts",
-    "fixtures:ape": "tsx scripts/fixtures/ape.ts"
+    "fixtures:ape": "tsx scripts/fixtures/ape.ts",
+    "fixtures:wav": "tsx scripts/fixtures/wav.ts",
+    "fixtures:aiff": "tsx scripts/fixtures/aiff.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.13",
