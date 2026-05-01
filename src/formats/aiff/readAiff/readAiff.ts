@@ -36,6 +36,9 @@ export const readAiff = async (input: Uint8Array): Promise<MetadataReadResult> =
   const body = input.subarray(AIFF_HEADER_SIZE);
   const chunks = parseChunks({ buffer: body, endianness: "big" });
 
+  // `ANNO` is genuinely repeatable (each chunk contributes one line); the
+  // single-instance native chunks (`NAME`, `AUTH`, `(c) `, `ID3 `) all
+  // follow last-wins semantics if a pathological file carries duplicates.
   const native: AiffNativeTags = { annotations: [] };
   const annotations: string[] = [];
   let id3Tag: TagData = {};

@@ -30,6 +30,8 @@ export const readWav = async (input: Uint8Array): Promise<MetadataReadResult> =>
   const body = input.subarray(WAV_HEADER_SIZE);
   const chunks = parseChunks({ buffer: body, endianness: "little" });
 
+  // If a pathological file carries multiple `LIST` or `id3 ` chunks the
+  // last one wins, matching what the writer above will round-trip back out.
   let infoTag: TagData = {};
   let id3Tag: TagData = {};
   for (const chunk of chunks) {

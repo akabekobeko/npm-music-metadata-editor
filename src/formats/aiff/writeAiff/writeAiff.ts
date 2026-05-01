@@ -49,6 +49,11 @@ export const writeAiff = async (input: Uint8Array, options: WriteOptions): Promi
   const body = input.subarray(AIFF_HEADER_SIZE);
   const chunks = parseChunks({ buffer: body, endianness: "big" });
 
+  // The loop must keep iterating to collect every non-ID3 chunk into
+  // `preservedChunks` below, so we can't break out on the first ID3 hit.
+  // Conformant AIFF files carry at most one `ID3 ` chunk; if a pathological
+  // file contains several, the last one's payload wins — same convention
+  // ATL.NET uses for its `HasEmbeddedID3v2` field.
   const preservedChunks: Buffer[] = [];
   let existingId3Payload: Uint8Array | undefined;
   for (const chunk of chunks) {

@@ -47,6 +47,11 @@ export const writeWav = async (input: Uint8Array, options: WriteOptions): Promis
   const body = input.subarray(WAV_HEADER_SIZE);
   const chunks = parseChunks({ buffer: body, endianness: "little" });
 
+  // The loop must keep iterating to collect every non-managed chunk into
+  // `preservedChunks` below, so we can't break out on the first id3 hit.
+  // Conformant WAV files carry at most one `id3 ` chunk; if a pathological
+  // file contains several, the last one's payload wins — same convention
+  // ATL.NET uses for its `id3v2Offset` field.
   const preservedChunks: Buffer[] = [];
   let existingId3Payload: Uint8Array | undefined;
   for (const chunk of chunks) {
