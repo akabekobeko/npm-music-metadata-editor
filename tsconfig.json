@@ -9,6 +9,6 @@
     "isolatedModules": true,
     "types": ["node"]
   },
-  "include": ["src/**/*", "vitest.config.ts"],
+  "include": ["src/**/*", "scripts/**/*", "vitest.config.ts"],
   "exclude": ["dist", "node_modules", "coverage"]
 }
