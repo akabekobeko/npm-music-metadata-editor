@@ -72,6 +72,7 @@ export const readExtendedContentDescription = (
  * Decode a UTF-16LE string with a trailing null terminator (the on-disk form
  * the ASF spec mandates for descriptor names).
  *
+ * @param bytes - Source bytes including any trailing UTF-16 nulls.
  * @returns The decoded string with the terminator stripped.
  */
 const stripUtf16Terminator = (bytes: Uint8Array): string => {
@@ -89,6 +90,11 @@ const stripUtf16Terminator = (bytes: Uint8Array): string => {
  *
  * Unknown / malformed values fall back to `Uint8Array` so callers can still
  * round-trip them on write.
+ *
+ * @param type - ASF type code declared on the descriptor.
+ * @param raw - Raw bytes of the descriptor value (length comes from the on-disk header).
+ * @returns The decoded value as a JavaScript primitive (or the raw bytes for
+ *   unrecognised type codes).
  */
 const decodeValue = (
   type: AsfDescriptorType,

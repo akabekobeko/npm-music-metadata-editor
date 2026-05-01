@@ -79,6 +79,9 @@ export const descriptorsToTagData = ({ content, extended }: Args): TagData => {
  * Mutates `tag` in place. Unmapped descriptor names are silently ignored
  * here; the writer is responsible for round-tripping them via the original
  * extended descriptor list.
+ *
+ * @param tag - Mutable target the descriptor is merged into.
+ * @param descriptor - One descriptor parsed from the Extended Content Description Object.
  */
 const applyExtended = (tag: TagData, descriptor: ExtendedDescriptor): void => {
   const text = descriptor.value === undefined ? "" : String(descriptor.value);

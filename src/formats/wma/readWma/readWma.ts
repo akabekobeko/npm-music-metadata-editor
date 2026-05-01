@@ -53,6 +53,12 @@ export const readWma = async (input: Uint8Array): Promise<MetadataReadResult> =>
   };
 };
 
-/** Slice the payload bytes of an ASF object out of the source buffer. */
+/**
+ * Slice the payload bytes of an ASF object out of the source buffer.
+ *
+ * @param source - Whole-file bytes the object was parsed from.
+ * @param object - The ASF object whose payload range is requested.
+ * @returns A zero-copy view of the payload (header excluded).
+ */
 const payloadOf = (source: Uint8Array, object: AsfObject): Uint8Array =>
   source.subarray(object.payloadOffset, object.payloadOffset + Number(object.payloadSize));

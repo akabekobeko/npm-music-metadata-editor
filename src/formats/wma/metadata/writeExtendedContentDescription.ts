@@ -36,7 +36,12 @@ export const writeExtendedContentDescription = (
   return new Uint8Array(out.buffer, out.byteOffset, out.byteLength);
 };
 
-/** Encode `name` as null-terminated UTF-16LE (no BOM). */
+/**
+ * Encode `name` as null-terminated UTF-16LE (no BOM).
+ *
+ * @param name - String to encode.
+ * @returns The UTF-16LE bytes followed by the 2-byte null terminator.
+ */
 const encodeNameWithTerminator = (name: string): Uint8Array => {
   const payload = encodeText(name, "utf16le");
   const out = Buffer.alloc(payload.length + 2);
@@ -51,6 +56,9 @@ const encodeNameWithTerminator = (name: string): Uint8Array => {
  * source, we trust those bytes verbatim — that is what lets us round-trip
  * descriptors whose semantics we don't model. Descriptors built from scratch
  * (mapped from {@link TagData}) leave `rawValue` empty and rely on `value`.
+ *
+ * @param descriptor - Source descriptor to encode.
+ * @returns Bytes ready to write directly into the descriptor's value slot.
  */
 const encodeValue = (descriptor: ExtendedDescriptor): Uint8Array => {
   if (descriptor.rawValue.length > 0) {

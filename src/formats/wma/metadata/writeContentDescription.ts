@@ -50,6 +50,9 @@ export const writeContentDescription = (description: ContentDescription): Uint8A
  * Inlined here (rather than relying on `encodeText("utf16")`) because the
  * Content Description format mandates UTF-16LE without a BOM, while
  * `encodeText("utf16")` prepends a BOM to make ID3v2 happy.
+ *
+ * @param value - String to encode.
+ * @returns The UTF-16LE bytes followed by the 2-byte null terminator.
  */
 const encodeFieldWithTerminator = (value: string): Uint8Array => {
   const payload = encodeText(value, "utf16le");

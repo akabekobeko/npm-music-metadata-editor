@@ -26,6 +26,8 @@ const FIXTURES_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../../tes
  * exist so the writer can patch the `File Size` field, and so detection /
  * parsing tests cover the common ASF layout. Only Channels (>= 1) and the
  * sample rate (8 kHz–96 kHz) are validated by ATL.NET-style consumers.
+ *
+ * @returns The 80-byte payload (no object header).
  */
 const buildFilePropertiesPayload = (): Uint8Array => {
   const out = Buffer.alloc(80);
@@ -51,6 +53,8 @@ const buildFilePropertiesPayload = (): Uint8Array => {
  * Build a minimal Stream Properties Object payload (audio stream, 1 channel,
  * 44.1 kHz). Sufficient for the parser to compute basic sample rate /
  * channel diagnostics without a real audio bitstream behind it.
+ *
+ * @returns The 78-byte payload (no object header).
  */
 const buildStreamPropertiesPayload = (): Uint8Array => {
   // 78 bytes of header + a 16-byte type-specific area. We only fill the
@@ -78,7 +82,11 @@ const buildStreamPropertiesPayload = (): Uint8Array => {
   return new Uint8Array(out.buffer, out.byteOffset, out.byteLength);
 };
 
-/** Wrap the audio packet area in a Data Object envelope. */
+/**
+ * Wrap the audio packet area in a Data Object envelope.
+ *
+ * @returns The full Data Object bytes including the 24-byte ASF object header.
+ */
 const buildDataObject = (): Uint8Array => {
   const payload = Buffer.alloc(40);
   // File ID (must match File Properties; we keep the placeholder GUID).
@@ -107,6 +115,9 @@ type FixtureSpec = {
  * Includes File Properties + Stream Properties (so detection / sanity tests
  * have something realistic to inspect), plus optional Content Description
  * and Extended Content Description Objects.
+ *
+ * @param spec - High-level description of which objects to emit.
+ * @returns The full WMA file bytes ready to write to disk.
  */
 const buildWmaFixture = (spec: FixtureSpec): Uint8Array => {
   const children: Uint8Array[] = [

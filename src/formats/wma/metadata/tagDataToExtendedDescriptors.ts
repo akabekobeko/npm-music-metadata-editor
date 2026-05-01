@@ -121,7 +121,12 @@ const stringDescriptor = (
   };
 };
 
-/** Append `descriptor` to `out` when it is defined. */
+/**
+ * Append `descriptor` to `out` when it is defined.
+ *
+ * @param out - Mutable destination list.
+ * @param descriptor - Descriptor to append, or `undefined` to skip.
+ */
 const pushIfDefined = (
   out: ExtendedDescriptor[],
   descriptor: ExtendedDescriptor | undefined,
