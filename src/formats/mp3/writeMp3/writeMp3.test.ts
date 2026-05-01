@@ -61,6 +61,52 @@ it("opts out of the ID3v1 trailer via includeId3v1=false", async () => {
   expect(readId3v1(rewritten)).toBeUndefined();
 });
 
+it("replaces APIC frames when the caller supplies pictures", async () => {
+  const original = await loadFixture("v24-with-extras.mp3");
+  const newPicture = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46]);
+  const rewritten = await writeMetadata(original, {
+    tag: {},
+    pictures: [
+      {
+        mimeType: "image/jpeg",
+        kind: 3,
+        description: "Replacement",
+        data: newPicture,
+      },
+    ],
+  });
+  const reread = await readMetadata(rewritten);
+  expect(reread.pictures).toHaveLength(1);
+  expect(reread.pictures[0]?.mimeType).toBe("image/jpeg");
+  expect(reread.pictures[0]?.description).toBe("Replacement");
+  expect(reread.pictures[0]?.data).toEqual(newPicture);
+});
+
+it("replaces USLT lyrics when the caller supplies new lyrics", async () => {
+  const original = await loadFixture("v24-with-extras.mp3");
+  const rewritten = await writeMetadata(original, {
+    tag: {},
+    lyrics: { language: "eng", description: "", unsynchronized: "Hello\nWorld" },
+  });
+  const reread = await readMetadata(rewritten);
+  expect(reread.lyrics?.unsynchronized).toBe("Hello\nWorld");
+});
+
+it("writes chapters as CHAP / CTOC frames and re-reads them", async () => {
+  const original = await loadFixture("v24-with-extras.mp3");
+  const rewritten = await writeMetadata(original, {
+    tag: {},
+    chapters: [
+      { id: "ch1", startMs: 0, endMs: 1000, title: "Intro" },
+      { id: "ch2", startMs: 1000, endMs: 5000, title: "Body" },
+    ],
+  });
+  const reread = await readMetadata(rewritten);
+  expect(reread.chapters).toHaveLength(2);
+  expect(reread.chapters[0]?.title).toBe("Intro");
+  expect(reread.chapters[1]?.id).toBe("ch2");
+});
+
 it("refreshes the APE Tag on a layered MP3 + APE + ID3v1 file", async () => {
   const original = await loadFixture("v23-with-ape-and-id3v1.mp3");
   const rewritten = await writeMetadata(original, {

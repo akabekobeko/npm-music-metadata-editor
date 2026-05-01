@@ -30,12 +30,12 @@ it("reads a basic APE v2 fixture", async () => {
   });
 });
 
-it("ignores binary items (cover art) in the projected TagData", async () => {
+it("surfaces binary cover-art items as pictures", async () => {
   const bytes = await loadFixture("with-picture.ape");
   const result = await readMetadata(bytes);
   expect(result.tag.title).toBe("APE with picture");
-  // Pictures stay empty in Phase 6 — Phase 9 will surface them.
-  expect(result.pictures).toEqual([]);
+  // Phase 9 surfaces the binary `Cover Art (...)` items via the public API.
+  expect(result.pictures.length).toBeGreaterThan(0);
 });
 
 it("reads a legacy v1 (footer-only) APE tag", async () => {

@@ -1,9 +1,19 @@
+import { readApeExtras } from "../../../extras/apeExtras/readApeExtras.js";
+import { readId3v2Extras } from "../../../extras/id3v2Extras/readId3v2Extras.js";
 import { apeTagToTagData } from "../../../tags/ape/apeTagToTagData/apeTagToTagData.js";
 import { readApeTag } from "../../../tags/ape/readApeTag/readApeTag.js";
 import { readId3v1 } from "../../../tags/id3v1/readId3v1/readId3v1.js";
 import { id3v2TagToTagData } from "../../../tags/id3v2/id3v2TagToTagData/id3v2TagToTagData.js";
 import { parseId3v2 } from "../../../tags/id3v2/parseId3v2/parseId3v2.js";
-import type { MetadataReadResult, ReadOptions, TagData, TagSource } from "../../../types.js";
+import type {
+  ChapterInfo,
+  LyricsInfo,
+  MetadataReadResult,
+  PictureInfo,
+  ReadOptions,
+  TagData,
+  TagSource,
+} from "../../../types.js";
 import { id3v1ToTagData } from "./id3v1ToTagData.js";
 import { mergeTags } from "./mergeTags.js";
 
@@ -33,11 +43,21 @@ export const readMp3 = async (
   const projections = priority.map((source) => projectTag({ source, input }));
   const tag = projections.reduce<TagData>((acc, projection) => mergeTags(acc, projection), {});
 
+  const id3v2 = parseId3v2(input);
+  const ape = readApeTag(input);
+  const id3Extras = id3v2 === undefined ? undefined : readId3v2Extras(id3v2);
+  const apeExtras = ape === undefined ? undefined : readApeExtras(ape);
+
+  const pictures: PictureInfo[] = [...(id3Extras?.pictures ?? []), ...(apeExtras?.pictures ?? [])];
+  const chapters: ChapterInfo[] = [...(id3Extras?.chapters ?? [])];
+  const lyrics: LyricsInfo | undefined = id3Extras?.lyrics;
+
   return {
     audioFormat: "mp3",
     tag,
-    pictures: [],
-    chapters: [],
+    pictures,
+    chapters,
+    ...(lyrics === undefined ? {} : { lyrics }),
   };
 };
 

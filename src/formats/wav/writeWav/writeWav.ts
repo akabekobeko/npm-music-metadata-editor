@@ -67,7 +67,13 @@ export const writeWav = async (input: Uint8Array, options: WriteOptions): Promis
     preservedChunks.push(Buffer.from(body.subarray(chunk.offset, chunk.offset + chunk.size)));
   }
 
-  const id3Bytes = buildId3Chunk({ tag: options.tag, existing: existingId3Payload });
+  const id3Bytes = buildId3Chunk({
+    tag: options.tag,
+    existing: existingId3Payload,
+    pictures: options.pictures,
+    chapters: options.chapters,
+    lyrics: options.lyrics,
+  });
   const listBytes = buildListInfoChunk(tagDataToInfoEntries(options.tag));
 
   const totalBodySize =

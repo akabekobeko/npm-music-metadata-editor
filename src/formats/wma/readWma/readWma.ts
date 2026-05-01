@@ -1,3 +1,4 @@
+import { readWmaPictures } from "../../../extras/wmaExtras/readWmaPictures.js";
 import type { MetadataReadResult } from "../../../types.js";
 import { parseAsfTree } from "../asf/parseAsfTree.js";
 import { ASF_GUID } from "../constants.js";
@@ -48,7 +49,7 @@ export const readWma = async (input: Uint8Array): Promise<MetadataReadResult> =>
   return {
     audioFormat: "wma",
     tag: descriptorsToTagData({ content, extended }),
-    pictures: [],
+    pictures: readWmaPictures(extended),
     chapters: [],
   };
 };

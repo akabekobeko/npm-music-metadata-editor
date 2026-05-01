@@ -1,4 +1,8 @@
 import { Buffer } from "node:buffer";
+import {
+  EXTRA_FRAME_IDS,
+  synthesizeExtraFrames,
+} from "../../../extras/id3v2Extras/synthesizeExtraFrames.js";
 import { readApeTag } from "../../../tags/ape/readApeTag/readApeTag.js";
 import { tagDataToApeTag } from "../../../tags/ape/tagDataToApeTag/tagDataToApeTag.js";
 import { writeApeTag } from "../../../tags/ape/writeApeTag/writeApeTag.js";
@@ -39,13 +43,29 @@ export const writeMp3 = async (input: Uint8Array, options: WriteOptions): Promis
 
   const existing = parseId3v2(input);
   const knownFrameIds = new Set(KNOWN_FRAME_IDS);
+  const overriddenFrameIds = pickOverriddenExtraFrames(options);
   const preserved =
     existing === undefined
       ? []
-      : existing.frames.filter((frame) => !knownFrameIds.has(frame.id) && frame.id !== "COMM");
+      : existing.frames.filter(
+          (frame) =>
+            !knownFrameIds.has(frame.id) &&
+            frame.id !== "COMM" &&
+            !overriddenFrameIds.has(frame.id),
+        );
 
   const majorVersion = mp3Options.id3v2MajorVersion ?? 3;
-  const id3v2Bytes = writeId3v2({ majorVersion, tag: options.tag, preserveFrames: preserved });
+  const extraFrames = synthesizeExtraFrames({
+    pictures: options.pictures,
+    chapters: options.chapters,
+    lyrics: options.lyrics,
+    majorVersion,
+  });
+  const id3v2Bytes = writeId3v2({
+    majorVersion,
+    tag: options.tag,
+    preserveFrames: [...extraFrames, ...preserved],
+  });
 
   const apeBytes = buildApeBytesIfPresent(input, options);
   const id3v1Bytes = buildId3v1BytesIfRequested({ input, options: mp3Options, tag: options.tag });
@@ -66,6 +86,42 @@ export const writeMp3 = async (input: Uint8Array, options: WriteOptions): Promis
   }
 
   return new Uint8Array(out.buffer, out.byteOffset, out.byteLength);
+};
+
+/**
+ * Resolve which ID3v2 frame IDs the new tag fully overrides.
+ *
+ * When the caller passes one of `pictures` / `chapters` / `lyrics` (even an
+ * empty array), the corresponding pre-existing frames are dropped from the
+ * preserved set so the writer doesn't emit duplicates alongside the
+ * synthesized ones.
+ *
+ * @param options - User-supplied {@link WriteOptions}.
+ * @returns The set of frame IDs the writer should remove from the preserved list.
+ */
+const pickOverriddenExtraFrames = (options: WriteOptions): Set<string> => {
+  const ids = new Set<string>();
+  if (options.pictures !== undefined) {
+    for (const id of EXTRA_FRAME_IDS) {
+      if (id === "APIC" || id === "PIC") {
+        ids.add(id);
+      }
+    }
+  }
+
+  if (options.chapters !== undefined) {
+    ids.add("CHAP");
+    ids.add("CTOC");
+  }
+
+  if (options.lyrics !== undefined) {
+    ids.add("USLT");
+    ids.add("ULT");
+    ids.add("SYLT");
+    ids.add("SLT");
+  }
+
+  return ids;
 };
 
 /**

@@ -1,12 +1,14 @@
 import { Buffer } from "node:buffer";
-import type { WriteOptions } from "../../../types.js";
+import { pictureToWmPicture } from "../../../extras/picture/converters/pictureToWmPicture.js";
+import type { PictureInfo, WriteOptions } from "../../../types.js";
 import { parseAsfTree } from "../asf/parseAsfTree.js";
-import { ASF_GUID } from "../constants.js";
+import { ASF_DESCRIPTOR_TYPE, ASF_GUID } from "../constants.js";
 import { detectWmaSignature } from "../detectWma.js";
 import { readContentDescription } from "../metadata/readContentDescription.js";
 import { readExtendedContentDescription } from "../metadata/readExtendedContentDescription.js";
 import { tagDataToContentDescription } from "../metadata/tagDataToContentDescription.js";
 import { tagDataToExtendedDescriptors } from "../metadata/tagDataToExtendedDescriptors.js";
+import type { ExtendedDescriptor } from "../metadata/types.js";
 import { writeContentDescription } from "../metadata/writeContentDescription.js";
 import { writeExtendedContentDescription } from "../metadata/writeExtendedContentDescription.js";
 import { buildAsfObject } from "./buildAsfObject.js";
@@ -74,10 +76,14 @@ export const writeWma = async (input: Uint8Array, options: WriteOptions): Promis
     tag: options.tag,
     existing: existingDescription,
   });
-  const newExtended = tagDataToExtendedDescriptors({
-    tag: options.tag,
-    existing: existingExtended,
+  const filteredExtended = filterExtendedExtras({
+    extended: existingExtended,
+    overridePictures: options.pictures !== undefined,
   });
+  const newExtended = [
+    ...tagDataToExtendedDescriptors({ tag: options.tag, existing: filteredExtended }),
+    ...buildPictureDescriptors(options.pictures),
+  ];
 
   const preserved: Buffer[] = [];
   let preservedCount = 0;
@@ -131,4 +137,54 @@ export const writeWma = async (input: Uint8Array, options: WriteOptions): Promis
 
   const out = Buffer.concat([Buffer.from(newHeaderObject), ...trailing]);
   return updateFilePropertiesSize(new Uint8Array(out.buffer, out.byteOffset, out.byteLength));
+};
+
+/** Arguments for {@link filterExtendedExtras}. */
+type FilterArgs = {
+  /** Existing Extended Content Description descriptors. */
+  extended: readonly ExtendedDescriptor[];
+  /** `true` when the writer is about to re-emit `WM/Picture` descriptors. */
+  overridePictures: boolean;
+};
+
+/**
+ * Drop pre-existing `WM/Picture` descriptors when the writer is about to
+ * synthesize new ones, so the output never carries stale duplicates.
+ *
+ * @returns The filtered descriptor list, in source order.
+ */
+const filterExtendedExtras = ({ extended, overridePictures }: FilterArgs): ExtendedDescriptor[] => {
+  if (!overridePictures) {
+    return [...extended];
+  }
+
+  return extended.filter((descriptor) => descriptor.name !== "WM/Picture");
+};
+
+/**
+ * Build the `WM/Picture` descriptors emitted from {@link WriteOptions.pictures}.
+ *
+ * The encoded picture bytes are stored on `rawValue` so the writer's value
+ * encoder reuses them verbatim (the `value` slot mirrors the same buffer for
+ * symmetry with descriptors decoded from disk).
+ *
+ * @param pictures - Pictures the caller wants embedded, or `undefined` to skip.
+ * @returns One descriptor per picture, in supplied order.
+ */
+const buildPictureDescriptors = (
+  pictures: readonly PictureInfo[] | undefined,
+): ExtendedDescriptor[] => {
+  if (pictures === undefined) {
+    return [];
+  }
+
+  return pictures.map((picture) => {
+    const bytes = pictureToWmPicture(picture);
+    return {
+      name: "WM/Picture",
+      type: ASF_DESCRIPTOR_TYPE.ByteArray,
+      value: bytes,
+      rawValue: bytes,
+    };
+  });
 };

@@ -1,6 +1,13 @@
+import { readId3v2Extras } from "../../../extras/id3v2Extras/readId3v2Extras.js";
 import { id3v2TagToTagData } from "../../../tags/id3v2/id3v2TagToTagData/id3v2TagToTagData.js";
 import { parseId3v2 } from "../../../tags/id3v2/parseId3v2/parseId3v2.js";
-import type { MetadataReadResult, TagData } from "../../../types.js";
+import type {
+  ChapterInfo,
+  LyricsInfo,
+  MetadataReadResult,
+  PictureInfo,
+  TagData,
+} from "../../../types.js";
 import { parseChunks } from "../../iff/parseChunks/parseChunks.js";
 import { WAV_CHUNK_ID3, WAV_CHUNK_LIST, WAV_HEADER_SIZE } from "../constants.js";
 import { detectWavSignature } from "../detectWav.js";
@@ -34,6 +41,9 @@ export const readWav = async (input: Uint8Array): Promise<MetadataReadResult> =>
   // last one wins, matching what the writer above will round-trip back out.
   let infoTag: TagData = {};
   let id3Tag: TagData = {};
+  let pictures: readonly PictureInfo[] = [];
+  let chapters: readonly ChapterInfo[] = [];
+  let lyrics: LyricsInfo | undefined;
   for (const chunk of chunks) {
     if (chunk.id === WAV_CHUNK_LIST) {
       const payload = body.subarray(chunk.payloadOffset, chunk.payloadOffset + chunk.payloadSize);
@@ -46,6 +56,10 @@ export const readWav = async (input: Uint8Array): Promise<MetadataReadResult> =>
       const parsed = parseId3v2(payload);
       if (parsed !== undefined) {
         id3Tag = id3v2TagToTagData(parsed);
+        const extras = readId3v2Extras(parsed);
+        pictures = extras.pictures;
+        chapters = extras.chapters;
+        lyrics = extras.lyrics;
       }
     }
   }
@@ -53,7 +67,8 @@ export const readWav = async (input: Uint8Array): Promise<MetadataReadResult> =>
   return {
     audioFormat: "wav",
     tag: { ...infoTag, ...id3Tag },
-    pictures: [],
-    chapters: [],
+    pictures,
+    chapters,
+    ...(lyrics === undefined ? {} : { lyrics }),
   };
 };

@@ -1,5 +1,10 @@
 import { Buffer } from "node:buffer";
+import {
+  buildVorbisCommentExtras,
+  MANAGED_EXTRA_KEYS,
+} from "../../../extras/vorbisCommentExtras/buildVorbisCommentExtras.js";
 import { tagDataToVorbisComment } from "../../../tags/vorbisComment/tagDataToVorbisComment/tagDataToVorbisComment.js";
+import type { VorbisCommentEntry } from "../../../tags/vorbisComment/types.js";
 import type { WriteOptions } from "../../../types.js";
 import { parseOggHeaders } from "../readOgg/parseOggHeaders.js";
 import type { OggPage } from "../types.js";
@@ -32,10 +37,19 @@ export const writeOgg = async (input: Uint8Array, options: WriteOptions): Promis
   const parsed = parseOggHeaders(input);
 
   const vendor = parsed.vorbisComment.vendor === "" ? DEFAULT_VENDOR : parsed.vorbisComment.vendor;
+  const preserveEntries = filterPreservedExtras({
+    entries: parsed.vorbisComment.comments,
+    overridePictures: options.pictures !== undefined,
+    overrideLyrics: options.lyrics !== undefined,
+  });
+  const extraEntries = buildVorbisCommentExtras({
+    pictures: options.pictures,
+    lyrics: options.lyrics,
+  });
   const newComment = tagDataToVorbisComment({
     tag: options.tag,
     vendor,
-    preserveEntries: parsed.vorbisComment.comments,
+    preserveEntries: [...preserveEntries, ...extraEntries],
   });
   const commentPacket = buildCommentPacket(newComment, parsed.codecInfo.codec);
 
@@ -64,6 +78,42 @@ export const writeOgg = async (input: Uint8Array, options: WriteOptions): Promis
 
   const total = Buffer.concat([input.subarray(0, bosPageEnd), ...newHeaderPages, trailingBytes]);
   return new Uint8Array(total.buffer, total.byteOffset, total.byteLength);
+};
+
+/** Arguments for {@link filterPreservedExtras}. */
+type FilterArgs = {
+  /** Source entries (the existing Vorbis Comment). */
+  entries: readonly VorbisCommentEntry[];
+  /** `true` when `options.pictures` is set — drops `METADATA_BLOCK_PICTURE`. */
+  overridePictures: boolean;
+  /** `true` when `options.lyrics` is set — drops the lyrics aliases. */
+  overrideLyrics: boolean;
+};
+
+/**
+ * Drop entries the writer is about to re-emit so the output never carries
+ * stale duplicates of the synthesized extras.
+ *
+ * @returns The filtered entry list, in source order.
+ */
+const filterPreservedExtras = ({
+  entries,
+  overridePictures,
+  overrideLyrics,
+}: FilterArgs): VorbisCommentEntry[] => {
+  if (!overridePictures && !overrideLyrics) {
+    return [...entries];
+  }
+
+  const dropKeys = new Set<string>();
+  for (const key of MANAGED_EXTRA_KEYS) {
+    const isPictureKey = key === "METADATA_BLOCK_PICTURE";
+    if ((isPictureKey && overridePictures) || (!isPictureKey && overrideLyrics)) {
+      dropKeys.add(key);
+    }
+  }
+
+  return entries.filter((entry) => !dropKeys.has(entry.key.toUpperCase()));
 };
 
 /**
