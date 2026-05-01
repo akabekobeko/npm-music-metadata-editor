@@ -1,5 +1,5 @@
-import type { VorbisComment } from "../../../tags/vorbisComment/types.js";
 import type { TagData } from "../../../types.js";
+import type { VorbisComment } from "../types.js";
 import { assignSlashPair } from "./assignSlashPair.js";
 import { FIELD_MAP, NUMERIC_FIELDS } from "./constants.js";
 
