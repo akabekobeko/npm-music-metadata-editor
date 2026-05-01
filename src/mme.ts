@@ -1,3 +1,4 @@
+import { registerAiffFormat } from "./formats/aiff/aiff.js";
 import { registerApeFormat } from "./formats/ape/ape.js";
 import { detectFormat, SIGNATURE_PROBE_BYTES } from "./formats/detect.js";
 import { registerFlacFormat } from "./formats/flac/flac.js";
@@ -5,6 +6,7 @@ import { registerMp3Format } from "./formats/mp3/mp3.js";
 import { registerMp4Format } from "./formats/mp4/mp4.js";
 import { registerOggFormat } from "./formats/ogg/ogg.js";
 import { getRegistration } from "./formats/registry.js";
+import { registerWavFormat } from "./formats/wav/wav.js";
 import { readFileBuffer } from "./io/file.js";
 import type { AudioFormat, MetadataReadResult, ReadOptions, WriteOptions } from "./types.js";
 
@@ -14,6 +16,8 @@ registerFlacFormat();
 registerMp4Format();
 registerOggFormat();
 registerApeFormat();
+registerWavFormat();
+registerAiffFormat();
 
 export type {
   AudioFormat,
