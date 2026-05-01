@@ -16,7 +16,7 @@
 | 07 | [RIFF (WAV) + AIFF](phase-07-riff-aiff.md)      | RIFF/AIFF チャンク パース、LIST INFO、BEXT、ID3 chunk    | DONE |
 | 08 | [WMA / ASF](phase-08-wma-asf.md)                | ASF ヘッダ、WM/* プロパティ                              | DONE |
 | 09 | [Lyrics / Chapters / Pictures](phase-09-extras.md) | 拡張メタデータ (歌詞、章、埋め込み画像)                  | DONE |
-| 10 | [Public API & Polish](phase-10-public-api.md)   | Track 相当の高レベル API、エラー戦略、ドキュメント整備   | TODO |
+| 10 | [Public API & Polish](phase-10-public-api.md)   | Track 相当の高レベル API、エラー戦略、ドキュメント整備   | DONE |
 
 ## 進め方
 
