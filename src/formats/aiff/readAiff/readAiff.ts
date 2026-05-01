@@ -11,7 +11,7 @@ import {
   AIFF_CHUNK_NAME,
   AIFF_HEADER_SIZE,
 } from "../constants.js";
-import { detectAiffSignature } from "../detectAiff.js";
+import { detectAiffSignature } from "../detectAiff/detectAiff.js";
 import { nativeTagsToTagData } from "../nativeTagsToTagData.js";
 import type { AiffNativeTags } from "../types.js";
 

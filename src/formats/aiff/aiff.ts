@@ -1,5 +1,5 @@
 import { registerFormat } from "../registry.js";
-import { detectAiffSignature } from "./detectAiff.js";
+import { detectAiffSignature } from "./detectAiff/detectAiff.js";
 import { readAiff } from "./readAiff/readAiff.js";
 import { writeAiff } from "./writeAiff/writeAiff.js";
 

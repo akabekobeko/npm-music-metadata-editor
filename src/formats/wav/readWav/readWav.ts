@@ -4,8 +4,8 @@ import type { MetadataReadResult, TagData } from "../../../types.js";
 import { parseChunks } from "../../iff/parseChunks/parseChunks.js";
 import { WAV_CHUNK_ID3, WAV_CHUNK_LIST, WAV_HEADER_SIZE } from "../constants.js";
 import { detectWavSignature } from "../detectWav.js";
-import { infoEntriesToTagData } from "../infoEntriesToTagData.js";
-import { parseListInfo } from "../parseListInfo.js";
+import { infoEntriesToTagData } from "../infoEntriesToTagData/infoEntriesToTagData.js";
+import { parseListInfo } from "../parseListInfo/parseListInfo.js";
 
 /**
  * Read RIFF/WAV (`.wav`) metadata.

@@ -1,27 +1,11 @@
 import { Buffer } from "node:buffer";
-import { decodeText } from "../../utils/encoding/decodeText.js";
-import { WAV_LIST_PURPOSE_INFO } from "./constants.js";
-import type { WavInfoEntry } from "./types.js";
+import { decodeText } from "../../../utils/encoding/decodeText.js";
+import { WAV_LIST_PURPOSE_INFO } from "../constants.js";
+import type { WavInfoEntry } from "../types.js";
+import { stripTrailingNulls } from "./stripTrailingNulls.js";
 
 /** Bytes consumed by an INFO sub-chunk header (4-byte key + 4-byte size). */
 const SUBCHUNK_HEADER_SIZE = 8;
-
-/**
- * Strip every trailing null byte from `bytes` before decoding.
- *
- * INFO entries are stored as null-terminated strings, but writers in the wild
- * are inconsistent about how many null bytes they emit (one for the
- * terminator, sometimes a second one for word alignment, rarely a few extra).
- * Trimming all of them avoids surfacing invisible NUL characters to callers.
- */
-const stripTrailingNulls = (bytes: Uint8Array): Uint8Array => {
-  let end = bytes.length;
-  while (end > 0 && bytes[end - 1] === 0) {
-    end--;
-  }
-
-  return bytes.subarray(0, end);
-};
 
 /**
  * Parse the entries inside a `LIST` chunk that carries the `INFO` purpose.

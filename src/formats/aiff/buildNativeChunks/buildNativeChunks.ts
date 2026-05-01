@@ -1,28 +1,13 @@
 import { Buffer } from "node:buffer";
-import type { TagData } from "../../types.js";
-import { encodeText } from "../../utils/encoding/encodeText.js";
+import type { TagData } from "../../../types.js";
+import { encodeText } from "../../../utils/encoding/encodeText.js";
 import {
   AIFF_CHUNK_ANNO,
   AIFF_CHUNK_AUTH,
   AIFF_CHUNK_COPYRIGHT,
   AIFF_CHUNK_NAME,
-} from "./constants.js";
-
-/**
- * Build a single AIFF chunk: 4-byte ID + 4-byte BE size + payload + optional pad byte.
- *
- * @param id - 4-character chunk ID.
- * @param payload - Encoded chunk payload.
- * @returns The assembled chunk bytes.
- */
-const buildChunk = (id: string, payload: Uint8Array): Uint8Array => {
-  const padding = payload.length % 2;
-  const out = Buffer.alloc(8 + payload.length + padding);
-  out.write(id.padEnd(4, " ").slice(0, 4), 0, 4, "latin1");
-  out.writeUInt32BE(payload.length, 4);
-  out.set(payload, 8);
-  return new Uint8Array(out.buffer, out.byteOffset, out.byteLength);
-};
+} from "../constants.js";
+import { buildChunk } from "./buildChunk.js";
 
 /**
  * Build the native AIFF metadata chunks (`NAME`, `AUTH`, `(c) `, `ANNO`)
@@ -43,20 +28,22 @@ const buildChunk = (id: string, payload: Uint8Array): Uint8Array => {
 export const buildNativeChunks = (tag: Partial<TagData>): Uint8Array => {
   const parts: Uint8Array[] = [];
   if (tag.title !== undefined && tag.title !== "") {
-    parts.push(buildChunk(AIFF_CHUNK_NAME, encodeText(tag.title, "latin1")));
+    parts.push(buildChunk({ id: AIFF_CHUNK_NAME, payload: encodeText(tag.title, "latin1") }));
   }
 
   if (tag.artist !== undefined && tag.artist !== "") {
-    parts.push(buildChunk(AIFF_CHUNK_AUTH, encodeText(tag.artist, "latin1")));
+    parts.push(buildChunk({ id: AIFF_CHUNK_AUTH, payload: encodeText(tag.artist, "latin1") }));
   }
 
   if (tag.copyright !== undefined && tag.copyright !== "") {
-    parts.push(buildChunk(AIFF_CHUNK_COPYRIGHT, encodeText(tag.copyright, "latin1")));
+    parts.push(
+      buildChunk({ id: AIFF_CHUNK_COPYRIGHT, payload: encodeText(tag.copyright, "latin1") }),
+    );
   }
 
   if (tag.comment !== undefined && tag.comment !== "") {
     for (const line of tag.comment.split("\n")) {
-      parts.push(buildChunk(AIFF_CHUNK_ANNO, encodeText(line, "latin1")));
+      parts.push(buildChunk({ id: AIFF_CHUNK_ANNO, payload: encodeText(line, "latin1") }));
     }
   }
 

@@ -1,37 +1,7 @@
-import type { TagData } from "../../types.js";
-import type { WavInfoEntry } from "./types.js";
-
-/** Match years emitted as plain `YYYY` values (e.g. `"1985"`). */
-const YEAR_ONLY = /^\d{4}$/;
-
-/** Extract the leading integer of a `"X"` or `"X/Y"` style track number. */
-const parseTrackNumber = (value: string): number | undefined => {
-  const head = value.split("/")[0]?.trim();
-  if (head === undefined || head === "") {
-    return undefined;
-  }
-
-  const parsed = Number.parseInt(head, 10);
-  return Number.isFinite(parsed) ? parsed : undefined;
-};
-
-/**
- * Project the recording date string emitted by the `ICRD` INFO entry onto
- * `TagData.year` (when the value is a bare year) and `TagData.recordingDate`
- * (otherwise — typically full ISO `YYYY-MM-DD`).
- */
-const assignRecordingDate = (target: TagData, value: string): void => {
-  if (YEAR_ONLY.test(value)) {
-    const parsed = Number.parseInt(value, 10);
-    if (Number.isFinite(parsed)) {
-      target.year = parsed;
-    }
-
-    return;
-  }
-
-  target.recordingDate = value;
-};
+import type { TagData } from "../../../types.js";
+import type { WavInfoEntry } from "../types.js";
+import { assignRecordingDate } from "./assignRecordingDate.js";
+import { parseTrackNumber } from "./parseTrackNumber.js";
 
 /**
  * Convert decoded `LIST/INFO` entries onto the high-level {@link TagData}

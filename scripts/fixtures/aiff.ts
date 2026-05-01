@@ -3,7 +3,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { buildNativeChunks } from "../../src/formats/aiff/buildNativeChunks.js";
+import { buildNativeChunks } from "../../src/formats/aiff/buildNativeChunks/buildNativeChunks.js";
 import {
   AIFF_CHUNK_COMM,
   AIFF_CHUNK_ID3,
