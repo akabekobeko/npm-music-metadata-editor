@@ -4,9 +4,7 @@
 
 [![Test](https://github.com/akabekobeko/npm-music-metadata-editor/actions/workflows/test.yml/badge.svg)](https://github.com/akabekobeko/npm-music-metadata-editor/actions/workflows/test.yml)
 
-A Node.js + TypeScript library for reading and writing audio file metadata.
-Designed as a function-only API (no classes) with first-class support for ESM
-and Node.js 24+.
+A Node.js + TypeScript library for reading and writing audio file metadata. Designed as a function-only API (no classes) with first-class support for ESM and Node.js 24+.
 
 Supported containers / tag formats:
 
@@ -44,9 +42,7 @@ console.log(track.tag.artist);    // "akabeko"
 console.log(track.pictures.length);
 ```
 
-`loadTrack` accepts either a file path (`string`) or pre-loaded bytes
-(`Uint8Array`). The returned `Track` is a Plain Object — every consumer
-mutation is done by spreading.
+`loadTrack` accepts either a file path (`string`) or pre-loaded bytes (`Uint8Array`). The returned `Track` is a Plain Object — every consumer mutation is done by spreading.
 
 ### Save a modified track
 
@@ -102,8 +98,7 @@ const edited = {
 await saveTrack(edited, { source: "./song.mp3" });
 ```
 
-For synchronized lyrics, populate `lyrics.synchronized` with
-`{ timeMs, text }[]` (sorted by `timeMs`).
+For synchronized lyrics, populate `lyrics.synchronized` with `{ timeMs, text }[]` (sorted by `timeMs`).
 
 ## Two-layer API
 
@@ -112,8 +107,7 @@ For synchronized lyrics, populate `lyrics.synchronized` with
 | High-level | `loadTrack`, `saveTrack` | Most workflows. Returns a stable `Track` Plain Object with `additionalFields` / `warnings` defaults. |
 | Low-level | `readMetadata`, `writeMetadata` | When you need the raw `MetadataReadResult` or want to pass `WriteOptions` directly. |
 
-Both layers honour the same `ReadOptions` (e.g. `tagPriority` for MP3) and
-`format` override for files without recognizable extensions or signatures.
+Both layers honour the same `ReadOptions` (e.g. `tagPriority` for MP3) and `format` override for files without recognizable extensions or signatures.
 
 ```ts
 import { readMetadata } from "music-metadata-editor";
@@ -144,14 +138,11 @@ try {
 | `truncated-input` | The input ended before a required structure could be read in full. |
 | `unsupported-feature` | The input uses a feature not yet supported (e.g. compression / encryption). |
 
-Recoverable problems (a single malformed frame in an otherwise valid tag, etc.)
-are surfaced as non-fatal `Track.warnings: readonly Warning[]` instead of
-throwing.
+Recoverable problems (a single malformed frame in an otherwise valid tag, etc.) are surfaced as non-fatal `Track.warnings: readonly Warning[]` instead of throwing.
 
 ## Field mapping
 
-The mapping between each tag format and the common `TagData` shape is
-documented in [`docs/field-mapping.md`](docs/field-mapping.md).
+The mapping between each tag format and the common `TagData` shape is documented in [`docs/field-mapping.md`](docs/field-mapping.md).
 
 ## Documentation
 

@@ -4,9 +4,7 @@
 
 [![Test](https://github.com/akabekobeko/npm-music-metadata-editor/actions/workflows/test.yml/badge.svg)](https://github.com/akabekobeko/npm-music-metadata-editor/actions/workflows/test.yml)
 
-音楽ファイルのメタデータを読み書きする Node.js + TypeScript 製ライブラリです。
-クラスを使わない関数中心の API として設計されており、ESM と Node.js 24+ を
-ファースト クラスでサポートします。
+音楽ファイルのメタデータを読み書きする Node.js + TypeScript 製ライブラリです。クラスを使わない関数中心の API として設計されており、ESM と Node.js 24+ をファースト クラスでサポートします。
 
 対応コンテナ / タグ形式:
 
@@ -44,9 +42,7 @@ console.log(track.tag.artist);    // "akabeko"
 console.log(track.pictures.length);
 ```
 
-`loadTrack` はファイル パス (`string`) と読み込み済みのバイト列 (`Uint8Array`)
-の両方を受け取れます。返される `Track` は Plain Object なので、編集はすべて
-スプレッド構文で行います。
+`loadTrack` はファイル パス (`string`) と読み込み済みのバイト列 (`Uint8Array`) の両方を受け取れます。返される `Track` は Plain Object なので、編集はすべてスプレッド構文で行います。
 
 ### 編集したトラックの保存
 
@@ -102,8 +98,7 @@ const edited = {
 await saveTrack(edited, { source: "./song.mp3" });
 ```
 
-同期歌詞を扱う場合は `lyrics.synchronized` に `{ timeMs, text }[]` を
-`timeMs` 昇順で渡してください。
+同期歌詞を扱う場合は `lyrics.synchronized` に `{ timeMs, text }[]` を `timeMs` 昇順で渡してください。
 
 ## 2 層構造の API
 
@@ -112,8 +107,7 @@ await saveTrack(edited, { source: "./song.mp3" });
 | 高レベル | `loadTrack`, `saveTrack` | 多くのケースで利用。`additionalFields` / `warnings` の既定値が補われた安定した `Track` Plain Object を返す。 |
 | 低レベル | `readMetadata`, `writeMetadata` | 生の `MetadataReadResult` を扱いたい場合や `WriteOptions` を直接指定したい場合に使う。 |
 
-両レイヤで同じ `ReadOptions` (例: MP3 の `tagPriority`) と `format` 強制
-オプション (拡張子やシグネチャから判定できないファイル向け) を共有します。
+両レイヤで同じ `ReadOptions` (例: MP3 の `tagPriority`) と `format` 強制オプション (拡張子やシグネチャから判定できないファイル向け) を共有します。
 
 ```ts
 import { readMetadata } from "music-metadata-editor";
@@ -123,8 +117,7 @@ const result = await readMetadata("./song.mp3", { tagPriority: ["ape", "id3v2", 
 
 ## エラーと警告
 
-スローされる例外はすべて `MmeError` で、安定した `code` を持つタグ付き
-`Error` です:
+スローされる例外はすべて `MmeError` で、安定した `code` を持つタグ付き `Error` です:
 
 ```ts
 import { loadTrack, isMmeError } from "music-metadata-editor";
@@ -145,14 +138,11 @@ try {
 | `truncated-input` | 必要な構造を読み終える前に入力が終端した。 |
 | `unsupported-feature` | 入力が未対応の機能 (例: 圧縮 / 暗号化) を使っている。 |
 
-回復可能な問題 (有効なタグの中で 1 つだけ壊れた frame があるケースなど) は
-スローではなく `Track.warnings: readonly Warning[]` に non-fatal な
-diagnostic として収集されます。
+回復可能な問題 (有効なタグの中で 1 つだけ壊れた frame があるケースなど) はスローではなく `Track.warnings: readonly Warning[]` に non-fatal な diagnostic として収集されます。
 
 ## フィールド対応表
 
-各タグ形式と共通 `TagData` の対応関係は
-[`docs/field-mapping.ja.md`](docs/field-mapping.ja.md) を参照してください。
+各タグ形式と共通 `TagData` の対応関係は [`docs/field-mapping.ja.md`](docs/field-mapping.ja.md) を参照してください。
 
 ## ドキュメント
 

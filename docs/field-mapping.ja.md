@@ -2,8 +2,7 @@
 
 # フィールド対応表
 
-各タグ形式と `TagData` フィールドの対応表です。`loadTrack` / `readMetadata` が
-返す `TagData` は、フォーマットによらず統一された名前でメタデータを公開します。
+各タグ形式と `TagData` フィールドの対応表です。`loadTrack` / `readMetadata` が返す `TagData` は、フォーマットによらず統一された名前でメタデータを公開します。
 
 凡例:
 

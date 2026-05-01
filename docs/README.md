@@ -2,8 +2,7 @@
 
 # Documentation Index
 
-Index of the documents stored under `docs/`. When adding a new topic, create a
-subdirectory for it and append an entry below.
+Index of the documents stored under `docs/`. When adding a new topic, create a subdirectory for it and append an entry below.
 
 ## Subdirectories
 

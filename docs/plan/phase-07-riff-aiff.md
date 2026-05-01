@@ -16,8 +16,7 @@ RIFF コンテナ (主に WAV) と AIFF (IFF 派生) のチャンク構造を解
   - `id3 ` — ID3v2 チャンク (Phase 2 を呼び出し)
   - `bext` — Broadcast Wave Format (EBU TECH 3285) (オプション)
   - `iXML` — XML メタデータ (オプション)
-- 書き込み: チャンク サイズ変更で **`data` のオフセット移動** が必要なケースは少ないが、`LIST` / `id3 ` チャンク差し替え時のリサイズに対応
-  - WAV は header → metadata chunks → data → trailing chunks の順が一般的。`data` 後ろに置けば再生に影響しない (実装簡素化のため後置を選ぶことを推奨)
+- 書き込み: チャンク サイズ変更で **`data` のオフセット移動** が必要なケースは少ないが、`LIST` / `id3 ` チャンク差し替え時のリサイズに対応 (WAV は header → metadata chunks → data → trailing chunks の順が一般的。`data` 後ろに置けば再生に影響しない (実装簡素化のため後置を選ぶことを推奨))
 
 ### AIFF (`src/formats/aiff/`)
 

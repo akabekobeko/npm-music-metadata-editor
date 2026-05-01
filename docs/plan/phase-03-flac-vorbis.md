@@ -2,8 +2,7 @@
 
 ## 目的
 
-FLAC コンテナの read/write と、汎用タグ形式である **Vorbis Comment** の共通実装を整える。
-Vorbis Comment は OGG (Phase 5) でも再利用するため、本フェーズで切り出しておく。
+FLAC コンテナの read/write と、汎用タグ形式である **Vorbis Comment** の共通実装を整える。Vorbis Comment は OGG (Phase 5) でも再利用するため、本フェーズで切り出しておく。
 
 ## スコープ
 
