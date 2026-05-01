@@ -159,7 +159,9 @@ The mapping between each tag format and the common `TagData` shape is documented
 
 Reference implementation:
 
-- [Zeugma440/atldotnet](https://github.com/Zeugma440/atldotnet) — C# audio-metadata library used as the behavioural reference. The cross-format compatibility table is published as [a Google Sheet](https://docs.google.com/spreadsheets/d/1Wo9ifsKbBloofdWCsoXziAtaS-QVjqci5aavAV8dt2U/).
+- [Zeugma440/atldotnet](https://github.com/Zeugma440/atldotnet)
+  - C# audio-metadata library used as the behavioural reference for this project.
+  - Cross-format compatibility table: [Google Sheet](https://docs.google.com/spreadsheets/d/1Wo9ifsKbBloofdWCsoXziAtaS-QVjqci5aavAV8dt2U/)
 
 Specifications and supporting documentation:
 

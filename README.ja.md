@@ -159,7 +159,9 @@ try {
 
 参考実装:
 
-- [Zeugma440/atldotnet](https://github.com/Zeugma440/atldotnet) — 機能面の参考実装として参照している C# 製音声メタデータ ライブラリ。各フォーマット対応状況の互換性表は [Google Sheets](https://docs.google.com/spreadsheets/d/1Wo9ifsKbBloofdWCsoXziAtaS-QVjqci5aavAV8dt2U/) で公開されている。
+- [Zeugma440/atldotnet](https://github.com/Zeugma440/atldotnet)
+  - 本プロジェクトが機能面の参考実装として参照している C# 製音声メタデータ ライブラリ
+  - 各フォーマット対応状況の互換性表: [Google Sheets](https://docs.google.com/spreadsheets/d/1Wo9ifsKbBloofdWCsoXziAtaS-QVjqci5aavAV8dt2U/)
 
 仕様 / リファレンス資料:
 
