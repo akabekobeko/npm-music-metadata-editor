@@ -1,7 +1,9 @@
 import { Buffer } from "node:buffer";
-import { decodeText } from "../utils/encoding/decodeText.js";
-import type { TextEncoding } from "../utils/encoding/types.js";
-import { decodeSyncSafeInt32 } from "../utils/syncSafeInt/decodeSyncSafeInt32.js";
+import { decodeText } from "../../utils/encoding/decodeText.js";
+import type { TextEncoding } from "../../utils/encoding/types.js";
+import { decodeSyncSafeInt32 } from "../../utils/syncSafeInt/decodeSyncSafeInt32.js";
+import { findSingleByteTerminator } from "./findSingleByteTerminator.js";
+import { findUtf16Terminator } from "./findUtf16Terminator.js";
 
 /**
  * Read-only cursor over a `Uint8Array` that tracks the current position.
@@ -248,42 +250,4 @@ export const createBufferCursor = (source: Uint8Array): BufferCursor => {
   };
 
   return cursor;
-};
-
-/**
- * Walk forward over `source` looking for the first single-byte `0x00` terminator.
- *
- * @param source - Bytes to scan.
- * @param start - Offset to start scanning from.
- * @returns The offset of the terminator, or `source.length` when no terminator exists.
- */
-const findSingleByteTerminator = (source: Uint8Array, start: number): number => {
-  let end = start;
-  while (end < source.length && source[end] !== 0) {
-    end++;
-  }
-
-  return end;
-};
-
-/**
- * Walk forward over `source` looking for the first aligned 2-byte `0x00 0x00`
- * terminator (UTF-16 family).
- *
- * @param source - Bytes to scan.
- * @param start - Offset to start scanning from. Should be aligned with the UTF-16 code-unit grid.
- * @returns The offset of the terminator, or the position at which scanning stopped
- *   (just past the last full code unit) when no terminator exists.
- */
-const findUtf16Terminator = (source: Uint8Array, start: number): number => {
-  let end = start;
-  while (end + 1 < source.length) {
-    if (source[end] === 0 && source[end + 1] === 0) {
-      return end;
-    }
-
-    end += 2;
-  }
-
-  return end;
 };

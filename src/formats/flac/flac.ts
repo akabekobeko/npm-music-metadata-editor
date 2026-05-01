@@ -1,6 +1,6 @@
 import { registerFormat } from "../registry.js";
 import { detectFlacSignature } from "./detectFlac.js";
-import { readFlac } from "./readFlac.js";
+import { readFlac } from "./readFlac/readFlac.js";
 import { writeFlac } from "./writeFlac.js";
 
 /**

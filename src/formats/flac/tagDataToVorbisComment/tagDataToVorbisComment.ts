@@ -1,40 +1,7 @@
-import type { VorbisComment, VorbisCommentEntry } from "../../tags/vorbisComment/types.js";
-import type { TagData } from "../../types.js";
-
-/**
- * Mapping from {@link TagData} field to the Vorbis Comment keys that field
- * controls.
- *
- * The first entry is the canonical key emitted on write; the remaining
- * entries are aliases that are *also* dropped from `preserveEntries` when the
- * field is provided, so we don't end up with both `TRACKTOTAL` and
- * `TOTALTRACKS` after a rewrite.
- */
-const FIELD_KEYS: Readonly<Partial<Record<keyof TagData, readonly string[]>>> = {
-  title: ["TITLE"],
-  artist: ["ARTIST"],
-  album: ["ALBUM"],
-  albumArtist: ["ALBUMARTIST"],
-  composer: ["COMPOSER"],
-  conductor: ["CONDUCTOR"],
-  lyricist: ["LYRICIST"],
-  publisher: ["PUBLISHER"],
-  copyright: ["COPYRIGHT"],
-  comment: ["COMMENT"],
-  description: ["DESCRIPTION"],
-  genre: ["GENRE"],
-  language: ["LANGUAGE"],
-  isrc: ["ISRC"],
-  productId: ["CATALOGNUMBER", "PRODUCTNUMBER"],
-  recordingDate: ["DATE"],
-  originalReleaseDate: ["ORIGINALDATE"],
-  publishingDate: ["RELEASEDATE"],
-  bpm: ["BPM"],
-  trackNumber: ["TRACKNUMBER"],
-  trackTotal: ["TRACKTOTAL", "TOTALTRACKS"],
-  discNumber: ["DISCNUMBER"],
-  discTotal: ["DISCTOTAL", "TOTALDISCS"],
-};
+import type { VorbisComment, VorbisCommentEntry } from "../../../tags/vorbisComment/types.js";
+import type { TagData } from "../../../types.js";
+import { FIELD_KEYS } from "./constants.js";
+import { stringifyValue } from "./stringifyValue.js";
 
 /** Arguments for {@link tagDataToVorbisComment}. */
 type Args = {
@@ -53,21 +20,6 @@ type Args = {
    * whose key clashes with a field that the caller is managing are dropped.
    */
   preserveEntries?: readonly VorbisCommentEntry[];
-};
-
-/**
- * Stringify a {@link TagData} value for emission as a Vorbis Comment.
- *
- * @returns A string representation, or `undefined` when the value should not
- *   be emitted (e.g. the field was set to `""` to clear it).
- */
-const stringifyValue = (value: string | number | undefined): string | undefined => {
-  if (value === undefined) {
-    return undefined;
-  }
-
-  const text = typeof value === "string" ? value : String(value);
-  return text === "" ? undefined : text;
 };
 
 /**

@@ -1,7 +1,7 @@
 import type { WriteOptions } from "../../types.js";
 import { buildFlac } from "./buildFlac/buildFlac.js";
 import { parseFlac } from "./parseFlac/parseFlac.js";
-import { tagDataToVorbisComment } from "./tagDataToVorbisComment.js";
+import { tagDataToVorbisComment } from "./tagDataToVorbisComment/tagDataToVorbisComment.js";
 import type { FlacWritablePicture } from "./types.js";
 
 /** Default vendor string used when the source file had no Vorbis Comment block. */
