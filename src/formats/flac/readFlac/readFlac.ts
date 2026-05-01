@@ -27,5 +27,6 @@ export const readFlac = async (input: Uint8Array): Promise<MetadataReadResult> =
     pictures: parsed.pictures.map(toPictureInfo),
     chapters: [],
     ...(lyrics === undefined ? {} : { lyrics }),
+    ...(parsed.streamInfo.durationMs > 0 ? { durationMs: parsed.streamInfo.durationMs } : {}),
   };
 };

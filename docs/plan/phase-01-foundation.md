@@ -27,6 +27,7 @@
 - `MetadataReadResult` — 読み取り結果 (`tag`, `audioFormat`, `pictures`, `chapters`, `lyrics`)
 
 すべての `type` には TSDoc を付ける。
+
 グローバル定数が必要になった場合は `src/constants.ts` を新設する (Phase 1 時点では不要)。
 
 ### バイナリ I/O (`src/io/`)

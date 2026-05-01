@@ -9,10 +9,17 @@ import type {
   TagData,
 } from "../../../types.js";
 import { parseChunks } from "../../iff/parseChunks/parseChunks.js";
-import { WAV_CHUNK_ID3, WAV_CHUNK_LIST, WAV_HEADER_SIZE } from "../constants.js";
+import {
+  WAV_CHUNK_DATA,
+  WAV_CHUNK_FMT,
+  WAV_CHUNK_ID3,
+  WAV_CHUNK_LIST,
+  WAV_HEADER_SIZE,
+} from "../constants.js";
 import { detectWavSignature } from "../detectWav.js";
 import { infoEntriesToTagData } from "../infoEntriesToTagData/infoEntriesToTagData.js";
 import { parseListInfo } from "../parseListInfo/parseListInfo.js";
+import { computeDurationMs } from "./computeDurationMs.js";
 
 /**
  * Read RIFF/WAV (`.wav`) metadata.
@@ -44,7 +51,21 @@ export const readWav = async (input: Uint8Array): Promise<MetadataReadResult> =>
   let pictures: readonly PictureInfo[] = [];
   let chapters: readonly ChapterInfo[] = [];
   let lyrics: LyricsInfo | undefined;
+  let fmtPayloadOffset: number | undefined;
+  let fmtPayloadSize = 0;
+  let dataPayloadSize = 0;
   for (const chunk of chunks) {
+    if (chunk.id === WAV_CHUNK_FMT) {
+      fmtPayloadOffset = chunk.payloadOffset;
+      fmtPayloadSize = chunk.payloadSize;
+      continue;
+    }
+
+    if (chunk.id === WAV_CHUNK_DATA) {
+      dataPayloadSize = chunk.payloadSize;
+      continue;
+    }
+
     if (chunk.id === WAV_CHUNK_LIST) {
       const payload = body.subarray(chunk.payloadOffset, chunk.payloadOffset + chunk.payloadSize);
       infoTag = infoEntriesToTagData(parseListInfo(payload));
@@ -64,11 +85,17 @@ export const readWav = async (input: Uint8Array): Promise<MetadataReadResult> =>
     }
   }
 
+  const durationMs =
+    fmtPayloadOffset === undefined
+      ? undefined
+      : computeDurationMs({ body, fmtPayloadOffset, fmtPayloadSize, dataPayloadSize });
+
   return {
     audioFormat: "wav",
     tag: { ...infoTag, ...id3Tag },
     pictures,
     chapters,
     ...(lyrics === undefined ? {} : { lyrics }),
+    ...(durationMs === undefined ? {} : { durationMs }),
   };
 };

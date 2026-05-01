@@ -13,6 +13,7 @@ import { parseChunks } from "../../iff/parseChunks/parseChunks.js";
 import {
   AIFF_CHUNK_ANNO,
   AIFF_CHUNK_AUTH,
+  AIFF_CHUNK_COMM,
   AIFF_CHUNK_COPYRIGHT,
   AIFF_CHUNK_ID3,
   AIFF_CHUNK_NAME,
@@ -21,6 +22,7 @@ import {
 import { detectAiffSignature } from "../detectAiff/detectAiff.js";
 import { nativeTagsToTagData } from "../nativeTagsToTagData.js";
 import type { AiffNativeTags } from "../types.js";
+import { computeDurationMs } from "./computeDurationMs.js";
 
 /**
  * Read AIFF (`.aiff` / `.aif` / `.aifc`) metadata.
@@ -52,9 +54,15 @@ export const readAiff = async (input: Uint8Array): Promise<MetadataReadResult> =
   let pictures: readonly PictureInfo[] = [];
   let chapters: readonly ChapterInfo[] = [];
   let lyrics: LyricsInfo | undefined;
+  let commPayloadOffset: number | undefined;
+  let commPayloadSize = 0;
   for (const chunk of chunks) {
     const payload = body.subarray(chunk.payloadOffset, chunk.payloadOffset + chunk.payloadSize);
     switch (chunk.id) {
+      case AIFF_CHUNK_COMM:
+        commPayloadOffset = chunk.payloadOffset;
+        commPayloadSize = chunk.payloadSize;
+        break;
       case AIFF_CHUNK_NAME:
         native.name = decodeText(payload, "latin1");
         break;
@@ -83,11 +91,17 @@ export const readAiff = async (input: Uint8Array): Promise<MetadataReadResult> =
   }
 
   const nativeTag = nativeTagsToTagData({ ...native, annotations });
+  const durationMs =
+    commPayloadOffset === undefined
+      ? undefined
+      : computeDurationMs({ body, commPayloadOffset, commPayloadSize });
+
   return {
     audioFormat: "aiff",
     tag: { ...nativeTag, ...id3Tag },
     pictures,
     chapters,
     ...(lyrics === undefined ? {} : { lyrics }),
+    ...(durationMs === undefined ? {} : { durationMs }),
   };
 };

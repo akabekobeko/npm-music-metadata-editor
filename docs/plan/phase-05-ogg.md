@@ -2,8 +2,7 @@
 
 ## 目的
 
-OGG コンテナ (Vorbis、Opus、Speex は将来検討) のページ構造を解析し、Vorbis Comment を編集できるようにする。
-Vorbis Comment 自体は Phase 3 で完成済みのため、本フェーズは **OGG の framing** に集中する。
+OGG コンテナ (Vorbis、Opus、Speex は将来検討) のページ構造を解析し、Vorbis Comment を編集できるようにする。Vorbis Comment 自体は Phase 3 で完成済みのため、本フェーズは **OGG の framing** に集中する。
 
 ## スコープ
 

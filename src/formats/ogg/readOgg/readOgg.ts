@@ -2,6 +2,7 @@ import { readVorbisCommentLyrics } from "../../../extras/vorbisCommentExtras/rea
 import { readVorbisCommentPictures } from "../../../extras/vorbisCommentExtras/readVorbisCommentPictures.js";
 import { vorbisCommentToTagData } from "../../../tags/vorbisComment/vorbisCommentToTagData/vorbisCommentToTagData.js";
 import type { MetadataReadResult } from "../../../types.js";
+import { computeDurationMs } from "./computeDurationMs.js";
 import { parseOggHeaders } from "./parseOggHeaders.js";
 
 /**
@@ -20,11 +21,17 @@ export const readOgg = async (input: Uint8Array): Promise<MetadataReadResult> =>
   const tag = vorbisCommentToTagData(parsed.vorbisComment);
   const pictures = readVorbisCommentPictures(parsed.vorbisComment);
   const lyrics = readVorbisCommentLyrics(parsed.vorbisComment);
+  const durationMs = computeDurationMs({
+    pages: parsed.pages,
+    codecInfo: parsed.codecInfo,
+    idPacket: parsed.idPacket,
+  });
   return {
     audioFormat: parsed.codecInfo.codec === "opus" ? "opus" : "ogg",
     tag,
     pictures,
     chapters: [],
     ...(lyrics === undefined ? {} : { lyrics }),
+    ...(durationMs === undefined ? {} : { durationMs }),
   };
 };
