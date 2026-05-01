@@ -2,17 +2,28 @@
 
 - **`class` を使わない**。`function` と Plain Object を組み合わせて実装する。
 - **TSDoc コメントを次のいずれにも付ける**:
-  - `function` / `const` で定義する関数
+  - `function` / `const` で定義する関数 (**export 有無を問わず、private helper も対象**)
   - `type` 定義
   - 公開する Object (定数 Object、ファクトリ Object、look-up table など)
 - コード内コメントは **英語で書く** (TSDoc も含む)。識別子も英語。
 - 関数の引数が 3 以上になったら **`type Args = {}`** として型に括り出す (Biome の `useMaxParams` で 3 引数以上は警告される)
   - 引数の TSDoc コメントは省略して、代わりにこちらのプロパティーにコメントをつける
-- **通常引数 (positional args) と戻り値は常に TSDoc で説明を書く**。
-  - 引数: `@param name - description`。TSDoc 厳密構文に合わせ、名前と説明の間に必ず `-` を入れる。
-  - 戻り値: 非 `void` の関数には `@returns description` を必ず付ける (`void` の関数は省略可)。
-  - **`@param` を省略できる唯一の例外**: 引数が 3 以上で**関数専用の `type Args = {}` に括り出した**ケース。この場合は引数 1 つだけになるため `@param` を書かず、説明は `type Args` のプロパティ TSDoc 側に寄せる。
+
+### `@param` / `@returns` 必須ルール
+
+ここは過去に何度も漏れた箇所のため、原則として例外を設けない:
+
+- **`@param`**: positional arg を取る関数は **すべての引数に `@param name - description` を書く** (private helper / 1 行アロー関数も対象)。
+  - TSDoc 厳密構文に合わせ、名前と説明の間に必ず `-` を入れる。
+  - **省略できる唯一の例外**: 引数が 3 以上で**関数専用の `type Args = {}` に括り出した**ケース。この場合は引数 1 つだけになるため `@param` を書かず、説明は `type Args` のプロパティ TSDoc 側に寄せる。
   - 1 引数しか取らないが既存の domain type (例: `FormatRegistration`) を受ける関数は **`@param` を省略しない** (Args オブジェクト パターンとは別物)。
+- **`@returns`**: 戻り値の型が `void` 以外なら **必ず `@returns description` を書く**。`void` の関数は省略可。
+  - `Promise<void>` は実質 `void` のため省略可。それ以外の `Promise<T>` は `@returns` 必須。
+- **新しい関数を書いた直後 / 既存関数を編集した直後の self-check**:
+  1. 引数が `type Args` 形式以外なら `@param` がすべての引数分そろっているか
+  2. 戻り値が `void` 以外なら `@returns` があるか
+  3. private helper を含めて差分中のすべての関数を見る
+- Biome 2.4 にはこの 2 つを検出するルールがない (`eslint-plugin-tsdoc` 相当が未実装) ため、レビューおよび上記 self-check で担保する。新しい Biome バージョンで対応ルールが追加された場合は `biome.json` に追記して機械化する。
 - **関数専用の Args 型はファイル内に閉じて `type Args = {}` と命名する**。
   - 名前を関数固有 (`type ResolveFormatArgs` など) にしない。冗長な命名は「他関数からも参照されうる」誤った印象を与える。
   - **export しない**。当該ファイル外で参照される場合は再利用される共有型なので、`types.ts` に移すか、その関数を呼び出す関数から離れた配置を再検討する。
