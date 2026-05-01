@@ -14,7 +14,7 @@
 | 05 | [OGG Container](phase-05-ogg.md)                | OGG ページ、Vorbis/Opus、Phase 3 との連携                | TODO |
 | 06 | [APE Tag + Monkey's Audio](phase-06-ape.md)     | APE Tag v1/v2、APE オーディオ ヘッダ                    | DONE |
 | 07 | [RIFF (WAV) + AIFF](phase-07-riff-aiff.md)      | RIFF/AIFF チャンク パース、LIST INFO、BEXT、ID3 chunk    | DONE |
-| 08 | [WMA / ASF](phase-08-wma-asf.md)                | ASF ヘッダ、WM/* プロパティ                              | TODO |
+| 08 | [WMA / ASF](phase-08-wma-asf.md)                | ASF ヘッダ、WM/* プロパティ                              | DONE |
 | 09 | [Lyrics / Chapters / Pictures](phase-09-extras.md) | 拡張メタデータ (歌詞、章、埋め込み画像)                  | TODO |
 | 10 | [Public API & Polish](phase-10-public-api.md)   | Track 相当の高レベル API、エラー戦略、ドキュメント整備   | TODO |
 
