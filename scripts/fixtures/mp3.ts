@@ -3,6 +3,9 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { ApeItemKind, ApeVersion } from "../../src/tags/ape/constants.js";
+import type { ApeItem } from "../../src/tags/ape/types.js";
+import { writeApeTag } from "../../src/tags/ape/writeApeTag/writeApeTag.js";
 import { ID3V1_NO_GENRE, ID3V1_TAG_SIZE } from "../../src/tags/id3v1/constants.js";
 import type { Id3v1Tag } from "../../src/tags/id3v1/types.js";
 import { writeId3v1 } from "../../src/tags/id3v1/writeId3v1/writeId3v1.js";
@@ -52,6 +55,8 @@ type FixtureSpec = {
   id3v2Frames: readonly Id3v2Frame[];
   /** ID3v2 major version to write (`3` or `4`). */
   id3v2MajorVersion: 3 | 4;
+  /** Optional APE Tag items to splice between the audio and any ID3v1 trailer. */
+  apeItems?: readonly ApeItem[];
   /** Optional ID3v1 trailer. */
   id3v1?: Id3v1Tag;
 };
@@ -175,21 +180,53 @@ const FIXTURES: readonly FixtureSpec[] = [
     ],
     id3v1: sampleId3v1,
   },
+  {
+    filename: "v23-with-ape-and-id3v1.mp3",
+    id3v2MajorVersion: 3,
+    id3v2Frames: [textFrame("TIT2", "ID3v2 Title"), textFrame("TALB", "Phase6 Album")],
+    apeItems: [
+      { key: "Title", value: "APE Title", kind: ApeItemKind.Text, readOnly: false },
+      { key: "Artist", value: "APE Artist", kind: ApeItemKind.Text, readOnly: false },
+      { key: "Year", value: "2025", kind: ApeItemKind.Text, readOnly: false },
+    ],
+    id3v1: {
+      minorVersion: 1,
+      title: "ID3v1 Title",
+      artist: "ID3v1 Artist",
+      album: "ID3v1 Album",
+      year: "2020",
+      comment: "Layered",
+      trackNumber: 5,
+      genreCode: 17,
+    },
+  },
 ];
 
-/** Combine ID3v2 + audio + optional ID3v1 trailer and return the final bytes. */
+/** Combine ID3v2 + audio + optional APE Tag + optional ID3v1 trailer. */
 const assemble = (spec: FixtureSpec): Uint8Array => {
   const id3v2 = buildId3v2({
     majorVersion: spec.id3v2MajorVersion,
     frames: spec.id3v2Frames,
     padding: 32,
   });
+  const ape =
+    spec.apeItems === undefined
+      ? new Uint8Array()
+      : writeApeTag({ items: spec.apeItems, version: ApeVersion.V2 });
   const id3v1 = spec.id3v1 === undefined ? new Uint8Array() : writeId3v1(spec.id3v1);
-  const out = Buffer.alloc(id3v2.length + SILENT_MP3_FRAME.length + id3v1.length);
-  out.set(id3v2, 0);
-  out.set(SILENT_MP3_FRAME, id3v2.length);
+  const out = Buffer.alloc(id3v2.length + SILENT_MP3_FRAME.length + ape.length + id3v1.length);
+  let cursor = 0;
+  out.set(id3v2, cursor);
+  cursor += id3v2.length;
+  out.set(SILENT_MP3_FRAME, cursor);
+  cursor += SILENT_MP3_FRAME.length;
+  if (ape.length > 0) {
+    out.set(ape, cursor);
+    cursor += ape.length;
+  }
+
   if (id3v1.length > 0) {
-    out.set(id3v1, id3v2.length + SILENT_MP3_FRAME.length);
+    out.set(id3v1, cursor);
   }
 
   return new Uint8Array(out.buffer, out.byteOffset, out.byteLength);
@@ -202,8 +239,9 @@ const main = async (): Promise<void> => {
     const bytes = assemble(spec);
     const out = join(FIXTURES_DIR, spec.filename);
     await writeFile(out, bytes);
-    const tail = spec.id3v1 === undefined ? "" : ` + ID3v1 (${ID3V1_TAG_SIZE}B)`;
-    process.stdout.write(`wrote ${spec.filename} — ${bytes.length} bytes${tail}\n`);
+    const apeTail = spec.apeItems === undefined ? "" : ` + APE`;
+    const id3v1Tail = spec.id3v1 === undefined ? "" : ` + ID3v1 (${ID3V1_TAG_SIZE}B)`;
+    process.stdout.write(`wrote ${spec.filename} — ${bytes.length} bytes${apeTail}${id3v1Tail}\n`);
   }
 
   // Touch the unused export so the linter does not flag it when the file is

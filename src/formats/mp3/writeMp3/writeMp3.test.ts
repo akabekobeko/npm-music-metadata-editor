@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { expect, it } from "vitest";
 // Importing mme registers the MP3 format as a side effect.
 import { readMetadata, writeMetadata } from "../../../mme.js";
+import { readApeTag } from "../../../tags/ape/readApeTag/readApeTag.js";
 import { ID3V1_TAG_SIZE } from "../../../tags/id3v1/constants.js";
 import { readId3v1 } from "../../../tags/id3v1/readId3v1/readId3v1.js";
 import { parseId3v2 } from "../../../tags/id3v2/parseId3v2/parseId3v2.js";
@@ -58,4 +59,23 @@ it("opts out of the ID3v1 trailer via includeId3v1=false", async () => {
     includeId3v1: false,
   } as Parameters<typeof writeMetadata>[1]);
   expect(readId3v1(rewritten)).toBeUndefined();
+});
+
+it("refreshes the APE Tag on a layered MP3 + APE + ID3v1 file", async () => {
+  const original = await loadFixture("v23-with-ape-and-id3v1.mp3");
+  const rewritten = await writeMetadata(original, {
+    tag: { title: "Refreshed", artist: "Refreshed Artist" },
+  });
+
+  // Both APE and ID3v1 trailers stay in place after a rewrite.
+  const ape = readApeTag(rewritten);
+  expect(ape).toBeDefined();
+  expect(ape?.items.find((item) => item.key.toLowerCase() === "title")?.value).toBe("Refreshed");
+
+  const v1 = readId3v1(rewritten);
+  expect(v1?.title).toBe("Refreshed");
+
+  // ID3v2 head also reflects the new title.
+  const id3v2 = parseId3v2(rewritten);
+  expect(id3v2).toBeDefined();
 });

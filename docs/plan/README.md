@@ -12,7 +12,7 @@
 | 03 | [FLAC + Vorbis Comment](phase-03-flac-vorbis.md)| FLAC メタデータ ブロック、Vorbis Comment 共通実装        | DONE |
 | 04 | [MP4 / M4A Atoms](phase-04-mp4.md)              | atom ツリー パース、iTunes アトム、read/write           | DONE |
 | 05 | [OGG Container](phase-05-ogg.md)                | OGG ページ、Vorbis/Opus、Phase 3 との連携                | TODO |
-| 06 | [APE Tag + Monkey's Audio](phase-06-ape.md)     | APE Tag v1/v2、APE オーディオ ヘッダ                    | TODO |
+| 06 | [APE Tag + Monkey's Audio](phase-06-ape.md)     | APE Tag v1/v2、APE オーディオ ヘッダ                    | DONE |
 | 07 | [RIFF (WAV) + AIFF](phase-07-riff-aiff.md)      | RIFF/AIFF チャンク パース、LIST INFO、BEXT、ID3 chunk    | TODO |
 | 08 | [WMA / ASF](phase-08-wma-asf.md)                | ASF ヘッダ、WM/* プロパティ                              | TODO |
 | 09 | [Lyrics / Chapters / Pictures](phase-09-extras.md) | 拡張メタデータ (歌詞、章、埋め込み画像)                  | TODO |

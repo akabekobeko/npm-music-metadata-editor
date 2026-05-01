@@ -193,9 +193,16 @@ export type LyricsInfo = {
 };
 
 /**
- * Options accepted by `readMetadata`.
+ * Tag flavours that can coexist inside a single MP3 file.
  *
- * Reserved for future use; no options are honoured in Phase 1.
+ * Used by {@link ReadOptions.tagPriority} to decide which tag wins when
+ * multiple are present. The default order matches ATL.NET: ID3v2 → APE →
+ * ID3v1.
+ */
+export type TagSource = "id3v2" | "ape" | "id3v1";
+
+/**
+ * Options accepted by `readMetadata`.
  */
 export type ReadOptions = {
   /**
@@ -203,6 +210,15 @@ export type ReadOptions = {
    * Useful when the input has no extension or an ambiguous signature.
    */
   format?: AudioFormat;
+  /**
+   * Order of tag sources to consult when several coexist (currently only MP3
+   * exposes more than one). Earlier entries win on field conflicts; later
+   * entries fill in fields the higher-priority sources left blank. Sources
+   * not listed here are skipped entirely.
+   *
+   * Default: `["id3v2", "ape", "id3v1"]` — same order as ATL.NET.
+   */
+  tagPriority?: readonly TagSource[];
 };
 
 /**
