@@ -45,7 +45,9 @@ console.log(track.pictures.length);
 
 `loadTrack` accepts either a file path (`string`) or pre-loaded bytes (`Uint8Array`). The returned `Track` is a Plain Object — every consumer mutation is done by spreading.
 
-`durationMs` is a read-only audio-derived field: the reader computes it from sample-count / sample-rate / bitrate fields, and `saveTrack` never writes it back to the file (the writer recomputes it on the next read). It is `undefined` when the source does not carry the values needed (e.g. a stripped-down fixture or a streaming MP3 with no Xing/VBRI header).
+`durationMs` is a read-only audio-derived field: the reader computes it from sample-count / sample-rate / bitrate fields, and `saveTrack` never writes it back to the file (the writer recomputes it on the next read). It is `undefined` when the source does not carry the values needed (e.g. a stripped-down fixture with no audio frames).
+
+> **MP3 caveat**: only CBR streams are supported. VBR-encoded MP3 (Xing / Info / VBRI headers) is not parsed, so the returned duration is a CBR-based estimate and may diverge from the true playback time on VBR files.
 
 ### Save a modified track
 
