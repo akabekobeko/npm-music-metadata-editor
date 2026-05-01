@@ -1,7 +1,7 @@
 import { Buffer } from "node:buffer";
 import { buildOffsetRemap } from "../chunkOffset/buildOffsetRemap.js";
 import { rewriteChunkOffsetAtom } from "../chunkOffset/rewriteChunkOffsetAtom.js";
-import { parseMp4 } from "../readMp4.js";
+import { parseMp4 } from "../readMp4/parseMp4.js";
 import type { ParsedMp4 } from "../types.js";
 
 /** Arguments for {@link applyChunkOffsetUpdates}. */

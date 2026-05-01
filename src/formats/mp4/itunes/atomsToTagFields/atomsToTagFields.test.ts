@@ -1,8 +1,8 @@
 import { Buffer } from "node:buffer";
 import { expect, it } from "vitest";
-import { ItunesDataType } from "../constants.js";
-import type { ItunesAtom, ItunesDataValue } from "../types.js";
-import { atomsToTagFields } from "./atomToTagField.js";
+import { ItunesDataType } from "../../constants.js";
+import type { ItunesAtom, ItunesDataValue } from "../../types.js";
+import { atomsToTagFields } from "./atomsToTagFields.js";
 
 /** Wrap UTF-8 text as an ItunesDataValue. */
 const utf8 = (text: string): ItunesDataValue => ({

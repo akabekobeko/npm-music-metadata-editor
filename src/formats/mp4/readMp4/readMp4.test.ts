@@ -4,7 +4,10 @@ import { fileURLToPath } from "node:url";
 import { expect, it } from "vitest";
 import { readMp4 } from "./readMp4.js";
 
-const FIXTURE_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../../../tests/fixtures/mp4");
+const FIXTURE_DIR = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  "../../../../tests/fixtures/mp4",
+);
 
 const loadFixture = async (name: string): Promise<Uint8Array> =>
   new Uint8Array(await readFile(resolve(FIXTURE_DIR, name)));

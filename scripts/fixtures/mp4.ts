@@ -4,7 +4,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { ITUNES_HDLR_PAYLOAD, ItunesDataType } from "../../src/formats/mp4/constants.js";
-import { writeIlstPayload } from "../../src/formats/mp4/itunes/writeIlst.js";
+import { writeIlst } from "../../src/formats/mp4/itunes/writeIlst/writeIlst.js";
 import type { ItunesAtom } from "../../src/formats/mp4/types.js";
 
 /**
@@ -208,7 +208,7 @@ const buildStcoPlaceholder = (): Buffer => {
 
 /** Build the `udta/meta/ilst` block carrying the requested iTunes metadata. */
 const buildUdtaMeta = (atoms: readonly ItunesAtom[]): Buffer => {
-  const ilstPayload = writeIlstPayload(atoms);
+  const ilstPayload = writeIlst(atoms);
   const ilst = atom("ilst", ilstPayload);
   const hdlr = atom("hdlr", ITUNES_HDLR_PAYLOAD);
   const versionFlags = Buffer.alloc(4);

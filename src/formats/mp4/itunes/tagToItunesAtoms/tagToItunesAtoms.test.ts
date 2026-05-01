@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
-import { ItunesDataType } from "../constants.js";
-import { tagToItunesAtoms } from "./tagFieldToAtom.js";
+import { ItunesDataType } from "../../constants.js";
+import { tagToItunesAtoms } from "./tagToItunesAtoms.js";
 
 it("emits the canonical 4-character atom codes for each TagData field", () => {
   const atoms = tagToItunesAtoms({

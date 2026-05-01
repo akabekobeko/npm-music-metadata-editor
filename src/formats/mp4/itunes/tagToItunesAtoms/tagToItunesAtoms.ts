@@ -1,111 +1,10 @@
-import { Buffer } from "node:buffer";
-import type { PictureInfo, TagData } from "../../../types.js";
-import { ItunesDataType, type ItunesDataTypeValue } from "../constants.js";
-import type { ItunesAtom, ItunesDataValue } from "../types.js";
-
-/**
- * Encode a UTF-8 text value as one `data` payload.
- *
- * @param text - Text to encode.
- * @returns A {@link ItunesDataValue} carrying the UTF-8 bytes.
- */
-const utf8Value = (text: string): ItunesDataValue => ({
-  typeIndicator: ItunesDataType.Utf8,
-  locale: 0,
-  data: new Uint8Array(Buffer.from(text, "utf8")),
-});
-
-/**
- * Encode a 1-, 2-, or 4-byte big-endian signed integer (iTunes type 21). The
- * smallest representation that fits the value is chosen, matching iTunes'
- * own behaviour.
- *
- * @param value - Signed integer to encode.
- * @returns A {@link ItunesDataValue} of type 21 (BE signed int).
- */
-const beSignedIntValue = (value: number): ItunesDataValue => {
-  const buf = encodeSignedBe(value);
-  return {
-    typeIndicator: ItunesDataType.BeSignedInt,
-    locale: 0,
-    data: buf,
-  };
-};
-
-/**
- * Encode a signed integer using the smallest BE representation that fits.
- *
- * @param value - Signed integer to encode.
- * @returns The encoded bytes (1, 2, or 4 bytes).
- */
-const encodeSignedBe = (value: number): Uint8Array => {
-  if (value >= -0x80 && value <= 0x7f) {
-    const out = Buffer.alloc(1);
-    out.writeInt8(value, 0);
-    return new Uint8Array(out);
-  }
-
-  if (value >= -0x8000 && value <= 0x7fff) {
-    const out = Buffer.alloc(2);
-    out.writeInt16BE(value, 0);
-    return new Uint8Array(out);
-  }
-
-  const out = Buffer.alloc(4);
-  out.writeInt32BE(value, 0);
-  return new Uint8Array(out);
-};
-
-/** Arguments for {@link numberAndTotalValue}. */
-type NumberAndTotalArgs = {
-  /** Track / disc number (`0` when unset). */
-  number: number;
-  /** Track / disc total (`0` when unset). */
-  total: number;
-  /** Whether to append the 2-byte trailing pad iTunes includes for `trkn` only. */
-  trailingPad: boolean;
-};
-
-/**
- * Build the `trkn` / `disk` data payload (8 bytes for `trkn`, 6 bytes for
- * `disk` — both encode `0 + number + total + 0`).
- *
- * @returns A {@link ItunesDataValue} of type 0 (implicit).
- */
-const numberAndTotalValue = ({
-  number,
-  total,
-  trailingPad,
-}: NumberAndTotalArgs): ItunesDataValue => {
-  const length = trailingPad ? 8 : 6;
-  const buf = Buffer.alloc(length);
-  buf.writeUInt16BE(0, 0);
-  buf.writeUInt16BE(number, 2);
-  buf.writeUInt16BE(total, 4);
-  return {
-    typeIndicator: ItunesDataType.Implicit,
-    locale: 0,
-    data: new Uint8Array(buf),
-  };
-};
-
-/**
- * Resolve the iTunes data type for an embedded picture's MIME type.
- *
- * @param mimeType - Picture MIME type (`"image/png"`, `"image/jpeg"`, ...).
- * @returns The matching iTunes data type indicator (defaults to JPEG).
- */
-const pictureTypeIndicator = (mimeType: string): ItunesDataTypeValue => {
-  if (mimeType === "image/png") {
-    return ItunesDataType.Png;
-  }
-
-  if (mimeType === "image/bmp") {
-    return ItunesDataType.Bmp;
-  }
-
-  return ItunesDataType.Jpeg;
-};
+import type { PictureInfo, TagData } from "../../../../types.js";
+import type { ItunesAtom } from "../../types.js";
+import { beSignedIntValue } from "./beSignedIntValue.js";
+import { numberAndTotalValue } from "./numberAndTotalValue.js";
+import { pictureTypeIndicator } from "./pictureTypeIndicator.js";
+import { singleValueAtom } from "./singleValueAtom.js";
+import { utf8Value } from "./utf8Value.js";
 
 /** Arguments for {@link tagToItunesAtoms}. */
 type Args = {
@@ -114,18 +13,6 @@ type Args = {
   /** Pictures to embed under `covr` (replaces any existing pictures). */
   pictures?: readonly PictureInfo[];
 };
-
-/**
- * Build a single-value {@link ItunesAtom} for a given (name, value) pair.
- *
- * @param name - 4-character atom code.
- * @param value - The data value to attach.
- * @returns The constructed atom.
- */
-const singleValueAtom = (name: string, value: ItunesDataValue): ItunesAtom => ({
-  name,
-  values: [value],
-});
 
 /**
  * Build the canonical iTunes atom list for the given tag.

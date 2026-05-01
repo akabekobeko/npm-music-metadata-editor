@@ -1,8 +1,8 @@
 import type { WriteOptions } from "../../../types.js";
 import { findAtom } from "../atom/findAtom.js";
-import { tagToItunesAtoms } from "../itunes/tagFieldToAtom.js";
-import { writeIlstPayload } from "../itunes/writeIlst.js";
-import { parseMp4 } from "../readMp4.js";
+import { tagToItunesAtoms } from "../itunes/tagToItunesAtoms/tagToItunesAtoms.js";
+import { writeIlst } from "../itunes/writeIlst/writeIlst.js";
+import { parseMp4 } from "../readMp4/parseMp4.js";
 import { applyChunkOffsetUpdates } from "./applyChunkOffsetUpdates.js";
 import { buildMetaAtom } from "./buildMetaAtom.js";
 import { buildMoovAtom } from "./buildMoovAtom.js";
@@ -43,7 +43,7 @@ export const writeMp4 = async (source: Uint8Array, options: WriteOptions): Promi
   });
   const merged = mergeIlstAtoms(parsed.metadata.ilstAtoms, incoming);
 
-  const ilstPayload = writeIlstPayload(merged);
+  const ilstPayload = writeIlst(merged);
   const newMeta = buildMetaAtom(ilstPayload);
   const udta = findAtom(parsed.tree, ["moov", "udta"]);
   const newUdta = buildUdtaAtom({ source, udta, newMeta });

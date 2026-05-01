@@ -1,10 +1,10 @@
 import { Buffer } from "node:buffer";
 import { expect, it } from "vitest";
-import { parseAtomTree } from "../atom/parseAtomTree.js";
-import { atomsToTagFields } from "./atomToTagField.js";
-import { readIlst } from "./readIlst.js";
-import { tagToItunesAtoms } from "./tagFieldToAtom.js";
-import { writeIlstPayload } from "./writeIlst.js";
+import { parseAtomTree } from "../../atom/parseAtomTree/parseAtomTree.js";
+import { atomsToTagFields } from "../atomsToTagFields/atomsToTagFields.js";
+import { readIlst } from "../readIlst/readIlst.js";
+import { tagToItunesAtoms } from "../tagToItunesAtoms/tagToItunesAtoms.js";
+import { writeIlst } from "./writeIlst.js";
 
 /** Wrap the writer's payload bytes in an ilst box so it can be re-parsed. */
 const wrapInIlst = (payload: Uint8Array): Buffer => {
@@ -29,7 +29,7 @@ it("emits a payload that round-trips back to the same TagData", () => {
       recordingDate: "2025-04-30",
     },
   });
-  const ilst = wrapInIlst(writeIlstPayload(built));
+  const ilst = wrapInIlst(writeIlst(built));
   const tree = parseAtomTree(ilst);
   const root = tree[0];
   if (root === undefined) throw new Error("missing ilst");
@@ -50,7 +50,7 @@ it("emits a payload that round-trips back to the same TagData", () => {
 
 it("preserves freeform LYRICIST values across a round-trip", () => {
   const built = tagToItunesAtoms({ tag: { lyricist: "Someone" } });
-  const ilst = wrapInIlst(writeIlstPayload(built));
+  const ilst = wrapInIlst(writeIlst(built));
   const tree = parseAtomTree(ilst);
   const root = tree[0];
   if (root === undefined) throw new Error("missing ilst");

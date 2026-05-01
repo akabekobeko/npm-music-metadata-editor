@@ -5,8 +5,8 @@ import { fileURLToPath } from "node:url";
 import { expect, it } from "vitest";
 import { findAllAtoms } from "../atom/findAllAtoms.js";
 import { findAtom } from "../atom/findAtom.js";
-import { parseAtomTree } from "../atom/parseAtomTree.js";
-import { readMp4 } from "../readMp4.js";
+import { parseAtomTree } from "../atom/parseAtomTree/parseAtomTree.js";
+import { readMp4 } from "../readMp4/readMp4.js";
 import { writeMp4 } from "./writeMp4.js";
 
 const FIXTURE_DIR = resolve(

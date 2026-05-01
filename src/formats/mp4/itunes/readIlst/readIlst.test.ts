@@ -1,7 +1,7 @@
 import { Buffer } from "node:buffer";
 import { expect, it } from "vitest";
-import { parseAtomTree } from "../atom/parseAtomTree.js";
-import { ItunesDataType } from "../constants.js";
+import { parseAtomTree } from "../../atom/parseAtomTree/parseAtomTree.js";
+import { ItunesDataType } from "../../constants.js";
 import { readIlst } from "./readIlst.js";
 
 /** Build a single atom (`size + type + payload`). */

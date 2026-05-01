@@ -1,7 +1,7 @@
 import { Buffer } from "node:buffer";
 import { expect, it } from "vitest";
 import { findAllAtoms } from "./findAllAtoms.js";
-import { parseAtomTree } from "./parseAtomTree.js";
+import { parseAtomTree } from "./parseAtomTree/parseAtomTree.js";
 
 /** Build a single atom (`size + type + payload`). */
 const atom = (type: string, payload: Uint8Array | Buffer = Buffer.alloc(0)): Buffer => {

@@ -1,6 +1,6 @@
 import { Buffer } from "node:buffer";
 import { expect, it } from "vitest";
-import { parseAtomTree } from "../atom/parseAtomTree.js";
+import { parseAtomTree } from "../atom/parseAtomTree/parseAtomTree.js";
 import { rewriteChunkOffsetAtom } from "./rewriteChunkOffsetAtom.js";
 
 /** Build a single atom (`size + type + payload`). */
