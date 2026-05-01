@@ -2,6 +2,7 @@ import { detectFormat, SIGNATURE_PROBE_BYTES } from "./formats/detect.js";
 import { registerFlacFormat } from "./formats/flac/flac.js";
 import { registerMp3Format } from "./formats/mp3/mp3.js";
 import { registerMp4Format } from "./formats/mp4/mp4.js";
+import { registerOggFormat } from "./formats/ogg/ogg.js";
 import { getRegistration } from "./formats/registry.js";
 import { readFileBuffer } from "./io/file.js";
 import type { AudioFormat, MetadataReadResult, ReadOptions, WriteOptions } from "./types.js";
@@ -10,6 +11,7 @@ import type { AudioFormat, MetadataReadResult, ReadOptions, WriteOptions } from 
 registerMp3Format();
 registerFlacFormat();
 registerMp4Format();
+registerOggFormat();
 
 export type {
   AudioFormat,
