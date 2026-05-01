@@ -7,6 +7,7 @@ import { registerMp4Format } from "./formats/mp4/mp4.js";
 import { registerOggFormat } from "./formats/ogg/ogg.js";
 import { getRegistration } from "./formats/registry.js";
 import { registerWavFormat } from "./formats/wav/wav.js";
+import { registerWmaFormat } from "./formats/wma/wma.js";
 import { readFileBuffer } from "./io/file.js";
 import type { AudioFormat, MetadataReadResult, ReadOptions, WriteOptions } from "./types.js";
 
@@ -18,6 +19,7 @@ registerOggFormat();
 registerApeFormat();
 registerWavFormat();
 registerAiffFormat();
+registerWmaFormat();
 
 export type {
   AudioFormat,
