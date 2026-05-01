@@ -1,22 +1,25 @@
+[Japanese](README.ja.md)
+
 # Documentation Index
 
-`docs/` 配下に置かれているドキュメントの索引です。新しいトピックを追加するときはサブディレクトリを切り、本ファイルにエントリを追記してください。
+Index of the documents stored under `docs/`. When adding a new topic, create a
+subdirectory for it and append an entry below.
 
-## サブディレクトリ
+## Subdirectories
 
-| パス | 内容 |
+| Path | Contents |
 | --- | --- |
-| [`plan/`](plan/README.md) | 実装計画 (フェーズ別の Markdown 群)。Phase 01〜10 の段階的な実装方針・スコープ・完了条件を記載 |
-| [`rules/`](rules/README.md) | 開発ルール (トピック別)。コード スタイル、テスト、Git 運用などを 1 トピック 1 ファイルで管理 |
+| [`plan/`](plan/README.md) | Implementation plan (one Markdown per phase). Documents the step-by-step scope and DoD for Phase 01–10. |
+| [`rules/`](rules/README.md) | Development rules per topic — coding style, testing, Git workflow, and so on. One topic per file. |
 
-## トップレベル ドキュメント
+## Top-level documents
 
-| パス | 内容 |
+| Path | Contents |
 | --- | --- |
-| [`field-mapping.md`](field-mapping.md) | 各タグ形式 (ID3v1/v2、Vorbis Comment、APE、MP4 atoms、RIFF/AIFF、WMA) と `TagData` の対応表 |
+| [`field-mapping.md`](field-mapping.md) | Mapping between each tag format (ID3v1/v2, Vorbis Comment, APE, MP4 atoms, RIFF/AIFF, WMA) and the common `TagData` shape. |
 
-## ルート ドキュメント
+## Root documents
 
-- Claude Code 向けガイダンス: [`../CLAUDE.md`](../CLAUDE.md)
-- 開発ルール (トピック別): [`rules/README.md`](rules/README.md)
-- パッケージ概要 / バッジ / 利用例: [`../README.md`](../README.md)
+- Claude Code guidance: [`../CLAUDE.md`](../CLAUDE.md)
+- Development rules (per topic): [`rules/README.md`](rules/README.md)
+- Package overview / badges / usage examples: [`../README.md`](../README.md)

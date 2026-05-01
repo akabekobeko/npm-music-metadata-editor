@@ -1,3 +1,5 @@
+[Japanese](README.ja.md)
+
 # music-metadata-editor
 
 [![Test](https://github.com/akabekobeko/npm-music-metadata-editor/actions/workflows/test.yml/badge.svg)](https://github.com/akabekobeko/npm-music-metadata-editor/actions/workflows/test.yml)
