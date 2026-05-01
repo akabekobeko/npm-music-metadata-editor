@@ -1,5 +1,5 @@
-import type { VorbisComment, VorbisCommentEntry } from "../../../tags/vorbisComment/types.js";
 import type { TagData } from "../../../types.js";
+import type { VorbisComment, VorbisCommentEntry } from "../types.js";
 import { FIELD_KEYS } from "./constants.js";
 import { stringifyValue } from "./stringifyValue.js";
 

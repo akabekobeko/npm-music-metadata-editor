@@ -1,6 +1,6 @@
+import { vorbisCommentToTagData } from "../../../tags/vorbisComment/vorbisCommentToTagData/vorbisCommentToTagData.js";
 import type { MetadataReadResult } from "../../../types.js";
 import { parseFlac } from "../parseFlac/parseFlac.js";
-import { vorbisCommentToTagData } from "../vorbisCommentToTagData/vorbisCommentToTagData.js";
 import { toPictureInfo } from "./toPictureInfo.js";
 
 /**

@@ -12,6 +12,8 @@ metadata writers change.
 ```bash
 pnpm fixtures:mp3
 pnpm fixtures:flac
+pnpm fixtures:mp4
+pnpm fixtures:ogg
 ```
 
 Each generator prints a one-line summary per file produced. Files are
