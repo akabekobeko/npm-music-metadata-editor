@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { createBufferCursor } from "./bufferCursor.js";
+import { createBufferCursor } from "../bufferCursor/bufferCursor.js";
 import { createBufferWriter } from "./bufferWriter.js";
 
 it("starts empty", () => {

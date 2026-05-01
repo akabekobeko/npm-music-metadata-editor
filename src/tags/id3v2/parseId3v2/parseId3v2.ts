@@ -1,5 +1,5 @@
 import { ID3V2_HEADER_SIZE } from "../constants.js";
-import { removeUnsynchronization } from "../removeUnsynchronization.js";
+import { removeUnsynchronization } from "../removeUnsynchronization/removeUnsynchronization.js";
 import type { Id3v2Frame, Id3v2Tag } from "../types.js";
 import { parseFrame } from "./parseFrame/parseFrame.js";
 import { parseHeader } from "./parseHeader.js";

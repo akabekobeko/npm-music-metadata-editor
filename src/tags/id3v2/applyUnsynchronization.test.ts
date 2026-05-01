@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 import { applyUnsynchronization } from "./applyUnsynchronization.js";
-import { removeUnsynchronization } from "./removeUnsynchronization.js";
+import { removeUnsynchronization } from "./removeUnsynchronization/removeUnsynchronization.js";
 
 it("returns the input unchanged when no 0xFF bytes are present", () => {
   const input = new Uint8Array([0x00, 0x10, 0x7f, 0xe0]);

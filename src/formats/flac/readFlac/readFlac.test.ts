@@ -3,11 +3,11 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, it } from "vitest";
 // Importing mme registers the FLAC format as a side effect.
-import { readMetadata } from "../../mme.js";
+import { readMetadata } from "../../../mme.js";
 
 const FIXTURES_DIR = resolve(
   dirname(fileURLToPath(import.meta.url)),
-  "../../../tests/fixtures/flac",
+  "../../../../tests/fixtures/flac",
 );
 
 const loadFixture = (name: string): Promise<Uint8Array> =>

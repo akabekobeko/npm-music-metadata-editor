@@ -1,4 +1,4 @@
-import { removeUnsynchronization } from "../../removeUnsynchronization.js";
+import { removeUnsynchronization } from "../../removeUnsynchronization/removeUnsynchronization.js";
 import type { Id3v2FrameFlags, Id3v2MajorVersion } from "../../types.js";
 
 /** Arguments for {@link unwrapV24FrameData}. */
