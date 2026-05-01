@@ -3,13 +3,16 @@ import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, it } from "vitest";
-import { findAllAtoms } from "./atom/findAllAtoms.js";
-import { findAtom } from "./atom/findAtom.js";
-import { parseAtomTree } from "./atom/parseAtomTree.js";
-import { readMp4 } from "./readMp4.js";
+import { findAllAtoms } from "../atom/findAllAtoms.js";
+import { findAtom } from "../atom/findAtom.js";
+import { parseAtomTree } from "../atom/parseAtomTree.js";
+import { readMp4 } from "../readMp4.js";
 import { writeMp4 } from "./writeMp4.js";
 
-const FIXTURE_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../../../tests/fixtures/mp4");
+const FIXTURE_DIR = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  "../../../../tests/fixtures/mp4",
+);
 
 const loadFixture = async (name: string): Promise<Uint8Array> =>
   new Uint8Array(await readFile(resolve(FIXTURE_DIR, name)));

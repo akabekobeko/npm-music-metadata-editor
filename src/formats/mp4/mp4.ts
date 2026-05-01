@@ -1,7 +1,7 @@
 import { registerFormat } from "../registry.js";
 import { detectMp4Signature } from "./detectMp4.js";
 import { readMp4 } from "./readMp4.js";
-import { writeMp4 } from "./writeMp4.js";
+import { writeMp4 } from "./writeMp4/writeMp4.js";
 
 /**
  * Register the MP4 / M4A format with the global registry.
