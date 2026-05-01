@@ -1,8 +1,8 @@
-[English](README.md)
-
 # music-metadata-editor
 
-[![Test](https://github.com/akabekobeko/npm-music-metadata-editor/actions/workflows/test.yml/badge.svg)](https://github.com/akabekobeko/npm-music-metadata-editor/actions/workflows/test.yml)
+[![Test](https://github.com/akabekobeko/npm-music-metadata-editor/actions/workflows/test.yml/badge.svg)](https://github.com/akabekobeko/npm-music-metadata-editor/actions/workflows/test.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+日本語 / [English](README.md)
 
 音楽ファイルのメタデータを読み書きする Node.js + TypeScript 製ライブラリです。クラスを使わない関数中心の API として設計されており、ESM と Node.js 24+ をファースト クラスでサポートします。
 
@@ -155,6 +155,18 @@ try {
 - [`docs/rules/`](docs/rules) — コーディング / テスト / Git のルール
 - [`docs/plan/`](docs/plan) — フェーズ単位の実装計画
 
-## ライセンス
+## 参考資料
 
-MIT © akabeko
+参考実装:
+
+- [Zeugma440/atldotnet](https://github.com/Zeugma440/atldotnet) — 機能面の参考実装として参照している C# 製音声メタデータ ライブラリ。各フォーマット対応状況の互換性表は [Google Sheets](https://docs.google.com/spreadsheets/d/1Wo9ifsKbBloofdWCsoXziAtaS-QVjqci5aavAV8dt2U/) で公開されている。
+
+仕様 / リファレンス資料:
+
+- [ID3v2.3](https://id3.org/id3v2.3.0) / [ID3v2.4 構造](https://id3.org/id3v2.4.0-structure) / [ID3v2.4 フレーム](https://id3.org/id3v2.4.0-frames)
+- [APE Tag (HydrogenAudio wiki)](https://wiki.hydrogenaud.io/index.php?title=APE_key) と [Monkey's Audio](https://www.monkeysaudio.com/)
+- [FLAC フォーマット](https://xiph.org/flac/format.html) と [Vorbis Comment](https://xiph.org/vorbis/doc/v-comment.html)
+- [RFC 3533 — Ogg Encapsulation](https://datatracker.ietf.org/doc/html/rfc3533) と [RFC 7845 — Ogg Encapsulation for Opus](https://datatracker.ietf.org/doc/html/rfc7845)
+- [ISO/IEC 14496-12 — ISO Base Media File Format (MP4)](https://en.wikipedia.org/wiki/ISO/IEC_base_media_file_format) と [iTunes Metadata atoms (AtomicParsley)](https://atomicparsley.sourceforge.net/mpeg-4files.html)
+- [RIFF (Wikipedia)](https://en.wikipedia.org/wiki/Resource_Interchange_File_Format) / [WAV `LIST/INFO`](https://www.recordingblogs.com/wiki/list-chunk-of-a-wave-file) / [AIFF (Wikipedia)](https://en.wikipedia.org/wiki/Audio_Interchange_File_Format)
+- [Advanced Systems Format (ASF / WMA)](https://en.wikipedia.org/wiki/Advanced_Systems_Format)

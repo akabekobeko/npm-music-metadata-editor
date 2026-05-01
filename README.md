@@ -1,8 +1,8 @@
-[Japanese](README.ja.md)
-
 # music-metadata-editor
 
-[![Test](https://github.com/akabekobeko/npm-music-metadata-editor/actions/workflows/test.yml/badge.svg)](https://github.com/akabekobeko/npm-music-metadata-editor/actions/workflows/test.yml)
+[![Test](https://github.com/akabekobeko/npm-music-metadata-editor/actions/workflows/test.yml/badge.svg)](https://github.com/akabekobeko/npm-music-metadata-editor/actions/workflows/test.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+English / [Japanese](README.ja.md)
 
 A Node.js + TypeScript library for reading and writing audio file metadata. Designed as a function-only API (no classes) with first-class support for ESM and Node.js 24+.
 
@@ -155,6 +155,18 @@ The mapping between each tag format and the common `TagData` shape is documented
 - [`docs/rules/`](docs/rules) — coding / testing / git rules
 - [`docs/plan/`](docs/plan) — phase-by-phase implementation plan
 
-## License
+## References
 
-MIT © akabeko
+Reference implementation:
+
+- [Zeugma440/atldotnet](https://github.com/Zeugma440/atldotnet) — C# audio-metadata library used as the behavioural reference. The cross-format compatibility table is published as [a Google Sheet](https://docs.google.com/spreadsheets/d/1Wo9ifsKbBloofdWCsoXziAtaS-QVjqci5aavAV8dt2U/).
+
+Specifications and supporting documentation:
+
+- [ID3v2.3](https://id3.org/id3v2.3.0) / [ID3v2.4 structure](https://id3.org/id3v2.4.0-structure) / [ID3v2.4 frames](https://id3.org/id3v2.4.0-frames)
+- [APE Tag (HydrogenAudio wiki)](https://wiki.hydrogenaud.io/index.php?title=APE_key) and [Monkey's Audio](https://www.monkeysaudio.com/)
+- [FLAC format](https://xiph.org/flac/format.html) and [Vorbis Comment](https://xiph.org/vorbis/doc/v-comment.html)
+- [RFC 3533 — Ogg Encapsulation](https://datatracker.ietf.org/doc/html/rfc3533) and [RFC 7845 — Ogg Encapsulation for Opus](https://datatracker.ietf.org/doc/html/rfc7845)
+- [ISO/IEC 14496-12 — ISO Base Media File Format (MP4)](https://en.wikipedia.org/wiki/ISO/IEC_base_media_file_format) and [iTunes Metadata atoms (AtomicParsley)](https://atomicparsley.sourceforge.net/mpeg-4files.html)
+- [RIFF (Wikipedia)](https://en.wikipedia.org/wiki/Resource_Interchange_File_Format), [WAV `LIST/INFO`](https://www.recordingblogs.com/wiki/list-chunk-of-a-wave-file), and [AIFF (Wikipedia)](https://en.wikipedia.org/wiki/Audio_Interchange_File_Format)
+- [Advanced Systems Format (ASF / WMA)](https://en.wikipedia.org/wiki/Advanced_Systems_Format)
