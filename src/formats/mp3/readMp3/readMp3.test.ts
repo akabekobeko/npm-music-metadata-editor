@@ -60,3 +60,32 @@ it("reads ID3v2 head while ID3v1 trailer is also present", async () => {
   expect(result.tag.trackNumber).toBe(7);
   expect(result.tag.year).toBe(2024);
 });
+
+it("merges ID3v2 + APE + ID3v1 by the default priority order", async () => {
+  const bytes = await loadFixture("v23-with-ape-and-id3v1.mp3");
+  const result = await readMetadata(bytes);
+  // ID3v2 wins for `title` (present in all three flavours).
+  expect(result.tag.title).toBe("ID3v2 Title");
+  // `artist` is missing from ID3v2, so APE wins over ID3v1.
+  expect(result.tag.artist).toBe("APE Artist");
+  // `year` only exists in APE (and ID3v1) — APE wins.
+  expect(result.tag.year).toBe(2025);
+  // `trackNumber` only ID3v1 carries it.
+  expect(result.tag.trackNumber).toBe(5);
+});
+
+it("honours a user-supplied tag priority", async () => {
+  const bytes = await loadFixture("v23-with-ape-and-id3v1.mp3");
+  // Force APE to win over ID3v2.
+  const result = await readMetadata(bytes, { tagPriority: ["ape", "id3v2", "id3v1"] });
+  expect(result.tag.title).toBe("APE Title");
+  expect(result.tag.album).toBe("Phase6 Album");
+});
+
+it("skips tag sources omitted from priority", async () => {
+  const bytes = await loadFixture("v23-with-ape-and-id3v1.mp3");
+  const result = await readMetadata(bytes, { tagPriority: ["id3v1"] });
+  expect(result.tag.title).toBe("ID3v1 Title");
+  // ID3v2 / APE excluded — `album` from ID3v1 wins.
+  expect(result.tag.album).toBe("ID3v1 Album");
+});

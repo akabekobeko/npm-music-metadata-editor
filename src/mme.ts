@@ -1,3 +1,4 @@
+import { registerApeFormat } from "./formats/ape/ape.js";
 import { detectFormat, SIGNATURE_PROBE_BYTES } from "./formats/detect.js";
 import { registerFlacFormat } from "./formats/flac/flac.js";
 import { registerMp3Format } from "./formats/mp3/mp3.js";
@@ -12,6 +13,7 @@ registerMp3Format();
 registerFlacFormat();
 registerMp4Format();
 registerOggFormat();
+registerApeFormat();
 
 export type {
   AudioFormat,
@@ -23,6 +25,7 @@ export type {
   ReadOptions,
   SynchronizedLyric,
   TagData,
+  TagSource,
   WriteOptions,
 } from "./types.js";
 export { PictureKind } from "./types.js";
