@@ -1,4 +1,4 @@
-# music-metadata-editor
+# @akabeko/music-metadata-editor
 
 [![Test](https://github.com/akabekobeko/npm-music-metadata-editor/actions/workflows/test.yml/badge.svg)](https://github.com/akabekobeko/npm-music-metadata-editor/actions/workflows/test.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -22,8 +22,8 @@
 ## インストール
 
 ```sh
-pnpm add music-metadata-editor
-# あるいは: npm install music-metadata-editor
+pnpm add @akabeko/music-metadata-editor
+# あるいは: npm install @akabeko/music-metadata-editor
 ```
 
 Node.js 24 以降が必要です。
@@ -33,7 +33,7 @@ Node.js 24 以降が必要です。
 ### トラックの読み込み
 
 ```ts
-import { loadTrack } from "music-metadata-editor";
+import { loadTrack } from "@akabeko/music-metadata-editor";
 
 const track = await loadTrack("./song.mp3");
 console.log(track.audioFormat);   // "mp3"
@@ -52,7 +52,7 @@ console.log(track.pictures.length);
 ### 編集したトラックの保存
 
 ```ts
-import { loadTrack, saveTrack } from "music-metadata-editor";
+import { loadTrack, saveTrack } from "@akabeko/music-metadata-editor";
 
 const track = await loadTrack("./song.mp3");
 const edited = {
@@ -73,7 +73,7 @@ const bytes = await saveTrack(edited, { source: await readFile("./song.mp3") });
 ### カバー アートの編集
 
 ```ts
-import { loadTrack, saveTrack, PictureKind } from "music-metadata-editor";
+import { loadTrack, saveTrack, PictureKind } from "@akabeko/music-metadata-editor";
 import { readFile } from "node:fs/promises";
 
 const track = await loadTrack("./song.mp3");
@@ -115,7 +115,7 @@ await saveTrack(edited, { source: "./song.mp3" });
 両レイヤで同じ `ReadOptions` (例: MP3 の `tagPriority`) と `format` 強制オプション (拡張子やシグネチャから判定できないファイル向け) を共有します。
 
 ```ts
-import { readMetadata } from "music-metadata-editor";
+import { readMetadata } from "@akabeko/music-metadata-editor";
 
 const result = await readMetadata("./song.mp3", { tagPriority: ["ape", "id3v2", "id3v1"] });
 ```
@@ -125,7 +125,7 @@ const result = await readMetadata("./song.mp3", { tagPriority: ["ape", "id3v2", 
 スローされる例外はすべて `MmeError` で、安定した `code` を持つタグ付き `Error` です:
 
 ```ts
-import { loadTrack, isMmeError } from "music-metadata-editor";
+import { loadTrack, isMmeError } from "@akabeko/music-metadata-editor";
 
 try {
   await loadTrack("./mystery.bin");
