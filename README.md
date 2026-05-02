@@ -6,7 +6,7 @@ English / [Japanese](README.ja.md)
 
 A Node.js + TypeScript library for reading and writing audio file metadata. Designed as a function-only API (no classes) with first-class support for ESM and Node.js 24+.
 
-Supported containers / tag formats:
+## Supported containers / tag formats:
 
 | Container | Read | Write | Notes |
 | --- | --- | --- | --- |
@@ -32,6 +32,8 @@ Requires Node.js 24 or newer.
 
 ### Load a track
 
+`loadTrack` accepts both a file path (`string`) and pre-loaded bytes (`Uint8Array`). The returned `Track` is a Plain Object.
+
 ```ts
 import { loadTrack } from "@akabeko/music-metadata-editor";
 
@@ -43,11 +45,13 @@ console.log(track.durationMs);    // 215000 (or `undefined` when not derivable)
 console.log(track.pictures.length);
 ```
 
-`loadTrack` accepts either a file path (`string`) or pre-loaded bytes (`Uint8Array`). The returned `Track` is a Plain Object — every consumer mutation is done by spreading.
+`durationMs` is a read-only audio-derived field. The reader computes it from sample-count / sample-rate / bitrate fields, and `saveTrack` never writes it back to the file (the writer recomputes it on the next read).
 
-`durationMs` is a read-only audio-derived field: the reader computes it from sample-count / sample-rate / bitrate fields, and `saveTrack` never writes it back to the file (the writer recomputes it on the next read). It is `undefined` when the source does not carry the values needed (e.g. a stripped-down fixture with no audio frames).
+It is `undefined` when the source does not carry the values needed (e.g. a stripped-down fixture with no audio frames).
 
-> **MP3 caveat**: only CBR streams are supported. VBR-encoded MP3 (Xing / Info / VBRI headers) is not parsed, so the returned duration is a CBR-based estimate and may diverge from the true playback time on VBR files.
+> **MP3 caveat**:
+> Only CBR streams are supported.
+> VBR-encoded MP3 (Xing / Info / VBRI headers) is not parsed; on VBR files the returned duration is a CBR-based estimate, so it may diverge from the true playback time.
 
 ### Save a modified track
 
@@ -60,13 +64,13 @@ const edited = {
   tag: { ...track.tag, title: "New Title", artist: "New Artist" },
 };
 
-// Overwrite the source file in place.
+// Overwrite the source file in place
 await saveTrack(edited, { source: "./song.mp3" });
 
-// Or write to a different path.
+// Or write to a different path
 await saveTrack(edited, { source: "./song.mp3", outputPath: "./out.mp3" });
 
-// Or rebuild bytes without touching the disk.
+// Or rebuild bytes without writing to a file
 const bytes = await saveTrack(edited, { source: await readFile("./song.mp3") });
 ```
 
@@ -122,7 +126,7 @@ const result = await readMetadata("./song.mp3", { tagPriority: ["ape", "id3v2", 
 
 ## Errors and warnings
 
-All thrown errors are `MmeError`, a tagged `Error` with a stable `code`:
+All thrown errors are `MmeError`, a tagged `Error` with a defined `code`.
 
 ```ts
 import { loadTrack, isMmeError } from "@akabeko/music-metadata-editor";
@@ -143,7 +147,7 @@ try {
 | `truncated-input` | The input ended before a required structure could be read in full. |
 | `unsupported-feature` | The input uses a feature not yet supported (e.g. compression / encryption). |
 
-Recoverable problems (a single malformed frame in an otherwise valid tag, etc.) are surfaced as non-fatal `Track.warnings: readonly Warning[]` instead of throwing.
+Recoverable problems do not throw — they are collected as non-fatal diagnostics on `Track.warnings: readonly Warning[]`. For example, a single malformed frame inside an otherwise valid tag falls into this category.
 
 ## Field mapping
 

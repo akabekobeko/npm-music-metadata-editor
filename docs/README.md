@@ -1,6 +1,6 @@
-[Japanese](README.ja.md)
-
 # Documentation Index
+
+English / [Japanese](README.ja.md)
 
 Index of the documents stored under `docs/`. When adding a new topic, create a subdirectory for it and append an entry below.
 

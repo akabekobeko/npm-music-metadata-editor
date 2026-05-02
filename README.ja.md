@@ -6,7 +6,7 @@
 
 音楽ファイルのメタデータを読み書きする Node.js + TypeScript 製ライブラリです。クラスを使わない関数中心の API として設計されており、ESM と Node.js 24+ をファースト クラスでサポートします。
 
-対応コンテナ / タグ形式:
+## 対応コンテナ / タグ形式:
 
 | コンテナ | 読み込み | 書き込み | 補足 |
 | --- | --- | --- | --- |
@@ -32,6 +32,8 @@ Node.js 24 以降が必要です。
 
 ### トラックの読み込み
 
+`loadTrack` はファイル パス (`string`) と読み込み済みのバイト列 (`Uint8Array`) に対応しています。返される `Track` は Plain Object です。
+
 ```ts
 import { loadTrack } from "@akabeko/music-metadata-editor";
 
@@ -43,11 +45,13 @@ console.log(track.durationMs);    // 215000 (取得できない場合は `undefi
 console.log(track.pictures.length);
 ```
 
-`loadTrack` はファイル パス (`string`) と読み込み済みのバイト列 (`Uint8Array`) の両方を受け取れます。返される `Track` は Plain Object なので、編集はすべてスプレッド構文で行います。
+`durationMs` は音声データから算出される、読み取り専用フィールドです。reader が sample 数 / サンプル レート / bitrate などから計算し、`saveTrack` でファイルへ書き戻されることはありません (次回読み込み時に再計算されます)。
 
-`durationMs` は音声データから算出される読み取り専用フィールドです。reader が sample 数 / サンプル レート / bitrate などから計算し、`saveTrack` でファイルへ書き戻されることはありません (次回読み込み時に再計算されます)。ソース側に必要な値が無い場合 (音声フレームを持たないフィクスチャなど) は `undefined` になります。
+ソース側に必要な値が無い場合 (音声フレームを持たないフィクスチャなど) は `undefined` になります。
 
-> **MP3 の注意点**: CBR (固定ビット レート) ストリームにのみ対応します。VBR (Xing / Info / VBRI ヘッダを伴う可変ビット レート) は解析しないため、VBR で符号化された MP3 では CBR ベースの近似値となり、実際の再生時間と一致しないことがあります。
+> **MP3 の注意点**:
+> CBR (固定ビット レート) ストリームにのみ対応します。
+> VBR (Xing / Info / VBRI ヘッダを伴う可変ビット レート) は解析せず、VBR で符号化された MP3 では CBR ベースの近似値とします。そのため実際の再生時間と一致しないことがあります。
 
 ### 編集したトラックの保存
 
@@ -60,13 +64,13 @@ const edited = {
   tag: { ...track.tag, title: "新しいタイトル", artist: "新しいアーティスト" },
 };
 
-// 元のファイルを上書き保存。
+// 元のファイルを上書き保存
 await saveTrack(edited, { source: "./song.mp3" });
 
-// 別のパスへ書き出すこともできる。
+// 別のパスへ書き出すこともできる
 await saveTrack(edited, { source: "./song.mp3", outputPath: "./out.mp3" });
 
-// ディスクには触れずバイト列だけ再構築する場合。
+// ファイル更新せず、バイト列だけ再構築する場合
 const bytes = await saveTrack(edited, { source: await readFile("./song.mp3") });
 ```
 
@@ -122,7 +126,7 @@ const result = await readMetadata("./song.mp3", { tagPriority: ["ape", "id3v2", 
 
 ## エラーと警告
 
-スローされる例外はすべて `MmeError` で、安定した `code` を持つタグ付き `Error` です:
+スローされる例外はすべて `MmeError` で、所定の `code` を持つタグ付き `Error` です。
 
 ```ts
 import { loadTrack, isMmeError } from "@akabeko/music-metadata-editor";
@@ -143,7 +147,7 @@ try {
 | `truncated-input` | 必要な構造を読み終える前に入力が終端した。 |
 | `unsupported-feature` | 入力が未対応の機能 (例: 圧縮 / 暗号化) を使っている。 |
 
-回復可能な問題 (有効なタグの中で 1 つだけ壊れた frame があるケースなど) はスローではなく `Track.warnings: readonly Warning[]` に non-fatal な diagnostic として収集されます。
+回復可能な問題は例外をスローせず、`Track.warnings: readonly Warning[]` に non-fatal な diagnostic として収集されます。例えば有効なタグの中で 1 つだけ壊れた frame があるケースなどが該当します。
 
 ## フィールド対応表
 

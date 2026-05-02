@@ -1,10 +1,10 @@
-[English](field-mapping.md)
-
 # フィールド対応表
+
+日本語 / [English](field-mapping.md)
 
 各タグ形式と `TagData` フィールドの対応表です。`loadTrack` / `readMetadata` が返す `TagData` は、フォーマットによらず統一された名前でメタデータを公開します。
 
-凡例:
+## 凡例
 
 - `—` … そのフォーマットでは対応するキーが存在しない / 利用しない
 - 値が複数キーから設定されうる場合、左から順に評価され **先勝ち** (Vorbis Comment / APE)
