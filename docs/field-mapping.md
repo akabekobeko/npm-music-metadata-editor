@@ -1,10 +1,11 @@
-[Japanese](field-mapping.ja.md)
-
 # Field Mapping
+
+English / [Japanese](field-mapping.ja.md)
+
 
 This document maps each tag format to the common `TagData` shape exposed by `loadTrack` / `readMetadata`. The returned `TagData` uses the same names regardless of the underlying container.
 
-Legend:
+## Legend
 
 - `—` … the format has no equivalent key, or the key is not used.
 - When a target field can be sourced from multiple keys, the leftmost match wins (this applies to Vorbis Comment / APE).
