@@ -1,5 +1,5 @@
 {
-  "name": "music-metadata-editor",
+  "name": "@akabeko/music-metadata-editor",
   "description": "This is a library for reading and writing metadata of music files.",
   "version": "1.0.0",
   "author": "akabeko (http://akabeko.me/)",
