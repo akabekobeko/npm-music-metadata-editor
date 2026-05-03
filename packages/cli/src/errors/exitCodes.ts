@@ -4,8 +4,8 @@ import type { MmeErrorCode } from "@akabeko/music-metadata-editor";
  * Exit codes emitted by the CLI.
  *
  * The numeric values are the contract documented in
- * `docs/plan/cli/phase-01-foundation.md` (the canonical source). Future phases
- * mirror the table into the user-facing README.
+ * `docs/plan/cli/phase-01-foundation.md` (the canonical source) and mirrored
+ * in the user-facing README.
  */
 export const ExitCode = {
   /** Successful run. */

@@ -18,7 +18,7 @@ export type VorbisCommentEntry = {
  *
  * Vorbis Comments accompany Vorbis-family codecs (Vorbis, Opus) inside OGG
  * pages and are also embedded as a `VORBIS_COMMENT` metadata block inside
- * FLAC files. Phase 5 reuses the same shape from OGG; Phase 3 covers FLAC.
+ * FLAC files. Both containers share this shape.
  */
 export type VorbisComment = {
   /** Vendor string (typically the encoder library identifier). */

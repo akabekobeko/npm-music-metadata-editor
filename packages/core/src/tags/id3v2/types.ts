@@ -1,7 +1,7 @@
 /**
  * Major version of an ID3v2 tag (`2`, `3`, or `4`).
  *
- * Phase 2 implements read for all three; write only emits `3` or `4`.
+ * The reader accepts all three; the writer only emits `3` or `4`.
  */
 export type Id3v2MajorVersion = 2 | 3 | 4;
 
@@ -40,7 +40,7 @@ export type Id3v2FrameFlags = {
 /**
  * One frame inside an ID3v2 tag.
  *
- * Phase 2 keeps every frame as raw post-decoded bytes: callers reach in via
+ * Every frame is kept as raw post-decoded bytes: callers reach in via
  * helpers (text frames in `parseTextFrame`, comment frames in
  * `parseCommentFrame`, …) so the round-trip writer can re-emit unknown frame
  * IDs verbatim.

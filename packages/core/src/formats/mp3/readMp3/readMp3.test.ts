@@ -45,7 +45,7 @@ it("reads an ID3v2.4 fixture with extras", async () => {
     bpm: 120,
     comment: "ID3v2.4 sample",
   });
-  // Phase 9 surfaces APIC / USLT through the public API.
+  // APIC / USLT are surfaced through the public API.
   expect(result.pictures).toHaveLength(1);
   expect(result.pictures[0]?.mimeType).toBe("image/png");
   expect(result.lyrics?.unsynchronized).toBe("the quick brown fox jumps over the lazy dog");

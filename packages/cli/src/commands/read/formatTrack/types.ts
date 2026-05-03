@@ -15,8 +15,7 @@ export type SanitizedPicture = {
 
 /**
  * `Track` reshaped for serialization: `pictures[].data` replaced with
- * `byteLength`. Phase 4 will add an opt-in `--with-picture-data` flag that
- * inlines the bytes as a base64 string instead of dropping them.
+ * `byteLength`. Callers that need the raw bytes use `mme picture extract`.
  */
 export type SerializableTrack = {
   readonly audioFormat: Track["audioFormat"];

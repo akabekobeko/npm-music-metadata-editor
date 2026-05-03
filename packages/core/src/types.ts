@@ -1,7 +1,5 @@
 /**
  * Container + codec identifier of an audio file.
- *
- * The list grows in subsequent phases as additional formats become supported.
  */
 export type AudioFormat =
   | "mp3"

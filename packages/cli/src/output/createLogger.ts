@@ -6,9 +6,9 @@ type Sink = (chunk: string) => void;
 /**
  * Logger that respects `--quiet` / `--verbose` / `--no-color`.
  *
- * Phase 5 routes every stderr write (informational status, warnings, debug
- * traces, terminal errors) through this interface so that the global flags
- * apply uniformly. Each method takes the raw message — the logger owns the
+ * Every stderr write (informational status, warnings, debug traces, terminal
+ * errors) is routed through this interface so that the global flags apply
+ * uniformly. Each method takes the raw message — the logger owns the
  * `[mme]` / `[warn]` / `[debug]` prefixing and ANSI styling.
  */
 export type Logger = {

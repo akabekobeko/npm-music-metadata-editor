@@ -7,7 +7,7 @@ afterEach(() => {
   writeSpy.mockClear();
 });
 
-it("falls back to JSON output in Phase 1", () => {
+it("falls back to JSON output", () => {
   writePretty({ title: "Hello" });
   expect(writeSpy).toHaveBeenCalledOnce();
   expect(writeSpy.mock.calls[0]?.[0]).toBe(`${JSON.stringify({ title: "Hello" }, null, 2)}\n`);

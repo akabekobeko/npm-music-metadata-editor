@@ -3,11 +3,11 @@ import { getLogger } from "./logger.js";
 /**
  * Mapping of buffered-stderr line prefixes to {@link Logger} methods.
  *
- * Phase 1〜4 handlers buffer stderr as a string with `[mme] …` / `[warn] …` /
- * `[debug] …` markers. Phase 5 keeps that buffered shape but routes the
- * lines through the active logger so `--quiet` / `--verbose` / `--no-color`
- * apply uniformly. Anything that does not match a known prefix is treated as
- * an error so unexpected raw output stays visible.
+ * Command handlers buffer stderr as a string with `[mme] …` / `[warn] …` /
+ * `[debug] …` markers; this dispatcher routes each line through the active
+ * logger so `--quiet` / `--verbose` / `--no-color` apply uniformly. Anything
+ * that does not match a known prefix is treated as an error so unexpected
+ * raw output stays visible.
  */
 const PREFIX_ROUTES: ReadonlyArray<{
   readonly prefix: string;
@@ -37,9 +37,9 @@ const dispatchLine = (line: string): void => {
 /**
  * Pump a handler's buffered stderr string through the active {@link Logger}.
  *
- * The Phase 1〜4 command handlers return `stderr` as a single string (zero or
- * more `[mme] …\n` / `[warn] …\n` lines). This helper splits on `\n`, drops
- * the trailing empty token, and dispatches each line to `logger.info` /
+ * Command handlers return `stderr` as a single string (zero or more
+ * `[mme] …\n` / `[warn] …\n` lines). This helper splits on `\n`, drops the
+ * trailing empty token, and dispatches each line to `logger.info` /
  * `.warn` / `.debug` based on its prefix. Lines without a known prefix are
  * routed to `.error` so unexpected output is still surfaced.
  *

@@ -34,7 +34,7 @@ it("surfaces binary cover-art items as pictures", async () => {
   const bytes = await loadFixture("with-picture.ape");
   const result = await readMetadata(bytes);
   expect(result.tag.title).toBe("APE with picture");
-  // Phase 9 surfaces the binary `Cover Art (...)` items via the public API.
+  // Binary `Cover Art (...)` items are surfaced via the public API.
   expect(result.pictures.length).toBeGreaterThan(0);
 });
 

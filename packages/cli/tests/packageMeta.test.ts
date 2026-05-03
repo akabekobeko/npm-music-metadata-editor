@@ -6,9 +6,10 @@ import { describe, expect, it } from "vitest";
 /**
  * Schema-light validation of `packages/cli/package.json`.
  *
- * Phase 5 commits the bin / files / publishConfig surface to npm. Asserting
- * the shape from a test catches accidental edits (e.g. flipping `private`
- * back to `true`, dropping the LICENSE from `files`) before they ship.
+ * The bin / files / publishConfig surface is what we publish to npm.
+ * Asserting the shape from a test catches accidental edits (e.g. flipping
+ * `private` back to `true`, dropping the LICENSE from `files`) before they
+ * ship.
  */
 const here = path.dirname(fileURLToPath(import.meta.url));
 const packageJsonPath = path.resolve(here, "../package.json");

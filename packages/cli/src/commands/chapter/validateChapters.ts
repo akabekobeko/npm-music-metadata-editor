@@ -12,9 +12,8 @@ const usageError = (message: string): never => {
 };
 
 /**
- * Validate that a `ChapterInfo` value satisfies the per-chapter invariants
- * documented in Phase 4: presence of `id`, finite `startMs` / `endMs`,
- * positive duration.
+ * Validate that a `ChapterInfo` value satisfies the per-chapter invariants:
+ * presence of `id`, finite `startMs` / `endMs`, positive duration.
  *
  * Per-element checks live here so {@link validateChapters} can focus on the
  * cross-element relationships (ordering and uniqueness).
@@ -43,7 +42,7 @@ const checkChapter = (chapter: ChapterInfo, where: string): void => {
 };
 
 /**
- * Validate a chapter list against the Phase 4 contract.
+ * Validate a chapter list against the cross-chapter invariants.
  *
  * Rules enforced:
  *

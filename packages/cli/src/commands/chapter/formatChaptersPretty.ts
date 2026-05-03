@@ -56,8 +56,7 @@ const padLeft = (value: string, width: number): string =>
   value.length >= width ? value : " ".repeat(width - value.length) + value;
 
 /**
- * Render a chapter list as the human-readable table documented in the Phase 4
- * plan.
+ * Render a chapter list as a human-readable table.
  *
  * Output shape:
  *

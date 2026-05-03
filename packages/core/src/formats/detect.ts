@@ -30,8 +30,8 @@ export const detectFormatByExtension = (filePath: string): AudioFormat | undefin
  * Detect the format by examining the leading bytes of the file.
  *
  * The first registered format whose `detectSignature` returns `true` wins. Registration
- * order therefore matters when two formats could both match — the first phase to
- * register a format claims its signature.
+ * order therefore matters when two formats could both match — the first registrant
+ * claims the signature.
  *
  * @param header - Leading bytes of the file (the first {@link SIGNATURE_PROBE_BYTES} are inspected).
  * @returns The matching format, or `undefined` when no signature matches.

@@ -18,7 +18,7 @@ type BuildId3v2Args = {
 /**
  * Build a complete ID3v2 tag (`"ID3" + header + frames + padding`).
  *
- * Phase 2 only emits ID3v2.3 and ID3v2.4. Tag-level unsynchronisation is not
+ * Only ID3v2.3 and ID3v2.4 are emitted. Tag-level unsynchronisation is not
  * applied; per-frame flags are zeroed; padding defaults to `0` bytes (caller
  * may opt in by setting `padding`).
  *

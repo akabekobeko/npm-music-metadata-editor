@@ -9,7 +9,7 @@ const HEADER_OBJECT_BYTES = encodeGuid(ASF_GUID.HeaderObject);
  *
  * This matches every ASF-derived format Microsoft ever shipped (`.wma`,
  * `.wmv`, `.asf`); telling them apart is the job of stream-level inspection
- * which this Phase 8 implementation deliberately leaves out of scope.
+ * which this implementation deliberately leaves out of scope.
  *
  * @param header - Leading bytes of the file (typically up to 64 bytes).
  * @returns `true` when the leading 16 bytes spell the Header Object GUID.

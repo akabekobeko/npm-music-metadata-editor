@@ -28,8 +28,8 @@ export type FormatWriter = (input: Uint8Array, options: WriteOptions) => Promise
 /**
  * Per-format registration record.
  *
- * Phase 1 only populates `extensions` / `detectSignature`; Phase 2 and later add the
- * `read` and `write` callbacks once the corresponding format is implemented.
+ * `extensions` / `detectSignature` are mandatory; `read` / `write` are
+ * optional so a format can register detection ahead of full I/O support.
  */
 export type FormatRegistration = {
   /** Canonical format identifier. */
@@ -61,8 +61,8 @@ const registrations = new Map<AudioFormat, FormatRegistration>();
 /**
  * Register (or replace) a format implementation.
  *
- * Subsequent phases call this from format-specific entry points (e.g. `formats/mp3/mp3.ts`)
- * so that {@link getRegistration} / {@link getAllRegistrations} can locate them.
+ * Format-specific entry points (e.g. `formats/mp3/mp3.ts`) call this so that
+ * {@link getRegistration} / {@link getAllRegistrations} can locate them.
  *
  * @param registration - The format record to insert; replaces any existing entry with the same `format`.
  */

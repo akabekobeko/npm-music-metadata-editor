@@ -24,8 +24,8 @@ import type { Mp3WriteOptions } from "./types.js";
  * 1. Locate the audio payload (between the existing ID3v2 head and any
  *    trailing APE / ID3v1 tag).
  * 2. Build a fresh ID3v2 tag from `tag`, preserving any unknown frames from
- *    the existing tag so APIC / USLT / CHAP round-trip even though Phase 2
- *    does not surface them via `MetadataReadResult`.
+ *    the existing tag so frames the writer doesn't synthesize itself still
+ *    round-trip.
  * 3. When the source carried an APE Tag, refresh it from `tag` (keeping
  *    custom items intact) so the same fields land on every flavour. When it
  *    did not, no APE Tag is emitted.

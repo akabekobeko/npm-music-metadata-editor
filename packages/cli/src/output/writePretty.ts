@@ -3,9 +3,9 @@ import { writeJson } from "./writeJson.js";
 /**
  * Write a value to stdout in a human-readable form.
  *
- * Phase 1 keeps this as a JSON fallback so that the rest of the pipeline can
- * already depend on the function. Phase 2 replaces the body with a TUI-style
- * table renderer; callers are expected to keep using this function unchanged.
+ * Per-command formatters (e.g. `commands/read/formatTrack/formatPretty.ts`)
+ * own the actual `--pretty` rendering. This helper is kept as a generic
+ * fallback that simply delegates to the JSON writer.
  *
  * @param value - Any value to render for human consumption.
  */
