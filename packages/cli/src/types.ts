@@ -16,7 +16,7 @@ export type RunResult = {
 /**
  * Globally toggled output preferences shared across commands.
  *
- * Phase 1 only declares the flags; later phases wire up colored output and
+ * Phase 1 only declared the flags; later phases wire up colored output and
  * progress suppression. Keeping the type here avoids re-declaring the shape in
  * every command module added in subsequent phases.
  */
@@ -25,4 +25,21 @@ export type CliGlobalOptions = {
   readonly noColor: boolean;
   /** When `true`, command output should suppress non-error chatter. */
   readonly quiet: boolean;
+};
+
+/**
+ * Side-channel context shared between `createProgram` and its subcommands.
+ *
+ * Subcommands that need to consume external resources (currently only stdin
+ * for the streaming `read` mode) take them through this object instead of
+ * touching `process` directly. Tests build a context with a synthetic stdin
+ * iterable; the bin layer passes the real `process.stdin`.
+ */
+export type CliContext = {
+  /**
+   * Async iterable yielding stdin chunks. `process.stdin` already implements
+   * this interface, and tests provide a single-yield iterable wrapping a
+   * `Uint8Array`.
+   */
+  readonly stdin: AsyncIterable<Uint8Array>;
 };

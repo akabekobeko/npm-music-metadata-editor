@@ -1,9 +1,10 @@
 import { createRequire } from "node:module";
 import { Command } from "commander";
+import { createReadCommand } from "./commands/read/read.js";
 import { registerVersionAndHelp } from "./commands/registerVersionAndHelp.js";
 import { ExitCode } from "./errors/exitCodes.js";
 import { formatMmeError } from "./errors/formatMmeError.js";
-import type { RunResult } from "./types.js";
+import type { CliContext, RunResult } from "./types.js";
 
 /**
  * Local `package.json` view, narrowed to the fields the CLI consumes.
@@ -17,6 +18,13 @@ const require = createRequire(import.meta.url);
 const packageMeta = require("../package.json") as PackageMeta;
 
 /**
+ * Default {@link CliContext}, wiring stdin to the real `process.stdin`.
+ *
+ * @returns A context using the real process streams.
+ */
+const defaultContext = (): CliContext => ({ stdin: process.stdin });
+
+/**
  * Build a fully configured commander {@link Command} for the CLI.
  *
  * Each call returns a fresh instance so tests can run in parallel without
@@ -24,10 +32,23 @@ const packageMeta = require("../package.json") as PackageMeta;
  * `CommanderError` instead of calling `process.exit` directly; the bin layer
  * (and {@link runCli}) translate those throws into exit codes.
  *
- * @returns A new commander program with version / help / global flags wired up.
+ * @param context - Optional side-channel context (currently the stdin
+ *   iterable for the streaming `read` mode). Defaults to a context backed
+ *   by the real `process.stdin`.
+ * @returns A new commander program with version / help / global flags + the
+ *   `read` subcommand wired up.
  */
-export const createProgram = (): Command =>
-  registerVersionAndHelp(new Command(), packageMeta.version).exitOverride();
+export const createProgram = (context: CliContext = defaultContext()): Command => {
+  const program = registerVersionAndHelp(new Command(), packageMeta.version).exitOverride();
+  program.addCommand(createReadCommand(context));
+  return program;
+};
+
+/** Optional knobs accepted by {@link runCli}. */
+type RunCliOptions = {
+  /** Synthetic stdin payload. When omitted, an empty stdin is used. */
+  readonly stdin?: Uint8Array;
+};
 
 /**
  * Run the CLI in-process and capture stdout / stderr.
@@ -40,9 +61,13 @@ export const createProgram = (): Command =>
  * a clean environment.
  *
  * @param argv - User arguments only (no `node` / script path), e.g. `["--version"]`.
+ * @param options - Optional knobs (e.g. a synthetic `stdin` payload).
  * @returns Captured streams and the resolved exit code.
  */
-export const runCli = async (argv: readonly string[]): Promise<RunResult> => {
+export const runCli = async (
+  argv: readonly string[],
+  options: RunCliOptions = {},
+): Promise<RunResult> => {
   const stdoutChunks: string[] = [];
   const stderrChunks: string[] = [];
   const originalStdoutWrite = process.stdout.write;
@@ -57,9 +82,15 @@ export const runCli = async (argv: readonly string[]): Promise<RunResult> => {
     return true;
   }) as typeof process.stderr.write;
 
+  const context: CliContext = {
+    stdin: makeStdin(options.stdin),
+  };
+
   let exitCode: number = ExitCode.Success;
   try {
-    await createProgram().parseAsync(argv as readonly string[] as string[], { from: "user" });
+    await createProgram(context).parseAsync(argv as readonly string[] as string[], {
+      from: "user",
+    });
   } catch (error) {
     const formatted = formatMmeError(error);
     if (formatted.message !== "") {
@@ -78,3 +109,20 @@ export const runCli = async (argv: readonly string[]): Promise<RunResult> => {
     stderr: stderrChunks.join(""),
   };
 };
+
+/**
+ * Build a synthetic stdin iterable from an optional byte payload.
+ *
+ * When `bytes` is `undefined` the iterable yields nothing — exactly what the
+ * `read --stdin` flow sees when the user never piped anything.
+ *
+ * @param bytes - Optional payload to deliver as a single chunk.
+ * @returns An async iterable suitable for {@link CliContext.stdin}.
+ */
+const makeStdin = (bytes: Uint8Array | undefined): AsyncIterable<Uint8Array> => ({
+  [Symbol.asyncIterator]: async function* () {
+    if (bytes !== undefined) {
+      yield bytes;
+    }
+  },
+});

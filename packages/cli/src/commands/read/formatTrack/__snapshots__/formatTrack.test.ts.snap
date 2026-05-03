@@ -1,0 +1,227 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`formatTrack — JSON mode > drops warnings when noWarnings is set 1`] = `
+{
+  "kind": "json",
+  "payload": {
+    "additionalFields": {},
+    "audioFormat": "flac",
+    "chapters": [],
+    "pictures": [],
+    "tag": {
+      "title": "Has warnings",
+    },
+  },
+}
+`;
+
+exports[`formatTrack — JSON mode > honors --exclude 1`] = `
+{
+  "kind": "json",
+  "payload": {
+    "additionalFields": {},
+    "audioFormat": "mp3",
+    "chapters": [],
+    "durationMs": 12345,
+    "tag": {
+      "artist": "World",
+      "title": "Hello",
+      "trackNumber": 1,
+      "trackTotal": 4,
+    },
+  },
+}
+`;
+
+exports[`formatTrack — JSON mode > honors --include 1`] = `
+{
+  "kind": "json",
+  "payload": {
+    "audioFormat": "mp3",
+    "tag": {
+      "artist": "World",
+      "title": "Hello",
+      "trackNumber": 1,
+      "trackTotal": 4,
+    },
+  },
+}
+`;
+
+exports[`formatTrack — JSON mode > renders empty fixture 1`] = `
+{
+  "kind": "json",
+  "payload": {
+    "additionalFields": {},
+    "audioFormat": "mp3",
+    "chapters": [],
+    "pictures": [],
+    "tag": {},
+    "warnings": [],
+  },
+}
+`;
+
+exports[`formatTrack — JSON mode > renders withAdditional fixture 1`] = `
+{
+  "kind": "json",
+  "payload": {
+    "additionalFields": {
+      "CUSTOM": "yes",
+      "REPLAYGAIN_TRACK_GAIN": "-7.5 dB",
+    },
+    "audioFormat": "mp3",
+    "chapters": [],
+    "pictures": [],
+    "tag": {
+      "title": "Has extras",
+    },
+    "warnings": [],
+  },
+}
+`;
+
+exports[`formatTrack — JSON mode > renders withLyrics fixture 1`] = `
+{
+  "kind": "json",
+  "payload": {
+    "additionalFields": {},
+    "audioFormat": "mp3",
+    "chapters": [],
+    "lyrics": {
+      "description": "Lyrics",
+      "language": "eng",
+      "unsynchronized": "Hello, world
+Line two
+",
+    },
+    "pictures": [],
+    "tag": {
+      "title": "Lyrics Test",
+    },
+    "warnings": [],
+  },
+}
+`;
+
+exports[`formatTrack — JSON mode > renders withPicture fixture 1`] = `
+{
+  "kind": "json",
+  "payload": {
+    "additionalFields": {},
+    "audioFormat": "mp3",
+    "chapters": [],
+    "durationMs": 12345,
+    "pictures": [
+      {
+        "byteLength": 5,
+        "description": "front",
+        "kind": 3,
+        "mimeType": "image/jpeg",
+      },
+    ],
+    "tag": {
+      "artist": "World",
+      "title": "Hello",
+      "trackNumber": 1,
+      "trackTotal": 4,
+    },
+    "warnings": [],
+  },
+}
+`;
+
+exports[`formatTrack — JSON mode > renders withWarnings fixture 1`] = `
+{
+  "kind": "json",
+  "payload": {
+    "additionalFields": {},
+    "audioFormat": "flac",
+    "chapters": [],
+    "pictures": [],
+    "tag": {
+      "title": "Has warnings",
+    },
+    "warnings": [
+      {
+        "code": "id3v2-bad-frame",
+        "message": "skipped malformed frame",
+        "severity": "warn",
+      },
+      {
+        "message": "ignored unknown atom",
+        "severity": "info",
+      },
+    ],
+  },
+}
+`;
+
+exports[`formatTrack — pretty mode > renders empty fixture 1`] = `
+{
+  "kind": "pretty",
+  "text": "Format          : mp3
+Pictures        : 0
+Chapters        : 0
+Lyrics          : none
+Warnings        : none
+",
+}
+`;
+
+exports[`formatTrack — pretty mode > renders withAdditional fixture 1`] = `
+{
+  "kind": "pretty",
+  "text": "Format          : mp3
+Title           : Has extras
+Pictures        : 0
+Chapters        : 0
+Lyrics          : none
+Additional      : 2 field(s)
+Warnings        : none
+",
+}
+`;
+
+exports[`formatTrack — pretty mode > renders withLyrics fixture 1`] = `
+{
+  "kind": "pretty",
+  "text": "Format          : mp3
+Title           : Lyrics Test
+Pictures        : 0
+Chapters        : 0
+Lyrics          : present (eng, 22 chars)
+Warnings        : none
+",
+}
+`;
+
+exports[`formatTrack — pretty mode > renders withPicture fixture 1`] = `
+{
+  "kind": "pretty",
+  "text": "Format          : mp3 (12.3 s)
+Title           : Hello
+Artist          : World
+Track           : 1 / 4
+Pictures        : 1 (image/jpeg, 5 B, kind 3)
+Chapters        : 0
+Lyrics          : none
+Warnings        : none
+",
+}
+`;
+
+exports[`formatTrack — pretty mode > renders withWarnings fixture 1`] = `
+{
+  "kind": "pretty",
+  "text": "Format          : flac
+Title           : Has warnings
+Pictures        : 0
+Chapters        : 0
+Lyrics          : none
+Warnings        : 2
+  - [warn] skipped malformed frame
+  - [info] ignored unknown atom
+",
+}
+`;
