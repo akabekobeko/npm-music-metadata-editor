@@ -151,13 +151,13 @@ try {
 
 ## フィールド対応表
 
-各タグ形式と共通 `TagData` の対応関係は [`docs/field-mapping.ja.md`](docs/field-mapping.ja.md) を参照してください。
+各タグ形式と共通 `TagData` の対応関係は [field-mapping.ja.md](https://github.com/akabekobeko/npm-music-metadata-editor/blob/main/docs/field-mapping.ja.md) を参照してください。
 
 ## ドキュメント
 
-- [`docs/README.ja.md`](docs/README.ja.md) — ドキュメント目次
-- [`docs/rules/`](docs/rules) — コーディング / テスト / Git のルール
-- [`docs/plan/`](docs/plan) — フェーズ単位の実装計画
+- [docs/](https://github.com/akabekobeko/npm-music-metadata-editor/tree/main/docs) — ドキュメント目次
+- [docs/rules/](https://github.com/akabekobeko/npm-music-metadata-editor/tree/main/docs/rules) — コーディング / テスト / Git のルール
+- [docs/plan/](https://github.com/akabekobeko/npm-music-metadata-editor/tree/main/docs/plan) — フェーズ単位の実装計画
 
 ## 参考資料
 

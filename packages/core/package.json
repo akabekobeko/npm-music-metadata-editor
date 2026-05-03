@@ -44,13 +44,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/akabekobeko/npm-music-metadata-editor.git"
+    "url": "git+https://github.com/akabekobeko/npm-music-metadata-editor.git",
+    "directory": "packages/core"
   },
   "bugs": {
     "url": "https://github.com/akabekobeko/npm-music-metadata-editor/issues"
   },
-  "homepage": "https://github.com/akabekobeko/npm-music-metadata-editor#readme",
-  "packageManager": "pnpm@10.33.2",
+  "homepage": "https://github.com/akabekobeko/npm-music-metadata-editor/tree/main/packages/core#readme",
   "engines": {
     "node": ">=24"
   },
@@ -75,9 +75,6 @@
     "prepublishOnly": "pnpm clean && pnpm build",
     "clean": "rm -rf dist coverage",
     "typecheck": "tsc --noEmit",
-    "lint": "biome lint .",
-    "format": "biome format --write .",
-    "check": "biome check --write .",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -91,7 +88,6 @@
     "fixtures:wma": "tsx scripts/fixtures/wma.ts"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.13",
     "@tsconfig/node24": "^24.0.4",
     "@types/node": "^25.6.0",
     "tsx": "^4.21.0",
