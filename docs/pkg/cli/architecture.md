@@ -95,7 +95,7 @@ sequenceDiagram
     participant Shell
     participant Bin as bin/mme.ts
     participant Program as createProgram
-    participant Cmd as commands/&lt;verb&gt;
+    participant Cmd as subcommand
     participant Output as output/logger
     participant Core as core API
     participant Errors as errors/formatMmeError
