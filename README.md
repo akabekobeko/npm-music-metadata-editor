@@ -11,6 +11,7 @@ A toolkit for reading and writing audio file metadata in Node.js. The repository
 | Package | Version | Description |
 | --- | --- | --- |
 | [`@akabeko/music-metadata-editor`](packages/core) | [![npm](https://img.shields.io/npm/v/@akabeko/music-metadata-editor.svg?label=%20)](https://www.npmjs.com/package/@akabeko/music-metadata-editor) | Core library — function-only API for reading / writing tag data on Node.js 24+. |
+| [`@akabeko/music-metadata-editor-cli`](packages/cli) | [![npm](https://img.shields.io/npm/v/@akabeko/music-metadata-editor-cli.svg?label=%20)](https://www.npmjs.com/package/@akabeko/music-metadata-editor-cli) | `mme` command-line tool — read / write tags, pictures, chapters, lyrics. |
 
 ## Documentation
 

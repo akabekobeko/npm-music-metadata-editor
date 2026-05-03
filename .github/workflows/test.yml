@@ -19,4 +19,8 @@ jobs:
       # Without this step, two test files fail to resolve the workspace
       # package and the smoke test is silently skipped.
       - run: pnpm -r build
+      # Smoke-test the bin shim independently so a missing shebang / chmod
+      # surfaces immediately rather than only when the in-process tests cover
+      # it. This is a lightweight `--version` invocation.
+      - run: node packages/cli/dist/bin/mme.js --version
       - run: pnpm test

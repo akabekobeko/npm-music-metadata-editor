@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import { writeStderr } from "../../output/writeStderr.js";
 import type { CliContext } from "../../types.js";
 import { type ClearChapterResult, clearChapter } from "./clearChapter.js";
 import { type ListChapterResult, listChapter } from "./listChapter.js";
@@ -18,9 +19,7 @@ const pump = (result: ListChapterResult | SetChapterResult | ClearChapterResult)
     process.stdout.write(result.stdout);
   }
 
-  if (result.stderr !== "") {
-    process.stderr.write(result.stderr);
-  }
+  writeStderr(result.stderr);
 };
 
 /** Raw commander options for `mme chapter list`. */
@@ -70,6 +69,17 @@ export const createChapterCommand = (context: CliContext): Command => {
       const result = await clearChapter({ file });
       pump(result);
     });
+
+  command.addHelpText(
+    "after",
+    [
+      "",
+      "Examples:",
+      "  $ mme chapter list song.mp3 --pretty",
+      "  $ mme chapter set song.mp3 --json chapters.json",
+      "  $ mme chapter clear song.mp3",
+    ].join("\n"),
+  );
 
   return command;
 };

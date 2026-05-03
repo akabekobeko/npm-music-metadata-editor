@@ -1,13 +1,13 @@
 import type { Warning } from "@akabeko/music-metadata-editor";
+import { getLogger } from "./logger.js";
 
 /**
- * Emit a single warning to stderr.
+ * Emit a single warning through the active {@link Logger}.
  *
- * Phase 1 prints in a fixed `[warn] <message>` shape. Phase 2 introduces
- * severity-aware coloring; callers do not need to migrate when that lands
- * because `severity` already flows through the input.
+ * The logger owns the `[warn] ` prefix and ANSI styling; this helper just
+ * forwards the raw message. `--quiet` suppresses the line; `--verbose` does
+ * not add anything (warnings are visible by default already).
  *
  * @param warning - Warning record produced by the core readers.
  */
-export const printWarning = (warning: Warning): void =>
-  void process.stderr.write(`[warn] ${warning.message}\n`);
+export const printWarning = (warning: Warning): void => getLogger().warn(warning.message);

@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import { writeStderr } from "../../output/writeStderr.js";
 import type { CliContext } from "../../types.js";
 import { handleWrite } from "./handleWrite.js";
 import { parseWriteOptions } from "./parseWriteOptions.js";
@@ -66,7 +67,7 @@ export const createWriteCommand = (context: CliContext): Command => {
 
   registerTagValueFlags(command);
 
-  return command
+  command
     .option("--track <spec>", 'set trackNumber (and trackTotal): "<n>" or "<n>/<total>"')
     .option("--disc <spec>", 'set discNumber (and discTotal): "<n>" or "<n>/<total>"')
     .option(
@@ -91,8 +92,20 @@ export const createWriteCommand = (context: CliContext): Command => {
         process.stdout.write(result.stdout);
       }
 
-      if (result.stderr !== "") {
-        process.stderr.write(result.stderr);
-      }
+      writeStderr(result.stderr);
     });
+
+  command.addHelpText(
+    "after",
+    [
+      "",
+      "Examples:",
+      "  $ mme write song.mp3 --title 'Hello' --artist 'World'",
+      '  $ mme write song.mp3 --json \'{"album":"OST"}\'',
+      "  $ mme write song.mp3 --clear comment --clear lyrics",
+      "  $ cat song.mp3 | mme write --stdin --format mp3 --title 'X' --output -",
+    ].join("\n"),
+  );
+
+  return command;
 };

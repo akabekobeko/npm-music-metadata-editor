@@ -4,6 +4,11 @@
 
 `docs/` 配下に置かれているドキュメントの索引です。新しいトピックを追加するときはサブディレクトリを切り、本ファイルにエントリを追記してください。
 
+## パッケージ
+
+- コア ライブラリ: [`packages/core/README.ja.md`](../packages/core/README.ja.md)
+- CLI (`mme`): [`packages/cli/README.ja.md`](../packages/cli/README.ja.md)
+
 ## サブディレクトリ
 
 | パス | 内容 |
