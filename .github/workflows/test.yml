@@ -12,4 +12,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
       - run: pnpm install --frozen-lockfile
+      # `pnpm test` depends on built artifacts:
+      # - cli's unit tests import `@akabeko/music-metadata-editor`, whose
+      #   `main` / `types` resolve to `packages/core/dist/`.
+      # - cli's bin smoke test spawns `packages/cli/dist/bin/mme.js`.
+      # Without this step, two test files fail to resolve the workspace
+      # package and the smoke test is silently skipped.
+      - run: pnpm -r build
       - run: pnpm test
