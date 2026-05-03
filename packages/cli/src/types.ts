@@ -9,6 +9,15 @@ export type RunResult = {
   readonly exitCode: number;
   /** Captured `process.stdout.write` payload (UTF-8). */
   readonly stdout: string;
+  /**
+   * Captured `process.stdout.write` payload as raw bytes.
+   *
+   * `mme write --stdin --output -` emits binary audio data through stdout;
+   * decoding it as UTF-8 (the default `stdout` field above) would corrupt
+   * the bytes, so we keep the raw concatenation alongside for tests that
+   * need to assert on the produced file.
+   */
+  readonly stdoutBytes: Uint8Array;
   /** Captured `process.stderr.write` payload (UTF-8). */
   readonly stderr: string;
 };

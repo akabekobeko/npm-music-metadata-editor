@@ -1,7 +1,9 @@
+import { Buffer } from "node:buffer";
 import { createRequire } from "node:module";
 import { Command } from "commander";
 import { createReadCommand } from "./commands/read/read.js";
 import { registerVersionAndHelp } from "./commands/registerVersionAndHelp.js";
+import { createWriteCommand } from "./commands/write/write.js";
 import { ExitCode } from "./errors/exitCodes.js";
 import { formatMmeError } from "./errors/formatMmeError.js";
 import type { CliContext, RunResult } from "./types.js";
@@ -41,6 +43,7 @@ const defaultContext = (): CliContext => ({ stdin: process.stdin });
 export const createProgram = (context: CliContext = defaultContext()): Command => {
   const program = registerVersionAndHelp(new Command(), packageMeta.version).exitOverride();
   program.addCommand(createReadCommand(context));
+  program.addCommand(createWriteCommand(context));
   return program;
 };
 
@@ -69,12 +72,20 @@ export const runCli = async (
   options: RunCliOptions = {},
 ): Promise<RunResult> => {
   const stdoutChunks: string[] = [];
+  const stdoutBuffers: Buffer[] = [];
   const stderrChunks: string[] = [];
   const originalStdoutWrite = process.stdout.write;
   const originalStderrWrite = process.stderr.write;
 
   process.stdout.write = ((chunk: string | Uint8Array): boolean => {
-    stdoutChunks.push(typeof chunk === "string" ? chunk : Buffer.from(chunk).toString("utf8"));
+    if (typeof chunk === "string") {
+      stdoutChunks.push(chunk);
+      stdoutBuffers.push(Buffer.from(chunk, "utf8"));
+    } else {
+      stdoutChunks.push(Buffer.from(chunk).toString("utf8"));
+      stdoutBuffers.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+
     return true;
   }) as typeof process.stdout.write;
   process.stderr.write = ((chunk: string | Uint8Array): boolean => {
@@ -103,9 +114,11 @@ export const runCli = async (
     process.stderr.write = originalStderrWrite;
   }
 
+  const merged = Buffer.concat(stdoutBuffers);
   return {
     exitCode,
     stdout: stdoutChunks.join(""),
+    stdoutBytes: new Uint8Array(merged.buffer, merged.byteOffset, merged.byteLength),
     stderr: stderrChunks.join(""),
   };
 };
