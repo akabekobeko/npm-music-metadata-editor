@@ -7,7 +7,7 @@
 ## 1. 役割
 
 - 音楽ファイル (MP3 / FLAC / MP4 / OGG / APE / WAV / AIFF / WMA) のメタデータを **共通の `Track` モデル** で扱えるようにする。
-- 読み書きの **正本フロー** (バイナリ → 内部モデル → バイナリ) を提供し、CLI や GUI など上位層はそこに乗るだけにする。
+- 読み書きの **処理フロー** (バイナリ → 内部モデル → バイナリ) を提供し、CLI や GUI など上位層はそこに乗るだけにする。
 - 参考実装は [ATL.NET (Zeugma440/atldotnet)](https://github.com/Zeugma440/atldotnet) ですが、コードはそのまま移植せず Node.js + TypeScript として再設計しています。
 
 非ゴール:
@@ -141,7 +141,7 @@ classDiagram
     Track --> LyricsInfo
 ```
 
-> 図中のフィールドは型のみを示しています。実際の TypeScript 定義では多くがオプショナル (`?`) で、正本は `src/types.ts` を参照してください。
+> 図中のフィールドは型のみを示しています。実際の TypeScript 定義では多くがオプショナル (`?`) で、マスターは `src/types.ts` を参照してください。
 
 `Track` はすべて `readonly` で **編集はスプレッドで新オブジェクトを作る** スタイルです。setter は意図的に提供しません (`docs/rules/code-style.md` の方針)。
 
