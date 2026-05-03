@@ -10,7 +10,7 @@ import { decodeGuid } from "./guid.js";
  * via `children` — that is the only level deep enough to discover the
  * Content / Extended Content Description Objects we care about. Header
  * Extension Objects keep their nested objects opaque, matching the
- * "raw transparent" strategy described in the Phase 8 plan.
+ * "raw transparent" strategy the writer relies on for round-tripping.
  *
  * Iteration stops cleanly when an object's declared size would overflow the
  * buffer, mirroring the IFF parser's tolerance for truncated files.

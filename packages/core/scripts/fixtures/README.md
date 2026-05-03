@@ -12,6 +12,7 @@ pnpm fixtures:ogg
 pnpm fixtures:ape
 pnpm fixtures:wav
 pnpm fixtures:aiff
+pnpm fixtures:wma
 ```
 
 Each generator prints a one-line summary per file produced. Files are **overwritten in place** — review the resulting diff before committing.
@@ -23,4 +24,4 @@ Each generator prints a one-line summary per file produced. Files are **overwrit
 - Embedded lyrics use the pangram `"the quick brown fox jumps over the lazy dog"` so it is easy to spot in hex dumps.
 - Each fixture's filename embeds its variant (`v23-basic.mp3`, `v24-with-apic.mp3`, …); the generator's source code is the single source of truth for what each fixture contains.
 
-When a future phase adds support for a new metadata kind (e.g. real APIC parsing in Phase 9), update the corresponding generator so the fixture exercises the new path, then commit the regenerated binary alongside the code change.
+When a generator adds support for a new metadata kind, update the fixture so it exercises the new path, then commit the regenerated binary alongside the code change.

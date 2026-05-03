@@ -143,9 +143,9 @@ const composeNextPictures = ({
 /**
  * Detect a duplicate picture (same kind, MIME, and bytes) in `current`.
  *
- * The "skip when already present" rule is documented in the Phase 4 plan:
- * an attempt to add a byte-identical picture is a no-op so that re-running
- * a script that pipes the same cover art does not bloat the file.
+ * The "skip when already present" rule: an attempt to add a byte-identical
+ * picture is a no-op so that re-running a script that pipes the same cover
+ * art does not bloat the file.
  *
  * @param current - Existing pictures.
  * @param next - Picture about to be added.

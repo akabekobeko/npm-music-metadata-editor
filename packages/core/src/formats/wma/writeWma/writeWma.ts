@@ -24,7 +24,7 @@ const REPLACED_CHILD_GUIDS: ReadonlySet<string> = new Set([
 /**
  * Rewrite a WMA / ASF file with new metadata.
  *
- * Strategy (mirrors the Phase 8 plan):
+ * Strategy:
  *
  * 1. Walk the Header Object's children and capture the existing Content
  *    Description and Extended Content Description so we can preserve fields

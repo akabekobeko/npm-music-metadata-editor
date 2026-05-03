@@ -2,7 +2,7 @@
  * Byte order used to decode multi-byte chunk size fields.
  *
  * RIFF (`.wav`) is little-endian; AIFF (`.aif`) is big-endian. The legacy
- * `RIFX` variant of WAV is big-endian but Phase 7 does not support it.
+ * `RIFX` variant of WAV is big-endian but is not supported.
  */
 export type Endianness = "little" | "big";
 

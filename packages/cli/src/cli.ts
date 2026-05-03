@@ -36,7 +36,7 @@ const defaultContext = (): CliContext => ({ stdin: process.stdin });
  *
  * Called from a commander `preAction` hook so the logger is in place by the
  * time any subcommand handler runs. Also validates the mutually-exclusive
- * combination of `--quiet` + `--verbose` (per Phase 5 spec, exit code 2).
+ * combination of `--quiet` + `--verbose` (exit code 2).
  *
  * @param raw - Raw global options returned by `program.opts()`.
  */

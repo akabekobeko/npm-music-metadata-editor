@@ -96,9 +96,9 @@ type ChapterArgs = {
  * Encode `chapters` as `CHAP` + a summary `CTOC` frame and append them to
  * `out`. When the chapters list is empty no frames are emitted.
  *
- * Sub-chapters, if any, are flattened into the top-level CTOC: the first
- * iteration of Phase 9 keeps a flat table of contents (matching ATL.NET's
- * convention) until ATL grows full hierarchical-CTOC support.
+ * Sub-chapters, if any, are flattened into the top-level CTOC: we keep a
+ * flat table of contents (matching ATL.NET's convention) until ATL grows
+ * full hierarchical-CTOC support.
  */
 const appendChapterFrames = ({ chapters, majorVersion, out }: ChapterArgs): void => {
   if (chapters.length === 0) {

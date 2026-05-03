@@ -54,11 +54,11 @@ mme
 
 | #  | フェーズ                                | 主なスコープ                                                                 | 状態 |
 | -- | -------------------------------------- | --------------------------------------------------------------------------- | ---- |
-| 01 | [Foundation](phase-01-foundation.md)   | パッケージ骨格、commander 配線、出力 / エラー戦略、E2E テスト基盤            | TODO |
-| 02 | [Read Commands](phase-02-read.md)      | `mme read <file>` (loadTrack)、JSON / pretty 出力、stdin → readMetadata     | TODO |
-| 03 | [Write Commands](phase-03-write.md)    | `mme write <file>` (saveTrack)、tag フラグ / JSON、stdin/stdout (writeMeta) | TODO |
-| 04 | [Pictures / Chapters / Lyrics](phase-04-extras.md) | 拡張メタデータ向けサブコマンド (画像 / 章 / 歌詞)                  | TODO |
-| 05 | [Polish & Release](phase-05-polish.md) | 色 / 静粛モード、ヘルプ拡張、bin 配布、README、npm publish 設定               | TODO |
+| 01 | [Foundation](phase-01-foundation.md)   | パッケージ骨格、commander 配線、出力 / エラー戦略、E2E テスト基盤            | DONE |
+| 02 | [Read Commands](phase-02-read.md)      | `mme read <file>` (loadTrack)、JSON / pretty 出力、stdin → readMetadata     | DONE |
+| 03 | [Write Commands](phase-03-write.md)    | `mme write <file>` (saveTrack)、tag フラグ / JSON、stdin/stdout (writeMeta) | DONE |
+| 04 | [Pictures / Chapters / Lyrics](phase-04-extras.md) | 拡張メタデータ向けサブコマンド (画像 / 章 / 歌詞)                  | DONE |
+| 05 | [Polish & Release](phase-05-polish.md) | 色 / 静粛モード、ヘルプ拡張、bin 配布、README、npm publish 設定               | DONE |
 
 ## 進め方
 

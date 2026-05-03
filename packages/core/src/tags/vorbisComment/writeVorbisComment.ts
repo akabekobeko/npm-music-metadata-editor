@@ -9,7 +9,7 @@ const EQUALS_BYTE = 0x3d;
  *
  * The output omits the OGG framing bit because that flag is part of the OGG
  * packet layer, not the comment block itself. Callers writing into an OGG
- * page must append `0x01` before flushing the packet (see Phase 5).
+ * page must append `0x01` before flushing the packet.
  *
  * @param tag - Comment block to encode.
  * @returns Raw block bytes ready to embed in a container (FLAC, OGG, ...).

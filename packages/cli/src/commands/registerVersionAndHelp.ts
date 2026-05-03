@@ -1,7 +1,7 @@
 import type { Command } from "commander";
 
 /**
- * Apply the Phase 1 baseline configuration to a commander {@link Command}.
+ * Apply the baseline program configuration to a commander {@link Command}.
  *
  * Sets the program name, description, the `-V, --version` and `-h, --help`
  * options, plus the global `--no-color` / `--quiet` / `--verbose` flags whose
@@ -12,7 +12,7 @@ import type { Command } from "commander";
  *
  * @param program - Bare `Command` instance to configure.
  * @param version - Version string sourced from `packages/cli/package.json`.
- * @returns The same `Command`, configured for the Phase 1 baseline.
+ * @returns The same `Command`, configured with the program-level options.
  */
 export const registerVersionAndHelp = (program: Command, version: string): Command => {
   program

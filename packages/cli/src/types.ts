@@ -25,7 +25,7 @@ export type RunResult = {
 /**
  * Globally toggled output preferences shared across commands.
  *
- * Phase 5 wires every flag here into `output/createLogger.ts` so each command
+ * Every flag here flows through `output/createLogger.ts` so each command
  * automatically picks up `--quiet` / `--verbose` / `--no-color` without
  * re-checking `process.env` itself.
  */

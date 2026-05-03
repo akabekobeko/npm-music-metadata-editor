@@ -53,8 +53,8 @@ export type ParsedOggHeaders = {
  * Vorbis Comment block carried by the comment packet.
  *
  * Multiplexed Ogg streams (multiple logical bitstreams interleaved) are out
- * of scope for Phase 5 — every page must share the BOS page's serial number
- * or the function throws.
+ * of scope — every page must share the BOS page's serial number or the
+ * function throws.
  *
  * @param input - Whole-file bytes.
  * @returns A {@link ParsedOggHeaders} describing the header region.

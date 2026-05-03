@@ -6,9 +6,8 @@ import type { SanitizedPicture } from "./types.js";
  * `byteLength`.
  *
  * `Uint8Array` does not survive `JSON.stringify` cleanly (it serialises as
- * an Object with numeric keys), and CLI users who want the bytes have a
- * dedicated extraction path planned for Phase 4. Until then the safest
- * default is to expose only metadata and the size.
+ * an Object with numeric keys), and CLI users who want the bytes use the
+ * dedicated `mme picture extract` command instead.
  *
  * @param pictures - Picture entries from a `Track`.
  * @returns Sanitized copies suitable for JSON / pretty rendering.

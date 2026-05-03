@@ -31,7 +31,7 @@ export const parseId3v2 = (buffer: Uint8Array): Id3v2Tag | undefined => {
   const body = header.flags.unsynchronization ? removeUnsynchronization(rawBody) : rawBody;
 
   // Skip the v2.3+ extended header when present. We do not interpret CRC /
-  // restrictions; preserving the rest is enough for round-tripping in Phase 2.
+  // restrictions; preserving the rest is enough for round-tripping.
   const startOffset = header.flags.extendedHeader
     ? skipExtendedHeader({ body, syncSafe: header.majorVersion === 4 })
     : 0;

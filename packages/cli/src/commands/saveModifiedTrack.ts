@@ -24,7 +24,7 @@ const projectWriteOptions = (track: Track): WriteOptions => ({
  * Rebuild a track's bytes via `writeMetadata` and atomically replace the
  * source file.
  *
- * Used by every Phase 4 extras subcommand that mutates a single track field
+ * Used by every extras subcommand that mutates a single track field
  * (pictures / chapters / lyrics) and writes back in place. Atomicity comes
  * from the same `tmp + rename` helper the `mme write` file branch uses, so
  * partial writes never leave the destination half-rewritten.

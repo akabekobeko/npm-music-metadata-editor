@@ -6,9 +6,9 @@ import { ASF_FILE_PROPERTIES_FILE_SIZE_OFFSET, ASF_GUID } from "../constants.js"
  * Patch the `File Size` field inside the File Properties Object (a child of
  * the Header Object) to match the rebuilt file's actual length.
  *
- * The Phase 8 plan calls out keeping this field in sync because Windows
- * Media Player and DirectShow filters cross-check it against the on-disk
- * file size and reject files that disagree.
+ * Keeping this field in sync matters because Windows Media Player and
+ * DirectShow filters cross-check it against the on-disk file size and
+ * reject files that disagree.
  *
  * `bytes` is mutated in place and also returned for chaining convenience.
  *

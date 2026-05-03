@@ -7,7 +7,7 @@
 | パッケージ | 状態 | 計画索引 | 概要 |
 | --- | --- | --- | --- |
 | `@akabeko/music-metadata-editor` (core) | リリース済 (v1) | [`core/README.md`](core/README.md) | 共通ライブラリ。Phase 01〜10 で読み書き対応コンテナを順次実装 |
-| `@akabeko/music-metadata-editor-cli` (cli) | 計画中 | [`cli/README.md`](cli/README.md) | core を CLI として提供。commander ベースのコマンド ツリー |
+| `@akabeko/music-metadata-editor-cli` (cli) | リリース準備完了 | [`cli/README.md`](cli/README.md) | core を CLI として提供。commander ベースのコマンド ツリー |
 
 新しいパッケージの計画を追加するときは `docs/plan/<package>/` を作成し、上の表にエントリを追記します。
 

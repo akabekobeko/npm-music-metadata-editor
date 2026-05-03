@@ -33,8 +33,8 @@ const DEFAULT_TAG_PRIORITY: readonly TagSource[] = ["id3v2", "ape", "id3v1"];
  * @param input - Whole-file bytes.
  * @param options - Reader options (currently `tagPriority` is honoured).
  * @returns A {@link MetadataReadResult} populated with the merged tag data.
- *   `pictures` / `chapters` / `lyrics` remain empty until Phase 9 lands the
- *   structural surfaces for APIC / CHAP / USLT etc.
+ *   `pictures` / `chapters` / `lyrics` are decoded from APIC / CHAP / USLT
+ *   frames (ID3v2) and `Cover Art (...)` items (APE) when present.
  */
 export const readMp3 = async (
   input: Uint8Array,

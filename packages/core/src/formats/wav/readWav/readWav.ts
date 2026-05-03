@@ -32,8 +32,8 @@ import { computeDurationMs } from "./computeDurationMs.js";
  *
  * @param input - Whole-file bytes.
  * @returns A {@link MetadataReadResult} populated with the merged tag data.
- *   `pictures` / `chapters` / `lyrics` are not surfaced in Phase 7 (see
- *   Phase 9).
+ *   `pictures` / `chapters` / `lyrics` are surfaced when an embedded `id3 `
+ *   chunk carries APIC / CHAP / USLT frames.
  * @throws when the leading bytes do not spell `RIFF...WAVE`.
  */
 export const readWav = async (input: Uint8Array): Promise<MetadataReadResult> => {

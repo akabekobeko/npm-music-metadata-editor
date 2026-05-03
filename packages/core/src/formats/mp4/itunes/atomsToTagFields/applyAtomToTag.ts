@@ -63,7 +63,8 @@ export const applyAtomToTag = ({ tag, pictures, atom }: Args): void => {
       tag.group = readUtf8(first);
       return;
     case "©lyr":
-      // Lyrics are surfaced via Phase 9; for now the value is dropped.
+      // Lyrics live on `MetadataReadResult.lyrics`, decoded separately by
+      // `readMp4Lyrics` — they are not part of the flat `TagData` projection.
       return;
     case "©too":
     case "©enc":

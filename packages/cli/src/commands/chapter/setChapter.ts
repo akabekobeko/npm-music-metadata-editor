@@ -26,8 +26,8 @@ export type SetChapterResult = {
  * Reads the JSON payload (file or stdin), runs {@link parseChaptersJson} to
  * enforce the per-chapter / cross-chapter invariants, and then rewrites the
  * file via {@link saveModifiedTrack} with the new chapter list. Any
- * pre-existing chapters are replaced wholesale; the plan does not include a
- * differential edit verb in Phase 4.
+ * pre-existing chapters are replaced wholesale; the CLI does not currently
+ * expose a differential edit verb.
  *
  * @returns Buffered stdout / stderr payload.
  */

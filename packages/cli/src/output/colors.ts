@@ -2,9 +2,9 @@
  * ANSI styling helpers and the shared color-mode resolver.
  *
  * Color decisions live in a single place so that command handlers never have
- * to inspect `process.env` or `tty` themselves. Phase 5 wires this module
- * into {@link ./createLogger.ts} (for stderr coloring) and a forthcoming
- * `--no-color`-aware pretty renderer (stdout labels).
+ * to inspect `process.env` or `tty` themselves. {@link ./createLogger.ts}
+ * consumes {@link resolveColorMode} for stderr coloring and the per-command
+ * pretty renderers reuse the same helpers for stdout labels.
  */
 
 /** Inputs accepted by {@link resolveColorMode}. */

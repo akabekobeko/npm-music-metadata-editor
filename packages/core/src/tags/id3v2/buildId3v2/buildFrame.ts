@@ -14,7 +14,7 @@ type Args = {
  *
  * Frame body bytes are emitted as-is — callers are responsible for handling
  * encoding bytes, terminators, and unsync. Status / format flag bytes are zero
- * because Phase 2's writer never sets per-frame flags.
+ * because the writer never sets per-frame flags.
  *
  * @returns The complete frame bytes (header + body).
  */

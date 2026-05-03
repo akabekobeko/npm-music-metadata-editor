@@ -15,14 +15,16 @@ import { computeDurationMs } from "./computeDurationMs.js";
  *
  * The reader walks the Header Object's children once, locating the optional
  * Content Description Object and Extended Content Description Object, and
- * projects their fields onto a {@link MetadataReadResult}. Header extension
- * objects (which can carry per-stream library metadata and additional
- * pictures) are deliberately left opaque in Phase 8 — Phase 9 will re-visit
- * them when picture / lyric support arrives.
+ * projects their fields onto a {@link MetadataReadResult}. Pictures encoded
+ * as `WM/Picture` byte-array descriptors inside the top-level Extended
+ * Content Description Object are surfaced via {@link readWmaPictures};
+ * Header Extension Objects (which can carry per-stream Metadata Library
+ * descriptors and additional pictures) are still left opaque.
  *
  * @param input - Whole-file bytes.
- * @returns A {@link MetadataReadResult} populated with the merged tag data.
- *   `pictures` / `chapters` / `lyrics` stay empty until Phase 9.
+ * @returns A {@link MetadataReadResult} populated with the merged tag data
+ *   plus any decoded `WM/Picture` entries. `chapters` / `lyrics` stay empty
+ *   because ASF carries neither concept natively.
  * @throws when the leading bytes don't match the ASF Header Object GUID.
  */
 export const readWma = async (input: Uint8Array): Promise<MetadataReadResult> => {
