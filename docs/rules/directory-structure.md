@@ -1,5 +1,7 @@
 # ディレクトリ規約
 
+以下のレイアウトは **`packages/core/` 配下** を起点とした相対構成です (リポジトリ全体は pnpm workspace で `packages/*` を束ねています)。新しいパッケージを追加する場合も同じ規約を `packages/<name>/` 配下で適用します。
+
 ```
 src/
   mme.ts                # 公開 API のエントリ ポイント (readMetadata / writeMetadata)
@@ -86,7 +88,7 @@ docs/
 - 音声ファイル系のテスト フィクスチャは **`tests/fixtures/<format>/`** に配置し、生成スクリプトを **`scripts/fixtures/<format>.ts`** として 1 ファイル/フォーマットで管理します。
 - スクリプトは無音 (またはそれに準ずる最小サイズ) の音声 + ダミー メタデータを書き出し、生成された **バイナリは commit** します。これにより CI でも生成器を実行する必要がありません。
 - 後続フェーズで新しいメタデータの本実装が入ったら、対応する生成スクリプトも更新してダミーを織り込み直します (例: Phase 9 で APIC/USLT/CHAP の構造化が入った時点で `scripts/fixtures/mp3.ts` を更新)。
-- 実行コマンドは `pnpm fixtures:<format>` (例: `pnpm fixtures:mp3`)。詳細は [`scripts/fixtures/README.md`](../../scripts/fixtures/README.md) を参照。
+- 実行コマンドは `pnpm --filter @akabeko/music-metadata-editor fixtures:<format>` (例: `pnpm --filter @akabeko/music-metadata-editor fixtures:mp3`)、または `packages/core/` で `pnpm fixtures:<format>`。詳細は [`scripts/fixtures/README.md`](../../packages/core/scripts/fixtures/README.md) を参照。
 
 `tags/` 配下は Phase 2 以降 (ID3v1/v2、APE、Vorbis Comment など) で各タグ形式の実装が追加された時点で作成します。Phase 1 完了時点では未配置です。
 
