@@ -52,10 +52,10 @@ docs/
 
 | Tag | 利用 container | 根拠 |
 | --- | --- | --- |
-| `id3v1` | MP3 (主)、WAV / AIFF (一部) | [phase-02](../plan/phase-02-id3-mp3.md) 設計方針 |
-| `id3v2` | MP3 + WAV + AIFF | [phase-02](../plan/phase-02-id3-mp3.md) / [phase-07](../plan/phase-07-riff-aiff.md) (`id3 ` chunk 経由で再利用) |
-| `vorbisComment` | FLAC + OGG Vorbis + Opus | [phase-03](../plan/phase-03-flac-vorbis.md) / [phase-05](../plan/phase-05-ogg.md) |
-| `ape` | APE + MP3 (+ FLAC / MPC / WV) | [phase-06](../plan/phase-06-ape.md) |
+| `id3v1` | MP3 (主)、WAV / AIFF (一部) | [phase-02](../plan/core/phase-02-id3-mp3.md) 設計方針 |
+| `id3v2` | MP3 + WAV + AIFF | [phase-02](../plan/core/phase-02-id3-mp3.md) / [phase-07](../plan/core/phase-07-riff-aiff.md) (`id3 ` chunk 経由で再利用) |
+| `vorbisComment` | FLAC + OGG Vorbis + Opus | [phase-03](../plan/core/phase-03-flac-vorbis.md) / [phase-05](../plan/core/phase-05-ogg.md) |
+| `ape` | APE + MP3 (+ FLAC / MPC / WV) | [phase-06](../plan/core/phase-06-ape.md) |
 
 これらは **純粋なバイナリ ↔ オブジェクト変換のみ** を担い、ファイル位置の決定 (head / tail / chunk 内など) は呼び出し元のコンテナに委ねます。
 
@@ -63,10 +63,10 @@ docs/
 
 | Tag / 構造 | 配置 | 根拠 |
 | --- | --- | --- |
-| MP4 atoms (iTunes アトム等) | `formats/mp4/` 配下 | [phase-04](../plan/phase-04-mp4.md) (MP4/M4A 専用) |
-| WMA / ASF プロパティ | `formats/wma/` 配下 | [phase-08](../plan/phase-08-wma-asf.md) (WMA 専用) |
-| RIFF `LIST INFO` / `BEXT` chunk | `formats/wav/` 配下 | [phase-07](../plan/phase-07-riff-aiff.md) (WAV 専用) |
-| AIFF native annotation 等 | `formats/aiff/` 配下 | [phase-07](../plan/phase-07-riff-aiff.md) (AIFF 専用) |
+| MP4 atoms (iTunes アトム等) | `formats/mp4/` 配下 | [phase-04](../plan/core/phase-04-mp4.md) (MP4/M4A 専用) |
+| WMA / ASF プロパティ | `formats/wma/` 配下 | [phase-08](../plan/core/phase-08-wma-asf.md) (WMA 専用) |
+| RIFF `LIST INFO` / `BEXT` chunk | `formats/wav/` 配下 | [phase-07](../plan/core/phase-07-riff-aiff.md) (WAV 専用) |
+| AIFF native annotation 等 | `formats/aiff/` 配下 | [phase-07](../plan/core/phase-07-riff-aiff.md) (AIFF 専用) |
 
 ### 判断フロー
 
@@ -76,7 +76,7 @@ docs/
 2. 1 つのコンテナでしか使わないか? → Yes なら `src/formats/<container>/` 配下にコロケート
 3. **横方向 import (例: `formats/wav/` から `formats/mp3/` へ) は禁止**。共通化が必要になった時点で `src/tags/` へ昇格させる。
 
-クロス フォーマットで動く拡張メタデータ (`PictureInfo` / `LyricsInfo` / `ChapterInfo`) のマッピング ロジックも、複数 tag 形式から `src/types.ts` の共通中間表現へ写像する位置に置きます ([phase-09](../plan/phase-09-extras.md) で本格化)。
+クロス フォーマットで動く拡張メタデータ (`PictureInfo` / `LyricsInfo` / `ChapterInfo`) のマッピング ロジックも、複数 tag 形式から `src/types.ts` の共通中間表現へ写像する位置に置きます ([phase-09](../plan/core/phase-09-extras.md) で本格化)。
 
 ## ファイル命名
 
@@ -92,4 +92,4 @@ docs/
 
 `tags/` 配下は Phase 2 以降 (ID3v1/v2、APE、Vorbis Comment など) で各タグ形式の実装が追加された時点で作成します。Phase 1 完了時点では未配置です。
 
-ディレクトリ構成は Phase 1 でファイナライズしました。[`../plan/phase-01-foundation.md`](../plan/phase-01-foundation.md) の決定事項を正とし、本ファイルとずれが生じた場合は本ファイルを更新します。
+ディレクトリ構成は Phase 1 でファイナライズしました。[`../plan/core/phase-01-foundation.md`](../plan/core/phase-01-foundation.md) の決定事項を正とし、本ファイルとずれが生じた場合は本ファイルを更新します。
