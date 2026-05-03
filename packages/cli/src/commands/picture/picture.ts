@@ -1,4 +1,5 @@
 import { Command, CommanderError } from "commander";
+import { writeStderr } from "../../output/writeStderr.js";
 import type { CliContext } from "../../types.js";
 import { type ClearPictureResult, clearPicture } from "./clearPicture.js";
 import { type ExtractPictureResult, extractPicture } from "./extractPicture.js";
@@ -43,9 +44,7 @@ const pump = (result: ExtractPictureResult | SetPictureResult | ClearPictureResu
     process.stdout.write(result.stdout);
   }
 
-  if (result.stderr !== "") {
-    process.stderr.write(result.stderr);
-  }
+  writeStderr(result.stderr);
 };
 
 /** Raw commander options for `mme picture extract`. */
@@ -143,6 +142,17 @@ export const createPictureCommand = (context: CliContext): Command => {
       });
       pump(result);
     });
+
+  command.addHelpText(
+    "after",
+    [
+      "",
+      "Examples:",
+      "  $ mme picture extract song.mp3 --output cover.jpg",
+      "  $ mme picture set song.mp3 --input cover.jpg --kind cover-front --replace",
+      "  $ mme picture clear song.mp3 --kind cover-back",
+    ].join("\n"),
+  );
 
   return command;
 };

@@ -15,11 +15,12 @@ describe("createProgram", () => {
     expect(createProgram()).not.toBe(createProgram());
   });
 
-  it("declares the global --no-color and --quiet flags", () => {
+  it("declares the global --no-color / --quiet / --verbose flags", () => {
     const program = createProgram();
     const flags = program.options.map((option) => option.long);
     expect(flags).toContain("--no-color");
     expect(flags).toContain("--quiet");
+    expect(flags).toContain("--verbose");
   });
 });
 
@@ -38,10 +39,23 @@ describe("runCli", () => {
     expect(result.stdout).toContain("mme");
   });
 
+  it("includes the Examples block in the root --help output", async () => {
+    const result = await runCli(["--help"]);
+    expect(result.stdout).toContain("Examples:");
+    expect(result.stdout).toContain("mme read song.mp3");
+  });
+
   it("treats an unknown subcommand as Usage failure", async () => {
     const result = await runCli(["unknown"]);
     expect(result.exitCode).toBe(ExitCode.Usage);
     expect(result.stderr).toContain("[mme]");
+  });
+
+  it("--quiet and --verbose together exit with code 2", async () => {
+    const result = await runCli(["--quiet", "--verbose", "read", "missing.mp3"]);
+    expect(result.exitCode).toBe(ExitCode.Usage);
+    expect(result.stderr).toContain("--quiet");
+    expect(result.stderr).toContain("--verbose");
   });
 
   it("restores process.stdout / process.stderr writers after running", async () => {

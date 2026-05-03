@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import { writeStderr } from "../../output/writeStderr.js";
 import type { CliContext } from "../../types.js";
 import { handleRead } from "./handleRead.js";
 import { parseReadOptions, type ReadCliRawOptions } from "./parseReadOptions.js";
@@ -16,8 +17,8 @@ import { parseReadOptions, type ReadCliRawOptions } from "./parseReadOptions.js"
  * @param context - Side-channel context (currently the stdin iterable).
  * @returns A configured commander `Command`.
  */
-export const createReadCommand = (context: CliContext): Command =>
-  new Command("read")
+export const createReadCommand = (context: CliContext): Command => {
+  const command = new Command("read")
     .description("Read metadata from a file or stdin")
     .argument("[file]", "input audio file (omit when using --stdin)")
     .option("--stdin", "read bytes from stdin instead of a file argument")
@@ -34,7 +35,20 @@ export const createReadCommand = (context: CliContext): Command =>
         process.stdout.write(result.stdout);
       }
 
-      if (result.stderr !== "") {
-        process.stderr.write(result.stderr);
-      }
+      writeStderr(result.stderr);
     });
+
+  command.addHelpText(
+    "after",
+    [
+      "",
+      "Examples:",
+      "  $ mme read song.mp3",
+      "  $ mme read song.mp3 --pretty",
+      "  $ mme read song.mp3 --field tag.title",
+      "  $ cat song.mp3 | mme read --stdin --format mp3",
+    ].join("\n"),
+  );
+
+  return command;
+};

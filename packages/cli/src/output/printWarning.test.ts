@@ -1,19 +1,30 @@
 import { afterEach, expect, it, vi } from "vitest";
+import { createLogger } from "./createLogger.js";
+import { resetLogger, setLogger } from "./logger.js";
 import { printWarning } from "./printWarning.js";
 
-const writeSpy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+const sink = vi.fn<(chunk: string) => void>();
 
 afterEach(() => {
-  writeSpy.mockClear();
+  sink.mockClear();
+  resetLogger();
 });
 
-it("writes [warn] <message> with a trailing newline to stderr", () => {
+it("forwards the message through Logger.warn (default formatting + newline)", () => {
+  setLogger(createLogger({ quiet: false, verbose: false, noColor: true, sink }));
   printWarning({ severity: "warn", message: "could not parse frame" });
-  expect(writeSpy).toHaveBeenCalledOnce();
-  expect(writeSpy.mock.calls[0]?.[0]).toBe("[warn] could not parse frame\n");
+  expect(sink).toHaveBeenCalledOnce();
+  expect(sink.mock.calls[0]?.[0]).toBe("[warn] could not parse frame\n");
 });
 
-it("ignores severity and code in Phase 1 output (no formatting yet)", () => {
+it("ignores severity and code (the logger applies its own [warn] prefix)", () => {
+  setLogger(createLogger({ quiet: false, verbose: false, noColor: true, sink }));
   printWarning({ severity: "error", message: "fatal-ish", code: "id3v2-bad-frame" });
-  expect(writeSpy.mock.calls[0]?.[0]).toBe("[warn] fatal-ish\n");
+  expect(sink.mock.calls[0]?.[0]).toBe("[warn] fatal-ish\n");
+});
+
+it("is suppressed under --quiet", () => {
+  setLogger(createLogger({ quiet: true, verbose: false, noColor: true, sink }));
+  printWarning({ severity: "warn", message: "noisy" });
+  expect(sink).not.toHaveBeenCalled();
 });

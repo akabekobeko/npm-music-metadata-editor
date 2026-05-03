@@ -1,4 +1,5 @@
 import { Command, CommanderError } from "commander";
+import { writeStderr } from "../../output/writeStderr.js";
 import type { CliContext } from "../../types.js";
 import { type ClearLyricsResult, clearLyrics } from "./clearLyrics.js";
 import { type GetLyricsResult, getLyrics, type LyricsGetFormat } from "./getLyrics.js";
@@ -42,9 +43,7 @@ const pump = (result: GetLyricsResult | SetLyricsResult | ClearLyricsResult): vo
     process.stdout.write(result.stdout);
   }
 
-  if (result.stderr !== "") {
-    process.stderr.write(result.stderr);
-  }
+  writeStderr(result.stderr);
 };
 
 /** Raw commander options for `mme lyrics get`. */
@@ -164,6 +163,18 @@ export const createLyricsCommand = (context: CliContext): Command => {
       const result = await clearLyrics({ file });
       pump(result);
     });
+
+  command.addHelpText(
+    "after",
+    [
+      "",
+      "Examples:",
+      "  $ mme lyrics get song.mp3",
+      "  $ mme lyrics get song.mp3 --format lrc",
+      "  $ mme lyrics set song.mp3 --lrc lyrics.lrc --language en",
+      "  $ mme lyrics clear song.mp3",
+    ].join("\n"),
+  );
 
   return command;
 };

@@ -25,15 +25,17 @@ export type RunResult = {
 /**
  * Globally toggled output preferences shared across commands.
  *
- * Phase 1 only declared the flags; later phases wire up colored output and
- * progress suppression. Keeping the type here avoids re-declaring the shape in
- * every command module added in subsequent phases.
+ * Phase 5 wires every flag here into `output/createLogger.ts` so each command
+ * automatically picks up `--quiet` / `--verbose` / `--no-color` without
+ * re-checking `process.env` itself.
  */
 export type CliGlobalOptions = {
   /** When `true`, command output should suppress ANSI color codes. */
   readonly noColor: boolean;
   /** When `true`, command output should suppress non-error chatter. */
   readonly quiet: boolean;
+  /** When `true`, command output should surface debug traces. */
+  readonly verbose: boolean;
 };
 
 /**

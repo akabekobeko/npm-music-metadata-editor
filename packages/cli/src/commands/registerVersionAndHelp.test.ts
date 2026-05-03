@@ -1,3 +1,4 @@
+import type { EventEmitter } from "node:events";
 import { Command } from "commander";
 import { expect, it } from "vitest";
 import { registerVersionAndHelp } from "./registerVersionAndHelp.js";
@@ -17,9 +18,23 @@ it("registers the version string passed in", () => {
   expect(program.version()).toBe("9.9.9");
 });
 
-it("registers the global --no-color and --quiet options", () => {
+it("registers the global --no-color / --quiet / --verbose options", () => {
   const program = registerVersionAndHelp(new Command(), "1.2.3");
   const longFlags = program.options.map((option) => option.long);
   expect(longFlags).toContain("--no-color");
   expect(longFlags).toContain("--quiet");
+  expect(longFlags).toContain("--verbose");
+});
+
+it("registers an Examples block via addHelpText (verified through runCli)", () => {
+  // commander's `helpInformation()` does not splice in `addHelpText("after",
+  // …)` content — that text is appended by the help-event listener that
+  // fires during the `--help` flow. The end-to-end check in
+  // `src/cli.test.ts` ("includes the Examples block in the root --help
+  // output") covers the rendered surface; this case keeps the unit
+  // assertion cheap by confirming the listener was registered. `Command`
+  // extends `EventEmitter` at runtime but the public types omit the helper,
+  // so cast to access `listenerCount`.
+  const program = registerVersionAndHelp(new Command(), "1.2.3");
+  expect((program as unknown as EventEmitter).listenerCount("afterHelp")).toBeGreaterThan(0);
 });

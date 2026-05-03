@@ -1,10 +1,9 @@
 {
   "name": "@akabeko/music-metadata-editor-cli",
   "description": "Command-line interface for @akabeko/music-metadata-editor.",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": "akabeko (http://akabeko.me/)",
   "license": "MIT",
-  "private": true,
   "keywords": [
     "music",
     "metadata",
@@ -26,16 +25,25 @@
   "engines": {
     "node": ">=24"
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "type": "module",
   "bin": {
     "mme": "./dist/bin/mme.js"
   },
   "files": [
     "dist",
-    "!dist/**/*.tsbuildinfo"
+    "!dist/**/*.tsbuildinfo",
+    "README.md",
+    "README.ja.md",
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && tsx scripts/postBuildShebang.ts",
+    "prepublishOnly": "pnpm clean && pnpm build && pnpm test",
     "clean": "rm -rf dist coverage",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

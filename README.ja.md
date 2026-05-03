@@ -11,6 +11,7 @@
 | パッケージ | バージョン | 説明 |
 | --- | --- | --- |
 | [`@akabeko/music-metadata-editor`](packages/core) | [![npm](https://img.shields.io/npm/v/@akabeko/music-metadata-editor.svg?label=%20)](https://www.npmjs.com/package/@akabeko/music-metadata-editor) | コア ライブラリ。関数中心 API でタグの読み書きを提供 (Node.js 24+) |
+| [`@akabeko/music-metadata-editor-cli`](packages/cli) | [![npm](https://img.shields.io/npm/v/@akabeko/music-metadata-editor-cli.svg?label=%20)](https://www.npmjs.com/package/@akabeko/music-metadata-editor-cli) | `mme` コマンドライン ツール。タグ / 画像 / チャプター / 歌詞の読み書き |
 
 ## ドキュメント
 

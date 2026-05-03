@@ -1,6 +1,6 @@
 import { Buffer } from "node:buffer";
 import { createRequire } from "node:module";
-import { Command } from "commander";
+import { Command, CommanderError } from "commander";
 import { createChapterCommand } from "./commands/chapter/chapter.js";
 import { createLyricsCommand } from "./commands/lyrics/lyrics.js";
 import { createPictureCommand } from "./commands/picture/picture.js";
@@ -9,7 +9,9 @@ import { registerVersionAndHelp } from "./commands/registerVersionAndHelp.js";
 import { createWriteCommand } from "./commands/write/write.js";
 import { ExitCode } from "./errors/exitCodes.js";
 import { formatMmeError } from "./errors/formatMmeError.js";
-import type { CliContext, RunResult } from "./types.js";
+import { createLogger } from "./output/createLogger.js";
+import { getLogger, resetLogger, setLogger } from "./output/logger.js";
+import type { CliContext, CliGlobalOptions, RunResult } from "./types.js";
 
 /**
  * Local `package.json` view, narrowed to the fields the CLI consumes.
@@ -30,12 +32,39 @@ const packageMeta = require("../package.json") as PackageMeta;
 const defaultContext = (): CliContext => ({ stdin: process.stdin });
 
 /**
+ * Initialize the process-wide {@link Logger} from the parsed global flags.
+ *
+ * Called from a commander `preAction` hook so the logger is in place by the
+ * time any subcommand handler runs. Also validates the mutually-exclusive
+ * combination of `--quiet` + `--verbose` (per Phase 5 spec, exit code 2).
+ *
+ * @param raw - Raw global options returned by `program.opts()`.
+ */
+const installLoggerFromOptions = (raw: Record<string, unknown>): void => {
+  const noColor = raw.color === false;
+  const quiet = raw.quiet === true;
+  const verbose = raw.verbose === true;
+  if (quiet && verbose) {
+    throw new CommanderError(
+      ExitCode.Usage,
+      "mme.usageError",
+      "--quiet and --verbose are mutually exclusive",
+    );
+  }
+
+  const options: CliGlobalOptions = { noColor, quiet, verbose };
+  setLogger(createLogger(options));
+};
+
+/**
  * Build a fully configured commander {@link Command} for the CLI.
  *
  * Each call returns a fresh instance so tests can run in parallel without
  * leaking state. `exitOverride()` is engaged so commander throws
  * `CommanderError` instead of calling `process.exit` directly; the bin layer
- * (and {@link runCli}) translate those throws into exit codes.
+ * (and {@link runCli}) translate those throws into exit codes. A
+ * `preAction` hook installs the process-wide logger from the parsed global
+ * flags before any subcommand runs.
  *
  * @param context - Optional side-channel context (currently the stdin
  *   iterable for the streaming `read` mode). Defaults to a context backed
@@ -45,6 +74,9 @@ const defaultContext = (): CliContext => ({ stdin: process.stdin });
  */
 export const createProgram = (context: CliContext = defaultContext()): Command => {
   const program = registerVersionAndHelp(new Command(), packageMeta.version).exitOverride();
+  program.hook("preAction", (thisCommand) => {
+    installLoggerFromOptions(thisCommand.opts());
+  });
   program.addCommand(createReadCommand(context));
   program.addCommand(createWriteCommand(context));
   program.addCommand(createPictureCommand(context));
@@ -67,7 +99,8 @@ type RunCliOptions = {
  * `process.stderr.write` channels for buffer-collecting stubs, and translating
  * any thrown value via {@link formatMmeError}. The real `process` streams are
  * always restored, even when the program throws, so subsequent test cases see
- * a clean environment.
+ * a clean environment. The active logger is also reset before the run so
+ * leftover state from a sibling test does not leak in.
  *
  * @param argv - User arguments only (no `node` / script path), e.g. `["--version"]`.
  * @param options - Optional knobs (e.g. a synthetic `stdin` payload).
@@ -99,6 +132,8 @@ export const runCli = async (
     return true;
   }) as typeof process.stderr.write;
 
+  resetLogger();
+
   const context: CliContext = {
     stdin: makeStdin(options.stdin),
   };
@@ -111,13 +146,14 @@ export const runCli = async (
   } catch (error) {
     const formatted = formatMmeError(error);
     if (formatted.message !== "") {
-      stderrChunks.push(`${formatted.message}\n`);
+      getLogger().error(formatted.message);
     }
 
     exitCode = formatted.exitCode;
   } finally {
     process.stdout.write = originalStdoutWrite;
     process.stderr.write = originalStderrWrite;
+    resetLogger();
   }
 
   const merged = Buffer.concat(stdoutBuffers);
