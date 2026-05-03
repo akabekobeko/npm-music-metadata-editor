@@ -4,7 +4,7 @@
 
 日本語 / [English](README.md)
 
-[@akabeko/music-metadata-editor](../core) のコマンドライン インターフェイスです。Phase 1 ではプログラム骨格のみを提供し、`mme --version` / `mme --help` が動く状態です。後続のフェーズでサブコマンドを順次追加していきます。
+[@akabeko/music-metadata-editor](../core) のコマンドライン インターフェイスです。Phase 2 でメタデータの読み込みサブコマンド `mme read` を提供します。書き込み / 付加情報 / publish 対応は [`docs/plan/cli/`](../../docs/plan/cli/) の Phase 3 以降で順次追加します。
 
 > **ステータス**: npm 未公開。Phase 5 でリリース対応が入るまで `private` パッケージとして扱います。
 
@@ -24,6 +24,38 @@ node packages/cli/dist/bin/mme.js --help
 ```
 
 `mme --version` は `package.json` の `version` をそのまま出力します。`mme --help` は commander 標準の usage ブロックを表示します。
+
+## `mme read` (Phase 2)
+
+ファイルまたは stdin からメタデータを読みます。既定は JSON 出力、`--pretty` で人間可読、`--field <name>` で単一値の抽出です。
+
+```sh
+# JSON フル出力
+mme read song.mp3
+
+# 整形済みサマリ
+mme read song.mp3 --pretty
+
+# 単一フィールド (先頭が tag.* の補完対象)
+mme read song.mp3 --field title
+mme read song.mp3 --field tag.artist
+mme read song.mp3 --field audioFormat
+mme read song.mp3 --field durationMs
+
+# 出力セクションの絞り込み (--exclude とは排他)
+mme read song.mp3 --include audioFormat,tag
+mme read song.mp3 --exclude pictures,warnings --no-warnings
+
+# stdin モード (--format 必須。auto-detect なし)
+cat song.mp3 | mme read --stdin --format mp3
+```
+
+### 補足
+
+- `pictures[].data` は JSON に **含めません** (バイナリは JSON 上で読めないため)。`byteLength` のみを残し、本体は Phase 4 で実装予定の `mme picture extract` で取得する設計です。
+- `--field` で複合セクション (`tag`、`pictures` 等) を指定した場合は JSON 出力に切り替わります。
+- 排他フラグの組み合わせ (`--stdin` + ファイル引数 / `--pretty` + `--field` / `--include` + `--exclude`) は exit code `2` で終了します。
+- 未存在フィールド (`--field nonexistent`) は exit code `1` + stderr に `[mme] field "<path>" not found` を出します。
 
 ## 終了コード
 

@@ -40,7 +40,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "fixtures:mp3": "tsx scripts/fixtures/mp3.ts"
   },
   "dependencies": {
     "@akabeko/music-metadata-editor": "workspace:*",

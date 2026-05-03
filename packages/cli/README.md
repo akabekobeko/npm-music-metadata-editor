@@ -4,7 +4,7 @@
 
 English / [Japanese](README.ja.md)
 
-Command-line interface for [@akabeko/music-metadata-editor](../core). Phase 1 only ships the program skeleton — `mme --version` and `mme --help` are wired up so subsequent phases can plug in subcommands.
+Command-line interface for [@akabeko/music-metadata-editor](../core). Phase 2 ships the `mme read` subcommand for reading metadata; Phase 3+ will add write / extras / publish support per [`docs/plan/cli/`](../../docs/plan/cli/).
 
 > **Status**: not yet published to npm. The package is `private` until Phase 5 introduces release tooling.
 
@@ -24,6 +24,38 @@ node packages/cli/dist/bin/mme.js --help
 ```
 
 `mme --version` echoes the value of `package.json#version`. `mme --help` prints the canonical commander usage block.
+
+## `mme read` (Phase 2)
+
+Read metadata from a file or stdin. Output defaults to JSON; `--pretty` switches to a human-readable summary, and `--field <name>` extracts a single value.
+
+```sh
+# JSON, full payload
+mme read song.mp3
+
+# Pretty-printed summary
+mme read song.mp3 --pretty
+
+# Single field (the implicit `tag.` prefix means `title` ≡ `tag.title`)
+mme read song.mp3 --field title
+mme read song.mp3 --field tag.artist
+mme read song.mp3 --field audioFormat
+mme read song.mp3 --field durationMs
+
+# Filter sections (mutually exclusive with --exclude)
+mme read song.mp3 --include audioFormat,tag
+mme read song.mp3 --exclude pictures,warnings --no-warnings
+
+# Streaming mode: pipe bytes through stdin (--format is required, no auto-detect)
+cat song.mp3 | mme read --stdin --format mp3
+```
+
+### Notes
+
+- `pictures[].data` is **not** emitted in JSON output (binary in JSON is unreadable). The CLI replaces it with `byteLength`; a future `mme picture extract` subcommand (Phase 4) will retrieve the raw bytes.
+- `--field` against a compound section (`tag`, `pictures`, ...) emits JSON instead of a stringified scalar.
+- Mutually exclusive flag combinations (`--stdin` + file argument, `--pretty` + `--field`, `--include` + `--exclude`) exit with code `2`.
+- Field misses (`--field nonexistent`) exit with code `1` and write `[mme] field "<path>" not found` to stderr.
 
 ## Exit codes
 
