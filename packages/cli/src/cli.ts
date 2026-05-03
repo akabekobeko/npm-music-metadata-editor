@@ -1,6 +1,9 @@
 import { Buffer } from "node:buffer";
 import { createRequire } from "node:module";
 import { Command } from "commander";
+import { createChapterCommand } from "./commands/chapter/chapter.js";
+import { createLyricsCommand } from "./commands/lyrics/lyrics.js";
+import { createPictureCommand } from "./commands/picture/picture.js";
 import { createReadCommand } from "./commands/read/read.js";
 import { registerVersionAndHelp } from "./commands/registerVersionAndHelp.js";
 import { createWriteCommand } from "./commands/write/write.js";
@@ -44,6 +47,9 @@ export const createProgram = (context: CliContext = defaultContext()): Command =
   const program = registerVersionAndHelp(new Command(), packageMeta.version).exitOverride();
   program.addCommand(createReadCommand(context));
   program.addCommand(createWriteCommand(context));
+  program.addCommand(createPictureCommand(context));
+  program.addCommand(createChapterCommand(context));
+  program.addCommand(createLyricsCommand(context));
   return program;
 };
 
