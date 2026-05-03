@@ -13,8 +13,14 @@
 
 | パス | 内容 |
 | --- | --- |
-| [`plan/`](plan/README.md) | 実装計画 (フェーズ別の Markdown 群)。Phase 01〜10 の段階的な実装方針・スコープ・完了条件を記載 |
+| [`pkg/`](pkg/) | パッケージ単位のドキュメント。`pkg/core/`・`pkg/cli/` 配下に実装計画 (`plan/`)、設計概要 (`architecture.md`)、`/security-review` の結果 (`security-review/`) を配置 |
 | [`rules/`](rules/README.md) | 開発ルール (トピック別)。コード スタイル、テスト、Git 運用などを 1 トピック 1 ファイルで管理 |
+
+## パッケージを横断する トップ レベル ドキュメント
+
+| パス | 内容 |
+| --- | --- |
+| [`plan.md`](plan.md) | パッケージ別実装計画のトップ レベル索引。`pkg/<name>/plan/` への入り口 |
 
 ## トップレベル ドキュメント
 

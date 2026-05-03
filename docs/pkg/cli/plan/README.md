@@ -64,7 +64,7 @@ mme
 
 - 各フェーズは **完了条件 (DoD)** を満たした時点で完了。`pnpm typecheck` / `pnpm test` / `pnpm check` がワークスペース全体で緑である必要がある。
 - core の API シグネチャに変更が必要になった場合は、**先に core 側にフェーズを追加** してリリースし、CLI はそれを前提に進める (CLI 側で core を破壊的に変更しない)。
-- CLI のディレクトリ規約・コード スタイル・テスト方針は core と共通の [`../../rules/README.md`](../../rules/README.md) に従う。
+- CLI のディレクトリ規約・コード スタイル・テスト方針は core と共通の [`../../../rules/README.md`](../../../rules/README.md) に従う。
 - フェーズ進行に合わせて `packages/cli/README.md` (利用者向け) を更新する。
 
 ## 参考にする CLI 群

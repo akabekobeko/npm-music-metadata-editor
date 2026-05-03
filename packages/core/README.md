@@ -157,7 +157,7 @@ The mapping between each tag format and the common `TagData` shape is documented
 
 - [docs/](https://github.com/akabekobeko/npm-music-metadata-editor/tree/main/docs) — documentation index
 - [docs/rules/](https://github.com/akabekobeko/npm-music-metadata-editor/tree/main/docs/rules) — coding / testing / git rules
-- [docs/plan/](https://github.com/akabekobeko/npm-music-metadata-editor/tree/main/docs/plan) — phase-by-phase implementation plan
+- [docs/plan.md](https://github.com/akabekobeko/npm-music-metadata-editor/blob/main/docs/plan.md) — index of per-package implementation plans
 
 ## References
 

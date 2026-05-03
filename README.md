@@ -17,7 +17,7 @@ A toolkit for reading and writing audio file metadata in Node.js. The repository
 
 - [`docs/`](docs/README.md) — documentation index
 - [`docs/rules/`](docs/rules) — coding / testing / git rules
-- [`docs/plan/`](docs/plan) — phase-by-phase implementation plan
+- [`docs/plan.md`](docs/plan.md) — index of per-package implementation plans (`docs/pkg/<package>/plan/`)
 
 ## Development
 

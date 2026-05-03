@@ -117,7 +117,7 @@ src/commands/
 ## 設計方針
 
 - 「argv → 編集後 Track」と「Track → 書き出し」を別関数に分け、テストではそれぞれ純関数として検証する。
-- `applyOverrides` は **新しい `TagData` Object を返す** (mutate しない)。spread で組み立てる core の方針 (`docs/plan/core/phase-10-public-api.md`) を CLI 側でも踏襲する。
+- `applyOverrides` は **新しい `TagData` Object を返す** (mutate しない)。spread で組み立てる core の方針 (`docs/pkg/core/plan/phase-10-public-api.md`) を CLI 側でも踏襲する。
 - `--track 3/12` のような複合 spec は `parseTagOverrides/parseTrackSpec.ts` 純関数で解析する (`/` 無し時は total 未設定)。
 - 数値 / 日付フィールドの validation は CLI 内で完結させる (core に追加検証を要求しない)。
 
