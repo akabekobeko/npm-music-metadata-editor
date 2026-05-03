@@ -11,6 +11,9 @@ importers:
       '@biomejs/biome':
         specifier: ^2.4.13
         version: 2.4.13
+
+  packages/core:
+    devDependencies:
       '@tsconfig/node24':
         specifier: ^24.0.4
         version: 24.0.4

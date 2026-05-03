@@ -1,101 +1,23 @@
 {
-  "name": "@akabeko/music-metadata-editor",
-  "description": "This is a library for reading and writing metadata of music files.",
-  "version": "1.0.0",
-  "author": "akabeko (http://akabeko.me/)",
-  "license": "MIT",
-  "keywords": [
-    "music",
-    "metadata",
-    "audio",
-    "tag",
-    "tags",
-    "editor",
-    "edit",
-    "writer",
-    "write",
-    "reader",
-    "read",
-    "parse",
-    "parser",
-    "duration",
-    "mp3",
-    "mp4",
-    "m4a",
-    "m4b",
-    "flac",
-    "ogg",
-    "ape",
-    "MonkeyAudio",
-    "wav",
-    "aiff",
-    "wma",
-    "asf",
-    "Vorbis",
-    "Opus",
-    "ID3",
-    "ID3v1",
-    "ID3v2",
-    "chapter",
-    "Chapters",
-    "lyrics",
-    "picture",
-    "artwork"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/akabekobeko/npm-music-metadata-editor.git"
-  },
-  "bugs": {
-    "url": "https://github.com/akabekobeko/npm-music-metadata-editor/issues"
-  },
-  "homepage": "https://github.com/akabekobeko/npm-music-metadata-editor#readme",
+  "name": "music-metadata-editor",
+  "private": true,
+  "type": "module",
   "packageManager": "pnpm@10.33.2",
   "engines": {
     "node": ">=24"
   },
-  "publishConfig": {
-    "access": "public"
-  },
-  "type": "module",
-  "main": "./dist/mme.js",
-  "types": "./dist/mme.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/mme.d.ts",
-      "default": "./dist/mme.js"
-    }
-  },
-  "files": [
-    "dist",
-    "!dist/**/*.tsbuildinfo"
-  ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "prepublishOnly": "pnpm clean && pnpm build",
-    "clean": "rm -rf dist coverage",
-    "typecheck": "tsc --noEmit",
+    "build": "pnpm -r build",
+    "clean": "pnpm -r clean",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:watch": "pnpm --filter @akabeko/music-metadata-editor test:watch",
+    "test:coverage": "pnpm -r test:coverage",
     "lint": "biome lint .",
     "format": "biome format --write .",
-    "check": "biome check --write .",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "fixtures:mp3": "tsx scripts/fixtures/mp3.ts",
-    "fixtures:flac": "tsx scripts/fixtures/flac.ts",
-    "fixtures:mp4": "tsx scripts/fixtures/mp4.ts",
-    "fixtures:ogg": "tsx scripts/fixtures/ogg.ts",
-    "fixtures:ape": "tsx scripts/fixtures/ape.ts",
-    "fixtures:wav": "tsx scripts/fixtures/wav.ts",
-    "fixtures:aiff": "tsx scripts/fixtures/aiff.ts",
-    "fixtures:wma": "tsx scripts/fixtures/wma.ts"
+    "check": "biome check --write ."
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.13",
-    "@tsconfig/node24": "^24.0.4",
-    "@types/node": "^25.6.0",
-    "tsx": "^4.21.0",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.5"
+    "@biomejs/biome": "^2.4.13"
   }
 }

@@ -4,21 +4,35 @@
 
 ## プロジェクト概要
 
-`music-metadata-editor` は音楽ファイルのメタデータを読み書きする Node.js + TypeScript 製ライブラリです。C# 実装の [ATL.NET (Zeugma440/atldotnet)](https://github.com/Zeugma440/atldotnet) を機能面の参考とします。
+`music-metadata-editor` は音楽ファイルのメタデータを読み書きする Node.js + TypeScript 製ツール群です。C# 実装の [ATL.NET (Zeugma440/atldotnet)](https://github.com/Zeugma440/atldotnet) を機能面の参考とします。
 
 ATL.NET のソースを参照する作業 (仕様確認、フィクスチャの所在確認など) が発生した場合は、**ローカルに clone 済みであれば そのパスをユーザーに確認**してください。clone されていない場合はリポジトリ URL から `git clone` するか、関連ファイルだけ取得する方針をユーザーと合意してから進めます。
 
 実装計画はフェーズ単位で `docs/plan/` 配下に分割しています。詳細は `docs/plan/README.md` を参照してください。
 
+## リポジトリ構成
+
+pnpm workspace 構成。コアとなるライブラリの上に CLI / GUI を追加していく予定。
+
+```
+packages/
+  core/                # @akabeko/music-metadata-editor (ライブラリ本体)
+docs/                  # ルール / 実装計画 / 設計資料 (リポジトリ全体で共有)
+```
+
+新しいパッケージを追加する際は `packages/<name>/` を作り `pnpm-workspace.yaml` (`packages/*` glob) に拾わせる。
+
 ## 環境とコマンド
 
 - Node.js 24 / pnpm 10 (`.mise.toml` でバージョン固定)
-- 主要スクリプト
-  - `pnpm typecheck` — `tsc --noEmit`
-  - `pnpm test` / `pnpm test:watch` / `pnpm test:coverage` — Vitest
-  - `pnpm build` — `tsc -p tsconfig.build.json` (`dist/` に ESM + 型定義を出力)
-  - `pnpm check` — Biome のフォーマット + Lint + import 整理 (書き込み)
+- ルートの主要スクリプトは `pnpm -r` で全パッケージへデリゲート
+  - `pnpm typecheck` — 各パッケージで `tsc --noEmit`
+  - `pnpm test` / `pnpm test:coverage` — 各パッケージで Vitest
+  - `pnpm test:watch` — `@akabeko/music-metadata-editor` のみ watch
+  - `pnpm build` — 各パッケージのビルド (core は `tsc -p tsconfig.build.json` で `packages/core/dist/` に ESM + 型定義を出力)
+  - `pnpm check` — Biome のフォーマット + Lint + import 整理 (書き込み、ワークスペース全体)
   - `pnpm lint` / `pnpm format` — Biome の lint / format
+- パッケージ固有のスクリプト (`fixtures:*` など) は `pnpm --filter @akabeko/music-metadata-editor <script>` または `cd packages/core && pnpm <script>` で実行
 
 ## 開発ルール
 
