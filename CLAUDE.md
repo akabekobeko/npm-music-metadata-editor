@@ -8,7 +8,7 @@
 
 ATL.NET のソースを参照する作業 (仕様確認、フィクスチャの所在確認など) が発生した場合は、**ローカルに clone 済みであれば そのパスをユーザーに確認**してください。clone されていない場合はリポジトリ URL から `git clone` するか、関連ファイルだけ取得する方針をユーザーと合意してから進めます。
 
-実装計画はフェーズ単位で `docs/plan/` 配下に分割しています。詳細は `docs/plan/README.md` を参照してください。
+実装計画はパッケージ単位で `docs/pkg/<package>/plan/` 配下に分割しています。索引は `docs/plan.md` を参照してください。各パッケージのディレクトリーには設計概要 (`architecture.md`) と `/security-review` の結果 (`security-review/`) も置きます。
 
 ## リポジトリ構成
 
@@ -53,10 +53,24 @@ monorepo 化に伴い、グローバルの Git 規約 (`~/.claude/CLAUDE.md` の
 
 scope は `.github/workflows/pr-label.yml` で抽出され、`pkg:<scope>` ラベル (`pkg:core` / `pkg:cli` / `pkg:gui` / `pkg:multiple`) として PR に自動付与される。
 
+## Pull Request 作成前の `/security-review`
+
+Claude Code 依存のため CI 化はせず、**Pull Request 作成前に Claude Code (本ツール) で `/security-review` を実行** し、結果を `docs/pkg/<package>/security-review/` に Markdown として残す運用です。
+
+- ファイル名は **対象パッケージのバージョン名**: 例えば `packages/core/package.json` の `version` が `1.0.0` なら `docs/pkg/core/security-review/v1.0.0.md`、CLI の `0.1.0` なら `docs/pkg/cli/security-review/v0.1.0.md`。
+- **同じバージョンで複数回実行した場合は最新の結果で上書き**。バージョンを上げた PR では新しいファイルを追加し、古いバージョンのファイルは履歴として残す (削除しない)。
+- 変更が複数パッケージにまたがる場合 (`pkg:multiple`) は、影響を受ける各パッケージの最新バージョン ファイルを更新する。
+- `/security-review` がブランチの pending changes のみを対象とする場合でも、**該当パッケージ全体の観点 (入力検証 / バイナリ パース / ファイル I/O / エラー処理 / 依存関係 / DoS) でレビュー** し、致命的な指摘があれば PR をマージ前に修正してから記録する。
+- レポートは **日本語** で記載。フォーマットは既存の `v*.md` を踏襲 (メタ情報 / サマリー / 良い点 / 所見 / 次回更新時のチェックリスト)。
+
+Claude Code 自身が `/security-review` を起動できないモード (Skill が読めない等) では、同じ観点を手動レビューでカバーし、メタ情報の「実施方法」欄にその旨を明記する。
+
 ## ドキュメント参照
 
 - ドキュメント目次: `docs/README.md`
 - 開発ルール (トピック別): `docs/rules/README.md`
-- 実装計画 (フェーズ別): `docs/plan/README.md`
+- 実装計画 (パッケージ別索引): `docs/plan.md` (個別フェーズは `docs/pkg/<package>/plan/`)
+- 各パッケージの設計概要: `docs/pkg/<package>/architecture.md`
+- `/security-review` 結果: `docs/pkg/<package>/security-review/v<version>.md`
 - ATL.NET ソース (参考実装): <https://github.com/Zeugma440/atldotnet> — ローカル clone がある場合はそのパスをユーザーに確認してから参照する
 - ATL.NET フォーマット互換性表: <https://docs.google.com/spreadsheets/d/1Wo9ifsKbBloofdWCsoXziAtaS-QVjqci5aavAV8dt2U/>

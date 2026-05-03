@@ -13,8 +13,14 @@ Index of the documents stored under `docs/`. When adding a new topic, create a s
 
 | Path | Contents |
 | --- | --- |
-| [`plan/`](plan/README.md) | Implementation plan (one Markdown per phase). Documents the step-by-step scope and DoD for Phase 01–10. |
+| [`pkg/`](pkg/) | Per-package documentation. Each subdirectory (`pkg/core/`, `pkg/cli/`) hosts the implementation plan (`plan/`), the architecture overview (`architecture.md`), and recorded `/security-review` results (`security-review/`). |
 | [`rules/`](rules/README.md) | Development rules per topic — coding style, testing, Git workflow, and so on. One topic per file. |
+
+## Top-level docs about packages
+
+| Path | Contents |
+| --- | --- |
+| [`plan.md`](plan.md) | Top-level index of the per-package implementation plans. Pointers into `pkg/<name>/plan/`. |
 
 ## Top-level documents
 

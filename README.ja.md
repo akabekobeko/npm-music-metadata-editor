@@ -17,7 +17,7 @@
 
 - [`docs/`](docs/README.ja.md) — ドキュメント目次
 - [`docs/rules/`](docs/rules) — コーディング / テスト / Git のルール
-- [`docs/plan/`](docs/plan) — フェーズ単位の実装計画
+- [`docs/plan.md`](docs/plan.md) — パッケージ別実装計画の索引 (`docs/pkg/<package>/plan/`)
 
 ## 開発
 

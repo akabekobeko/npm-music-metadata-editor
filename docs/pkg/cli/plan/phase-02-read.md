@@ -49,7 +49,7 @@ mme read song.mp3
   ```
 
 - フィールドごとの未設定 (`undefined`) は行ごと省略する (空欄を並べない)。
-- `tag` のフィールドは [`docs/field-mapping.md`](../../field-mapping.md) の順番に揃える。
+- `tag` のフィールドは [`docs/field-mapping.md`](../../../field-mapping.md) の順番に揃える。
 
 ### `mme read <file> --field <name>`
 
@@ -177,6 +177,6 @@ export type ReadCommandOptions = {
 
 - core: `packages/core/src/api/loadTrack.ts`、`packages/core/src/api/readMetadata.ts`
 - core: `packages/core/src/types.ts` (`Track` / `MetadataReadResult` の shape)
-- フィールド対応: [`docs/field-mapping.md`](../../field-mapping.md)
+- フィールド対応: [`docs/field-mapping.md`](../../../field-mapping.md)
 - pretty 出力の参考: `metaflac --list`、`eyeD3 song.mp3` (default モード)、`exiftool song.mp3`
 - field 抽出の参考: `jq` / `exiftool -Title -s -s -s file.jpg` (値だけ出すモード)

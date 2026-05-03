@@ -75,7 +75,7 @@ mme lyrics get song.mp3 --format lrc
 
 ## 終了コード
 
-リポジトリ全体と同じ終了コード表を採用します。**正本は [`docs/plan/cli/phase-01-foundation.md`](../../docs/plan/cli/phase-01-foundation.md)**、本表はクイック リファレンスです。
+リポジトリ全体と同じ終了コード表を採用します。**正本は [`docs/pkg/cli/plan/phase-01-foundation.md`](../../docs/pkg/cli/plan/phase-01-foundation.md)**、本表はクイック リファレンスです。
 
 | コード | 意味 |
 | --- | --- |

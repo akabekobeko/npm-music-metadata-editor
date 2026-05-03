@@ -75,7 +75,7 @@ The CLI also honors the [NO_COLOR](https://no-color.org/) and [FORCE_COLOR](http
 
 ## Exit codes
 
-The exit codes are the same shape as the rest of the project. The canonical source of truth is [`docs/plan/cli/phase-01-foundation.md`](../../docs/plan/cli/phase-01-foundation.md); the table is mirrored here for quick reference.
+The exit codes are the same shape as the rest of the project. The canonical source of truth is [`docs/pkg/cli/plan/phase-01-foundation.md`](../../docs/pkg/cli/plan/phase-01-foundation.md); the table is mirrored here for quick reference.
 
 | Code | Meaning |
 | --- | --- |

@@ -2,7 +2,7 @@
 
 `@akabeko/music-metadata-editor` (core ライブラリ) の実装計画をフェーズ単位で分割したドキュメント群です。各フェーズはおおむね独立した PR (または小さな PR の連なり) として進められる粒度を目安にしています。
 
-CLI / GUI など core 以外のパッケージの計画は [`../README.md`](../README.md) の索引から参照してください。
+CLI / GUI など core 以外のパッケージの計画は [`../../../plan.md`](../../../plan.md) の索引から参照してください。core の設計概要は [`../architecture.md`](../architecture.md)、`/security-review` の結果は [`../security-review/`](../security-review/) にあります。
 
 ## フェーズ一覧
 
@@ -23,5 +23,5 @@ CLI / GUI など core 以外のパッケージの計画は [`../README.md`](../R
 
 - 各フェーズは **完了条件 (DoD)** を満たすことをもって完了とします。
 - フェーズをまたぐ依存は「依存」セクションで明示します。前提となるフェーズが TODO のまま着手しないこと。
-- ATL.NET ([Zeugma440/atldotnet](https://github.com/Zeugma440/atldotnet)) は **挙動の参考実装**です。コードをそのまま移植するのではなく、Node.js + TypeScript として最適な形に再設計します (開発ルールは `../../rules/README.md` を参照)。
-- ATL.NET のソースが必要になった場合は、ローカルへの clone パスを Claude Code がユーザーに確認します (`../../../CLAUDE.md` の「プロジェクト概要」を参照)。
+- ATL.NET ([Zeugma440/atldotnet](https://github.com/Zeugma440/atldotnet)) は **挙動の参考実装**です。コードをそのまま移植するのではなく、Node.js + TypeScript として最適な形に再設計します (開発ルールは `../../../rules/README.md` を参照)。
+- ATL.NET のソースが必要になった場合は、ローカルへの clone パスを Claude Code がユーザーに確認します (`../../../../CLAUDE.md` の「プロジェクト概要」を参照)。

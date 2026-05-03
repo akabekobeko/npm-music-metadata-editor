@@ -157,7 +157,7 @@ try {
 
 - [docs/](https://github.com/akabekobeko/npm-music-metadata-editor/tree/main/docs) — ドキュメント目次
 - [docs/rules/](https://github.com/akabekobeko/npm-music-metadata-editor/tree/main/docs/rules) — コーディング / テスト / Git のルール
-- [docs/plan/](https://github.com/akabekobeko/npm-music-metadata-editor/tree/main/docs/plan) — フェーズ単位の実装計画
+- [docs/plan.md](https://github.com/akabekobeko/npm-music-metadata-editor/blob/main/docs/plan.md) — パッケージ別実装計画の索引
 
 ## 参考資料
 
