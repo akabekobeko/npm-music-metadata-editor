@@ -11,7 +11,7 @@ jobs:
   label:
     runs-on: ubuntu-latest
     steps:
-      - name: Apply Conventional Commits prefix label
+      - name: Apply Conventional Commits prefix and scope labels
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_TITLE: ${{ github.event.pull_request.title }}
@@ -19,22 +19,45 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           set -eu
+
+          # Apply a label to the PR only when that label exists in the repo.
+          # Skips silently (with a notice) when the label is missing so that
+          # a missing label never fails the workflow.
+          apply_label() {
+            label="$1"
+            if gh api "repos/$REPO/labels/$label" --silent >/dev/null 2>&1; then
+              echo "Label '$label' exists. Adding it to PR #$PR_NUMBER."
+              gh pr edit "$PR_NUMBER" --repo "$REPO" --add-label "$label"
+            else
+              echo "::notice::Label '$label' does not exist in $REPO. Skipping."
+            fi
+          }
+
           # Extract the Conventional Commits type prefix from the PR title.
           # Examples:
-          #   "feat: ..."        -> feat
-          #   "feat(parser): ..." -> feat
-          #   "feat!: ..."       -> feat
+          #   "feat: ..."         -> feat
+          #   "feat(core): ..."   -> feat
+          #   "feat(core)!: ..."  -> feat
           prefix=$(printf '%s' "$PR_TITLE" | grep -oE '^[a-zA-Z]+' | head -n1 || true)
           if [ -z "$prefix" ]; then
             echo "::notice::No Conventional Commits prefix found in PR title: $PR_TITLE"
-            exit 0
-          fi
-          echo "Detected prefix: $prefix"
-
-          # Apply the label only when a label with that exact name already exists.
-          if gh api "repos/$REPO/labels/$prefix" --silent >/dev/null 2>&1; then
-            echo "Label '$prefix' exists. Adding it to PR #$PR_NUMBER."
-            gh pr edit "$PR_NUMBER" --repo "$REPO" --add-label "$prefix"
           else
-            echo "::notice::Label '$prefix' does not exist in $REPO. Skipping."
+            echo "Detected prefix: $prefix"
+            apply_label "$prefix"
+          fi
+
+          # Extract the (scope) and apply a `pkg:<scope>` label.
+          # Examples:
+          #   "feat(core): ..."     -> pkg:core
+          #   "chore(multiple): ..." -> pkg:multiple
+          # When no scope is present the label step is skipped (the prefix
+          # label step above still runs). PR titles authored by humans should
+          # always include a scope per `docs/rules/git.md`; the workflow only
+          # warns rather than fails so that drafts do not block reviewers.
+          scope=$(printf '%s' "$PR_TITLE" | grep -oE '^[a-zA-Z]+\(([a-zA-Z0-9_-]+)\)' | sed -E 's/^[a-zA-Z]+\(([a-zA-Z0-9_-]+)\)/\1/' | head -n1 || true)
+          if [ -z "$scope" ]; then
+            echo "::notice::No (scope) found in PR title: $PR_TITLE"
+          else
+            echo "Detected scope: $scope"
+            apply_label "pkg:$scope"
           fi
