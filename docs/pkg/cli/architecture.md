@@ -85,7 +85,7 @@ flowchart LR
 | `mme chapter <verb>` | 章 (ID3 CHAP / MP4 chap) の操作 | `loadTrack` + `saveTrack` |
 | `mme lyrics <verb>` | 歌詞 (text / LRC / JSON) の操作 | `loadTrack` + `saveTrack` |
 
-各サブコマンドの仕様は [`plan/`](plan/) のフェーズ別 Markdown を正本とします。
+各サブコマンドの仕様は [`plan/`](plan/) のフェーズ別 Markdown をマスターとします。
 
 ## 4. ランタイム フロー
 
@@ -95,7 +95,7 @@ sequenceDiagram
     participant Shell
     participant Bin as bin/mme.ts
     participant Program as createProgram
-    participant Cmd as commands/&lt;verb&gt;
+    participant Cmd as subcommand
     participant Output as output/logger
     participant Core as core API
     participant Errors as errors/formatMmeError
@@ -157,7 +157,7 @@ flowchart LR
 | `4` | `IoError` | ファイル / stream I/O 失敗 |
 | `5` | `InvalidTag` | `MmeError.code === "invalid-tag"` |
 
-正本は [`plan/phase-01-foundation.md`](plan/phase-01-foundation.md)。`exitCodes.ts` の `exitCodeForMmeError` テーブルが **疎** に保たれているのは意図的で、core が新しい `MmeErrorCode` を増やしても CLI が明示的に分類するまで `1 (Failure)` にフォールバックするためです。
+マスターは [`plan/phase-01-foundation.md`](plan/phase-01-foundation.md)。`exitCodes.ts` の `exitCodeForMmeError` テーブルが **疎** に保たれているのは意図的で、core が新しい `MmeErrorCode` を増やしても CLI が明示的に分類するまで `1 (Failure)` にフォールバックするためです。
 
 ## 7. テスト戦略
 

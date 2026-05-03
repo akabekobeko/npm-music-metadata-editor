@@ -7,7 +7,7 @@
 ## 1. 役割
 
 - 音楽ファイル (MP3 / FLAC / MP4 / OGG / APE / WAV / AIFF / WMA) のメタデータを **共通の `Track` モデル** で扱えるようにする。
-- 読み書きの **正本フロー** (バイナリ → 内部モデル → バイナリ) を提供し、CLI や GUI など上位層はそこに乗るだけにする。
+- 読み書きの **処理フロー** (バイナリ → 内部モデル → バイナリ) を提供し、CLI や GUI など上位層はそこに乗るだけにする。
 - 参考実装は [ATL.NET (Zeugma440/atldotnet)](https://github.com/Zeugma440/atldotnet) ですが、コードはそのまま移植せず Node.js + TypeScript として再設計しています。
 
 非ゴール:
@@ -25,35 +25,11 @@ flowchart TB
         track["loadTrack / saveTrack"]
         meta["readMetadata / writeMetadata"]
     end
-    subgraph registry["フォーマット レジストリー (src/formats/registry.ts)"]
-        detect["detect (マジック バイト判定)"]
-        reg["FormatHandler テーブル"]
-    end
-    subgraph formats["フォーマット別 reader / writer (src/formats/<fmt>/)"]
-        mp3["mp3"]
-        flac["flac"]
-        mp4["mp4"]
-        ogg["ogg"]
-        ape["ape"]
-        wav["wav"]
-        aiff["aiff"]
-        wma["wma"]
-    end
-    subgraph tags["タグ実装 (src/tags/)"]
-        id3v1["id3v1"]
-        id3v2["id3v2"]
-        vorbis["vorbisComment"]
-        apeTag["ape"]
-    end
-    subgraph extras["拡張メタデータ (src/extras/)"]
-        picture["picture"]
-        chapter["chapter"]
-        lyrics["lyrics"]
-    end
-    subgraph io["I/O (src/io/)"]
-        cursor["bufferCursor / bufferWriter"]
-        file["file (fs ラッパ)"]
-    end
+    registry["フォーマット レジストリー (src/formats/registry.ts)<br/>detect + FormatHandler テーブル"]
+    formats["フォーマット別 reader / writer (src/formats/)<br/>mp3 / flac / mp4 / ogg / ape / wav / aiff / wma"]
+    tags["タグ実装 (src/tags/)<br/>id3v1 / id3v2 / vorbisComment / ape"]
+    extras["拡張メタデータ (src/extras/)<br/>picture / chapter / lyrics"]
+    io["I/O (src/io/)<br/>bufferCursor / bufferWriter / file"]
     types["共通型 (src/types.ts)"]
     errors["MmeError (src/errors/)"]
 
@@ -64,13 +40,13 @@ flowchart TB
     formats --> tags
     formats --> extras
     formats --> io
-    extras --> io
     tags --> io
+    extras --> io
     public --> errors
     formats --> errors
+    public --> types
     formats --> types
     extras --> types
-    public --> types
 ```
 
 役割を 1 行で:
@@ -107,8 +83,8 @@ flowchart LR
     in3 --> readMetadata["readMetadata (低レベル)"]:::low --> out3
     in4 --> writeMetadata["writeMetadata (低レベル)"]:::low --> out4
 
-    loadTrack -.→ readMetadata
-    saveTrack -.→ writeMetadata
+    loadTrack -.-> readMetadata
+    saveTrack -.-> writeMetadata
 ```
 
 | API | 想定ユース | 入力 | 出力 |
@@ -126,45 +102,46 @@ flowchart LR
 classDiagram
     class Track {
       +AudioFormat audioFormat
-      +number? durationMs
+      +number durationMs
       +TagData tag
       +PictureInfo[] pictures
       +ChapterInfo[] chapters
-      +LyricsInfo? lyrics
-      +Record~string,string~ additionalFields
+      +LyricsInfo lyrics
+      +Object additionalFields
       +Warning[] warnings
     }
     class TagData {
-      +string? title
-      +string? artist
-      +string? album
-      +number? trackNumber
-      +number? trackTotal
-      +...
+      +string title
+      +string artist
+      +string album
+      +number trackNumber
+      +number trackTotal
     }
     class PictureInfo {
       +string mimeType
       +PictureKindValue kind
-      +string? description
+      +string description
       +Uint8Array data
     }
     class ChapterInfo {
       +string id
       +number startMs
       +number endMs
-      +string? title
-      +ChapterInfo[]? subChapters
+      +string title
+      +ChapterInfo[] subChapters
     }
     class LyricsInfo {
-      +string? language
-      +string? unsynchronized
-      +SynchronizedLyric[]? synchronized
+      +string language
+      +string unsynchronized
+      +SynchronizedLyric[] synchronized
     }
     Track --> TagData
     Track --> PictureInfo
     Track --> ChapterInfo
     Track --> LyricsInfo
 ```
+
+> 図中のフィールドは型のみを示しています。実際の TypeScript 定義では多くがオプショナル (`?`) で、マスターは `src/types.ts` を参照してください。
 
 `Track` はすべて `readonly` で **編集はスプレッドで新オブジェクトを作る** スタイルです。setter は意図的に提供しません (`docs/rules/code-style.md` の方針)。
 
@@ -178,9 +155,9 @@ sequenceDiagram
     participant Resolve as resolveFormat
     participant Detect as formats/detect
     participant Registry as formats/registry
-    participant Reader as formats/<fmt>/readXxx
-    participant Tag as tags/<tag>
-    participant Extras as extras/*
+    participant Reader as formats reader
+    participant Tag as tags
+    participant Extras as extras
 
     App->>API: input (path / bytes), options?
     API->>API: loadInput → bytes
@@ -211,9 +188,9 @@ sequenceDiagram
     participant App
     participant API as writeMetadata
     participant Resolve as resolveFormat
-    participant Writer as formats/<fmt>/writeXxx
-    participant Tag as tags/<tag>
-    participant Extras as extras/*
+    participant Writer as formats writer
+    participant Tag as tags
+    participant Extras as extras
 
     App->>API: source (path / bytes), WriteOptions
     API->>API: source bytes を読み込み
