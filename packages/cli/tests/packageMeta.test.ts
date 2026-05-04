@@ -8,8 +8,7 @@ import { describe, expect, it } from "vitest";
  *
  * The bin / files / publishConfig surface is what we publish to npm.
  * Asserting the shape from a test catches accidental edits (e.g. flipping
- * `private` back to `true`, dropping the LICENSE from `files`) before they
- * ship.
+ * `private` back to `true`, removing `dist` from `files`) before they ship.
  */
 const here = path.dirname(fileURLToPath(import.meta.url));
 const packageJsonPath = path.resolve(here, "../package.json");
@@ -43,21 +42,17 @@ describe("packages/cli/package.json", () => {
     expect(pkg.bin).toEqual({ mme: "./dist/bin/mme.js" });
   });
 
-  it("ships the documented files (dist + READMEs + LICENSE + CHANGELOG)", async () => {
+  it("ships dist and excludes tsbuildinfo (READMEs / LICENSE are auto-included by npm)", async () => {
     const pkg = await loadPackageJson();
     expect(pkg.files).toBeDefined();
     const files = pkg.files ?? [];
     expect(files).toContain("dist");
-    expect(files).toContain("README.md");
-    expect(files).toContain("README.ja.md");
-    expect(files).toContain("LICENSE");
-    expect(files).toContain("CHANGELOG.md");
+    expect(files).toContain("!dist/**/*.tsbuildinfo");
   });
 
-  it("declares public access + the npm registry under publishConfig", async () => {
+  it("declares public access under publishConfig", async () => {
     const pkg = await loadPackageJson();
     expect(pkg.publishConfig?.access).toBe("public");
-    expect(pkg.publishConfig?.registry).toBe("https://registry.npmjs.org/");
   });
 
   it("wires prepublishOnly through clean + build + test", async () => {
