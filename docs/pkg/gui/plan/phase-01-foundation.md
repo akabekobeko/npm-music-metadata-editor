@@ -43,6 +43,7 @@
 ### electron-starter からの取り込み方針
 
 - **コピー対象** (内容を本リポジトリ向けに最小化して取り込む):
+  - `.mise.toml` (gui パッケージ専用の Node / pnpm バージョンとして取り込む。詳細は「モノレポへの統合」節を参照)
   - `scripts/dev.mjs` / `scripts/sync-electron-targets.mjs` / `scripts/shadcn.mjs` / `scripts/get-electron-target-env.mjs`
   - `src/main/main.ts`、`src/main/vite.config.ts`
   - `src/preload/preload.ts`、`src/preload/vite.config.ts`
@@ -60,6 +61,7 @@
   - `tsconfig.web.json` の `paths` で `@/*` → `src/renderer/*` を維持。
   - `electron-builder.yml` の `appId` / `productName` を確定値に書き換え (例: `appId: net.akabekobeko.music-metadata-editor`、`productName: Music Metadata Editor`)。
   - 開発時 dev server は **5174** ポートに変更 (5173 は core / cli の future use や他の Electron アプリと衝突しがちなため、本リポジトリ専用に変える)。`scripts/dev.mjs` の `VITE_DEV_SERVER_URL` と `server.port` を併せて修正。
+  - `scripts/sync-electron-targets.mjs` は electron-starter (= リポジトリ ルート) で `.mise.toml` を更新する前提のコードになっているので、本リポジトリでは **`packages/gui/.mise.toml`** を更新するよう書き換える。`tsconfig.node.json` / `tsconfig.web.json` / `src/{main,preload,renderer}/vite.config.ts` への書き込みは相対パスのまま動く。
 
 ### モノレポへの統合
 
@@ -69,8 +71,36 @@
     - 案 A: `pnpm -r build` のまま (gui の `build` も実行されるが、electron-builder は `package` で初めて呼ぶので vite build のみ。許容可)。
     - 案 B: gui の `build` をルートの一括 build から除外 (`pnpm --filter "!@akabeko/music-metadata-editor-gui" -r build`)。
   - 既定は案 A とし、CI 時間が問題になったら案 B に切り替える。
-- `.mise.toml` はルートのものを共有する。electron-starter の Node バージョンが本リポジトリのものと食い違う場合は **本リポジトリ側のバージョンに合わせる** (Electron 41 系の bundled Node が古ければ `sync-targets` を Phase 7 直前に走らせる)。
 - ルート `biome.json` は `packages/gui/src/**/*.{ts,tsx}` を lint / format 対象に含める (拡張子 `.tsx` を新規追加)。`pnpm check` がエラーなく通ること。
+
+#### Node バージョンの分離 (mise の二段構成)
+
+- **方針**: ルートの `.mise.toml` は core / cli が動く Node に固定し、**`packages/gui/.mise.toml` は Electron がバンドルする Node メジャーに追従させる**。`scripts/sync-electron-targets.mjs` を gui ディレクトリ内で走らせて `.mise.toml` の `node` を Electron バージョンに合わせて自動更新する。
+- **Electron アプリは bundled Node で動く**ため、本来ホスト Node のバージョンは関係ない。が、`scripts/dev.mjs` 等の **ビルド ホスト**は OS の Node で動くので、Electron 公式が前提とする Node メジャー (= bundled Node と同じ系) で開発・パッケージングしたい。これを mise の階層解決で実現する。
+- **mise の階層解決**: mise は cwd から親方向に `.mise.toml` を探索して **深い設定で浅い設定を上書き** する。`packages/gui/.mise.toml` の `[tools] node` がルートと違っていれば、`cd packages/gui` 配下のシェルでは gui の Node が使われる。ルート直下では従来通りルートの Node。
+- **取り込み手順**:
+  1. electron-starter の `.mise.toml` をそのまま `packages/gui/.mise.toml` にコピー (Phase 1 着手時点では現にルートと同値の場合もあるが、ファイルとして別管理することに意味がある)。
+  2. ルートの `.mise.toml` は **触らない** (core / cli への影響を遮断)。
+  3. `mise install` を `packages/gui/` で 1 回実行し、Node が解決できることを確認。
+
+##### モノレポ運用としての含意 (調査結果)
+
+| 観点                                  | 結論 / 注意点                                                                                                                              |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm install` をどの Node で走らせるか | **ルート Node** で問題ない。レジストリ解決とロックファイル更新はホスト Node に依存しない (近年の pnpm は Node 18+ で動作)。                |
+| `pnpm --filter <gui> dev` をルート cwd で実行 | **ルート Node** が使われる (mise は cwd で解決するため)。Electron 自体は spawn 内で bundled Node を使うので動作上は問題なし。とはいえ「Electron が要求する Node で開発する」運用を貫くなら **`cd packages/gui && pnpm dev`** を推奨ルートにする。 |
+| `pnpm -r typecheck` / `pnpm -r build` | ルート Node で全パッケージを実行する。TypeScript / Vite / Biome / Vitest は Node ABI に強く依存しないため、ルート Node と gui 期待 Node のメジャーが 1〜2 違う程度なら壊れない (実害は出ない)。 |
+| ネイティブ依存 (better-sqlite3 等)    | gui 配下に native 依存が増えた場合は **N-API ABI のバージョン差**でリビルドが必要になることがある。Phase 1 の依存集合 (electron / vite / react 系) はすべて prebuilt で済むため影響なし。Phase 7 までに native 依存を追加するときは `electron-rebuild` の導入を再検討する。 |
+| Electron のバンドル変更 (`sync-targets`) | gui の `.mise.toml` を書き換える運用に固定すれば、ルートには波及しない。ルートのチームが core / cli の都合で Node を上げ下げするタイミングと完全に独立する。 |
+| CI                                    | 1 つの GHA ジョブで `pnpm -r build` を回すなら **ルート Node 1 種類で全部ビルド** する (実害なし)。Electron 公式の Node で gui だけビルドしたい場合は `working-directory: packages/gui` のジョブを切り、その内側で `mise install --quiet` を呼んで gui Node を有効にする (Phase 7 で本格設計)。 |
+| `engines` 制約                        | gui の `package.json` に `engines.node` を **書かない**。書くと workspace 全体の install で警告が出てしまう。Node メジャー要件は `.mise.toml` で表現する。 |
+
+> **判定: モノレポ運用として問題なし**。ルート Node と gui Node の二段運用は mise の階層解決で素直に実現でき、`pnpm install` / `pnpm -r ...` の挙動も壊れない。注意点は (a) gui の dev / build はパッケージ ディレクトリで実行する、(b) `sync-targets` の書き換え対象を gui の `.mise.toml` に固定する、の 2 点のみ。
+
+##### CLAUDE.md への影響 (フォロー アップ)
+
+- ルート `CLAUDE.md` の「環境とコマンド」節は現状「Node.js 24 / pnpm 10 (`.mise.toml` でバージョン固定)」とだけ書かれている。Phase 1 完了時に **「gui パッケージは `packages/gui/.mise.toml` で別管理」** の 1 行を追記する (この PR には含めない。Phase 1 着手 PR で対応)。
+- ユーザーの私的な `~/.claude/CLAUDE.md` には踏み込まない。
 
 ### 3 プロセス スケルトン
 
@@ -161,6 +191,8 @@ declare global {
 - `pnpm -r typecheck` / `pnpm -r test` / `pnpm check` がワークスペース全体で緑。
 - `electron-builder.yml` の `appId` / `productName` が確定値で commit されている (Phase 7 で再調整しない値にする)。
 - `package.json` が `private: true`。
+- `packages/gui/.mise.toml` が **gui 専用の Node / pnpm バージョン**として commit されている。`cd packages/gui && mise current` で gui 用 Node が解決され、リポジトリ ルートでは従来通りのルート Node が解決される (動作確認はレビュー時に手動)。
+- `scripts/sync-electron-targets.mjs` の書き換え対象が **`packages/gui/.mise.toml`** になっており、`pnpm --filter @akabeko/music-metadata-editor-gui sync-targets` で gui の `.mise.toml` だけが更新される (ルートの `.mise.toml` は変化しない)。
 
 ## 参考資料
 
