@@ -8,50 +8,79 @@ GUI の主体である **スプレッドシート (列 = メタデータ、行 =
 
 ### スプレッドシート ライブラリ選定
 
-Phase 3 冒頭で 3 候補を 1 日程度の PoC で評価し、1 つに採用する。評価項目とスコアリング:
+要件に明示された 3 つを満たすことが最低条件:
 
-| 候補               | 採用判断ポイント                                                           |
-| ------------------ | -------------------------------------------------------------------------- |
-| **Glide Data Grid**  | Canvas 描画で 1 万行スクロール OK、列ヘッダー固定 / 列幅リサイズ / 範囲選択 / コピペが標準。MIT。shadcn/ui との見た目統一はテーマ オーバーライドで頑張る必要がある。 |
-| **TanStack Table v8**| ヘッドレス。レンダリングは自分で書くので shadcn/ui に完全に揃えやすい。範囲選択 / コピペは自前実装。仮想スクロールは `@tanstack/react-virtual` で別途。 |
-| **RevoGrid**         | Web Components。Excel ライクな UX、コピペや列固定が箱出しで動く。React 連携はあるが shadcn と組み合わせにくい。 |
+1. **セルのインライン編集** (ダブル クリック / Enter / 入力でセル内エディタが立ち上がる)。
+2. **セルごとに input type を切り替えられる** (テキスト / 数値 / Select / カスタム → shadcn の `Input` / `Select` / `Textarea` / `Combobox` を **その列の editor として直接置ける** こと)。各列を `editor: (props) => <ReactNode>` で記述できるのがゴール。
+3. **複数セル / 列範囲選択 → クリップボードからの列ペースト**。Phase 4 で本実装するが、Phase 3 で「ライブラリ側がペースト経路を許容するか」を確認しておく。
 
-評価は **PoC ブランチで 3 つとも最低限の表 (10 行 × 10 列、1 列固定、範囲選択 + コピペ) を作って比較**する。判断は次の優先順位:
+候補を 5 つに広げ、Phase 3 冒頭で **PoC を 1 日程度** 行って 1 つに絞る。評価表:
 
-1. **複数セル選択 → クリップボードからの列ペースト** が素直に書けるか (要件で必須)。
-2. **行数 1,000 〜 10,000** までスムーズにスクロールするか (1 ライブラリにつき行数を変えてベンチ)。
-3. **未対応セルの disabled 表示** をセル単位でカスタマイズできるか。
-4. **shadcn/ui のテーマ (light/dark)** に合わせやすいか。
+| 候補                            | License    | インライン編集 | 任意 input type (React editor) | 列ペースト | 列固定 | 仮想スクロール (1〜10k 行) | shadcn/ui との親和性                          |
+| ------------------------------- | ---------- | -------------- | ------------------------------ | ---------- | ------ | -------------------------- | --------------------------------------------- |
+| **TanStack Table v8** + `@tanstack/react-virtual` | MIT        | 自前実装 (= 完全に自由)                 | ◎ cell renderer に **任意の React** を返せる | 自前 (Phase 4 で実装)             | 自前 (CSS `position: sticky`) | `react-virtual` で別途 | ◎ shadcn の `Input`/`Select`/`Textarea` を素直に埋め込める |
+| **react-data-grid** (adazzle)   | MIT        | ○ `renderEditCell` で React を返すだけ | ◎ editor は完全に React        | ○ `onPaste` イベントで実装可     | ○ `frozen` 列        | 標準で内蔵            | ○ 内部スタイルあり、Tailwind と併存可能       |
+| **AG Grid Community**           | MIT (Comm) | ○ ビルトイン editor + `cellEditor` で自前可 | ○ React editor 可だが AG Grid の `agInit` に合わせる必要あり | ○ Community でも cell paste 可    | ○ `pinned`           | 標準で内蔵            | △ 独自 DOM が大きく shadcn テーマを上書きしにくい |
+| **Glide Data Grid**             | MIT        | ○ `provideEditor` で React オーバーレイ | ○ Canvas + `provideEditor` (HTML) で React 描画は可だが overlay の groove に手が要る | ◎ `onPaste` 標準 | ◎ `freezeColumns` | ◎ Canvas で 100k 行 OK | △ Canvas なので Tailwind は editor overlay にしか効かない |
+| **RevoGrid**                    | MIT        | ○ editor を登録 | △ Web Components 内 (Shadow DOM) なので shadcn の Tailwind が届きにくい | ◎ 標準     | ○      | ◎                           | ✗ Shadow DOM の境界で Tailwind が無効化される |
 
-PoC の所感を `docs/pkg/gui/plan/phase-03-spreadsheet.md` の末尾 (このファイル) に追記し、結論を書き残す。**PoC 結果が想定と違ったらこの計画書を更新してから先に進む**。
+> 凡例: ◎ そのまま要件を満たす / ○ ライブラリの API で十分書ける / △ 工夫が要る / ✗ 要件と合わない。
 
-> **既定の方針**: 上記の優先順位で評価した結果、要件が「列ペースト + フォーマット差での disabled」を含むため、**Glide Data Grid を第一候補**とする。最終判断は PoC で。
+#### 評価の優先順位 (新要件を反映)
+
+1. **任意 input type の editor が React コンポーネントで書けるか** ★★★ (ユーザー要件で追加)。  shadcn/ui の `Input` / `Select` / `Textarea` / `Checkbox` / `Combobox` をそのまま editor 内で再利用できることを必須にする。
+2. **複数セル選択 → 列ペースト** が素直に書けるか (Phase 4 の実装コストを左右)。
+3. **行数 1,000 〜 10,000** でスクロール体感が許容範囲か。
+4. **未対応セルの disabled 表示** をセル単位で出せるか。
+5. **shadcn/ui のテーマ (light/dark)** に乗せやすいか。
+
+PoC では **5 候補のうち上から 3 つ (TanStack Table、react-data-grid、Glide Data Grid)** を実装する。下 2 つ (AG Grid / RevoGrid) は表で除外理由が明確なので PoC 不要。
+
+#### 既定の方針
+
+> **第一候補は TanStack Table v8 + `@tanstack/react-virtual`** に切り替える。理由は次の 3 つ。
+>
+> 1. 要件 2 (任意 input type を React コンポーネントで切り替えられる) を **API として最も素直に**満たす。ヘッドレスなので cell renderer / editor は React コンポーネントを返すだけで、shadcn の `Input` / `Select` / `Textarea` / `Combobox` をそのまま editor として置ける。
+> 2. 列定義 (`columns.ts`) を「型から派生する Plain Object テーブル」として書く設計 (`docs/rules/code-style.md`) と整合する。`columnHelper.accessor` の API が型主導で、`TagData` の `keyof` を直接列に展開できる。
+> 3. shadcn/ui との見た目統一が **テーマ調整なしに最初から綺麗に出る**。light/dark 切り替え (Phase 7) も Tailwind の `dark:` 変数だけで完結する。
+>
+> 弱みは「範囲選択 + クリップボード ペースト + 列固定」を **自前で書く必要がある** 点。ただし Phase 4 で `parseClipboardText` / `applyPaste` を純関数として既に切り出しているため、UI 層の追加コストは「`useState<SelectionRange>` + `onMouseDown` / `onMouseEnter` ハンドラ + `useEffect` で `paste` listener」の 3 ピースで済む見込み。
+>
+> 第二候補は **react-data-grid (adazzle)**。TanStack Table の自前実装コスト (とくに範囲選択ハンドラ) が PoC で重く出た場合のフォールバック。第三候補は **Glide Data Grid** で、行数 10k を超えるベンチで前 2 つが詰まった場合のスケール保険。
+>
+> **PoC 結果が想定と違ったらこの計画書を更新してから先に進む**。結論はこのファイル末尾の「ライブラリ選定の結論」に追記する。
 
 ### 列定義
 
 列は core の `TagData` / `pictures` / `chapters` / `lyrics` から導出する。Phase 3 では下記をハードコード相当で並べ、Phase 6 で「ON/OFF 設定」を JSON 永続化する:
 
-| #  | カラム ID         | データ ソース                       | 既定表示 | 編集 (Phase 4 以降) | 備考                                                   |
-| -- | ----------------- | ----------------------------------- | -------- | ------------------- | ------------------------------------------------------ |
-| 1  | `fileName`        | `path.basename(filePath)`           | 表示     | 不可                | **常時表示・編集不可・列固定**。tooltip でフルパス。   |
-| 2  | `audioFormat`     | `Track.audioFormat`                 | 表示     | 不可                | format 列。disabled 表示。                              |
-| 3  | `durationMs`      | `Track.durationMs`                  | 表示     | 不可                | `m:ss` 整形して表示。                                  |
-| 4  | `tag.title`       | `Track.tag.title`                   | 表示     | 可                  |                                                        |
-| 5  | `tag.artist`      | `Track.tag.artist`                  | 表示     | 可                  |                                                        |
-| 6  | `tag.album`       | `Track.tag.album`                   | 表示     | 可                  |                                                        |
-| 7  | `tag.albumArtist` | `Track.tag.albumArtist`             | 表示     | 可                  |                                                        |
-| 8  | `tag.trackNumber` | `Track.tag.trackNumber`             | 表示     | 可                  | `track / total` の合成表示は Phase 4 で。              |
-| 9  | `tag.trackTotal`  | `Track.tag.trackTotal`              | 非表示   | 可                  | 既定では off、列表示で on にできる (Phase 6)。          |
-| 10 | `tag.discNumber`  | `Track.tag.discNumber`              | 非表示   | 可                  |                                                        |
-| 11 | `tag.discTotal`   | `Track.tag.discTotal`               | 非表示   | 可                  |                                                        |
-| 12 | `tag.year`        | `Track.tag.year`                    | 表示     | 可                  |                                                        |
-| 13 | `tag.genre`       | `Track.tag.genre`                   | 表示     | 可                  |                                                        |
-| 14 | `tag.composer`    | `Track.tag.composer`                | 非表示   | 可                  |                                                        |
-| 15〜| `tag.*` の残り    | `TagData` の全フィールド            | 非表示   | 可                  | `conductor / lyricist / publisher / copyright / comment / group / description / language / isrc / productId / recordingDate / originalReleaseDate / publishingDate / bpm / rating` を網羅。 |
-| -  | `pictures`        | `Track.pictures.length`             | 表示     | モーダル            | セルは「件数 + Cover Front の有無」を表示、ダブル クリックでモーダル (Phase 5)。 |
-| -  | `lyrics`          | `Track.lyrics`                      | 表示     | モーダル            | `none` / `text` / `synced` のサマリー表示、ダブル クリックでモーダル (Phase 5)。 |
-| -  | `chapters`        | `Track.chapters.length`             | 非表示   | -                   | 表示は OK、編集は v1 では非対応 (Phase 7 の deferred)。 |
-| -  | `warnings`        | `Track.warnings.length`             | 表示     | 不可                | 0 件以外は警告アイコン + tooltip で内容を表示。       |
+| #  | カラム ID         | データ ソース                       | 既定表示 | 編集 (Phase 4 以降) | inputKind        | 備考                                                   |
+| -- | ----------------- | ----------------------------------- | -------- | ------------------- | ---------------- | ------------------------------------------------------ |
+| 1  | `fileName`        | `path.basename(filePath)`           | 表示     | 不可                | -                | **常時表示・編集不可・列固定**。tooltip でフルパス。   |
+| 2  | `audioFormat`     | `Track.audioFormat`                 | 表示     | 不可                | -                | format 列。disabled 表示。                              |
+| 3  | `durationMs`      | `Track.durationMs`                  | 表示     | 不可                | -                | `m:ss` 整形して表示。                                  |
+| 4  | `tag.title`       | `Track.tag.title`                   | 表示     | 可                  | text             |                                                        |
+| 5  | `tag.artist`      | `Track.tag.artist`                  | 表示     | 可                  | text             |                                                        |
+| 6  | `tag.album`       | `Track.tag.album`                   | 表示     | 可                  | text             |                                                        |
+| 7  | `tag.albumArtist` | `Track.tag.albumArtist`             | 表示     | 可                  | text             |                                                        |
+| 8  | `tag.trackNumber` | `Track.tag.trackNumber`             | 表示     | 可                  | number           | `track / total` の合成表示は Phase 4 で。              |
+| 9  | `tag.trackTotal`  | `Track.tag.trackTotal`              | 非表示   | 可                  | number           | 既定では off、列表示で on にできる (Phase 6)。          |
+| 10 | `tag.discNumber`  | `Track.tag.discNumber`              | 非表示   | 可                  | number           |                                                        |
+| 11 | `tag.discTotal`   | `Track.tag.discTotal`               | 非表示   | 可                  | number           |                                                        |
+| 12 | `tag.year`        | `Track.tag.year`                    | 表示     | 可                  | number           | 4 桁整数。                                              |
+| 13 | `tag.genre`       | `Track.tag.genre`                   | 表示     | 可                  | select (free)    | shadcn `Combobox` (datalist 互換)。任意入力可、よくある genre は候補表示。 |
+| 14 | `tag.composer`    | `Track.tag.composer`                | 非表示   | 可                  | text             |                                                        |
+| -  | `tag.conductor` / `lyricist` / `publisher` / `copyright` / `comment` / `group` / `description` / `isrc` / `productId` | `TagData` の各フィールド | 非表示 | 可 | text             |                                                        |
+| -  | `tag.language`    | `Track.tag.language`                | 非表示   | 可                  | select (free)    | ISO-639 候補 (`eng` / `jpn` ...) + 自由入力。           |
+| -  | `tag.recordingDate` / `originalReleaseDate` / `publishingDate` | `TagData` の日付系 | 非表示 | 可 | date             | `<Input type="text" inputMode="numeric" />` + ISO-8601 検証 (`YYYY` / `YYYY-MM` / `YYYY-MM-DD`)。 |
+| -  | `tag.bpm`         | `Track.tag.bpm`                     | 非表示   | 可                  | number           | 1〜999 の整数。                                         |
+| -  | `tag.rating`      | `Track.tag.rating`                  | 非表示   | 可                  | custom           | 星 5 つの `<RatingEditor />` (Phase 4 で実装)。表示は ★/☆ 5 つ。 |
+| -  | `pictures`        | `Track.pictures.length`             | 表示     | モーダル            | -                | セルは「件数 + Cover Front の有無」を表示、ダブル クリックでモーダル (Phase 5)。 |
+| -  | `lyrics`          | `Track.lyrics`                      | 表示     | モーダル            | -                | `none` / `text` / `synced` のサマリー表示、ダブル クリックでモーダル (Phase 5)。 |
+| -  | `chapters`        | `Track.chapters.length`             | 非表示   | -                   | -                | 表示は OK、編集は v1 では非対応 (Phase 7 の deferred)。 |
+| -  | `warnings`        | `Track.warnings.length`             | 表示     | 不可                | -                | 0 件以外は警告アイコン + tooltip で内容を表示。       |
+
+> Phase 3 では `inputKind` 列の値を **型として確定 + 各列に設定する** ところまで行う (実際のエディタ コンポーネントは Phase 4 で実装)。`tag.rating` の `<RatingEditor />` のような **custom editor 列が現実に登場する** ことを Phase 3 で型レベルで担保しておくことで、Phase 4 でライブラリ非依存な editor 配線を組みやすくする。
 
 列定義は **`src/renderer/features/spreadsheet/columns.ts`** に純関数化したテーブルとして置く。`TagData` の型から派生させるので、core で `TagData` にフィールドを増やすと型エラーで GUI 側に列追加を促せる構造にする (`type ColumnId = | "fileName" | "audioFormat" | ...` を `TagData` の `keyof` から組み立てる)。
 
@@ -143,6 +172,30 @@ export type ColumnDefinition = {
   readonly width: number;
   readonly editable: "never" | "tag" | "modal";   // Phase 4 / 5 で利用
   readonly readValue: (row: TrackRow) => string | number | undefined;
+  /**
+   * 列ごとの input type をここで切り替える (Phase 4 で実体を実装、Phase 3 では型のみ)。
+   * - "text"   : `<Input />`
+   * - "number" : `<Input type="number" />` + 範囲バリデーション
+   * - "select" : `<Select />` + `options` (genre / language の autocomplete 用)
+   * - "date"   : `<Input type="text" inputMode="numeric" />` + ISO-8601 検証
+   * - "custom" : `editor` フィールドで任意の React コンポーネントを指定
+   */
+  readonly inputKind: "text" | "number" | "select" | "date" | "custom";
+  /** select 用の候補リスト (固定または非同期で解決)。inputKind === "select" のみで使う。 */
+  readonly options?: readonly { value: string; label: string }[];
+  /**
+   * inputKind === "custom" のときに使う editor。受け取った value を `commit(next)` で
+   * 親 (= 編集 store) に渡し、`cancel()` でロールバックする。Phase 4 で配線する。
+   */
+  readonly editor?: (props: CellEditorProps) => React.ReactNode;
+};
+
+export type CellEditorProps = {
+  readonly row: TrackRow;
+  readonly value: string | number | undefined;
+  readonly commit: (next: string | number | undefined) => void;
+  readonly cancel: () => void;
+  readonly disabled: boolean;       // フォーマット未対応セルでは true
 };
 
 export const buildColumns: (
@@ -180,9 +233,14 @@ export const isCellWritable: (row: TrackRow, columnId: ColumnId, support: ...) =
 
 ## 参考資料
 
-- Glide Data Grid: <https://github.com/glideapps/glide-data-grid>
 - TanStack Table: <https://tanstack.com/table/v8>
+- TanStack Table Editable Data の例: <https://tanstack.com/table/v8/docs/framework/react/examples/editable-data>
 - TanStack Virtual: <https://tanstack.com/virtual/latest>
+- react-data-grid (adazzle): <https://github.com/adazzle/react-data-grid>
+- react-data-grid `renderEditCell`: <https://adazzle.github.io/react-data-grid/#/CommonFeatures>
+- Glide Data Grid: <https://github.com/glideapps/glide-data-grid>
+- Glide Data Grid `provideEditor`: <https://docs.grid.glideapps.com/api/dataeditor#provideeditor>
+- AG Grid Community: <https://www.ag-grid.com/react-data-grid/>
 - RevoGrid: <https://github.com/revolist/revogrid>
 - core の `FormatSupport` 派生表 (Phase 2): `packages/gui/src/main/ipc/formatSupport/matrix.ts`
 - 先行 GUI のスプレッドシート: Mp3tag (Windows) のメイン ビュー、kid3 のリスト ビュー

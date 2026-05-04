@@ -83,7 +83,7 @@ packages/gui/
 ## ライブラリ選定の方針
 
 - **UI コンポーネント**: shadcn/ui (electron-starter と同じ。`pnpm shadcn add ...` で追加)。
-- **スプレッドシート**: Phase 03 で評価し決定する。第一候補は **Glide Data Grid** (Canvas ベース、列固定 / セル コピペ / 大量行のスクロールに強い、MIT)、対抗馬として **TanStack Table v8** (ヘッドレス、shadcn/ui との見た目統一が容易)、**RevoGrid** (Web Components、Excel ライク)。Phase 03 で PoC して 1 つ採用し、以降のフェーズはそれを前提に書く。
+- **スプレッドシート**: Phase 03 で評価し決定する。要件は **(a) セルのインライン編集、(b) セルごとに input type を切り替え (列ごとに任意の React コンポーネントを editor として置ける)、(c) 列範囲選択 → クリップボード ペースト**。第一候補は **TanStack Table v8 + `@tanstack/react-virtual`** (ヘッドレス、editor が完全に React、shadcn/ui の `Input` / `Select` / `Textarea` をそのまま editor に使える、MIT)。対抗馬として **react-data-grid (adazzle)** (`renderEditCell` で React editor が素直、列固定や仮想スクロールが標準で内蔵)、スケール保険として **Glide Data Grid** (Canvas ベース、10k 行超で前 2 つが詰まった場合のフォールバック)。Phase 03 で PoC して 1 つ採用し、以降のフェーズはそれを前提に書く。
 - **状態管理**: 当面は React の `useReducer` + Context で済ます。スプレッドシート × ファイル数で状態が爆発する兆候が見えたら **Zustand** を検討 (Phase 04 までに結論)。
 - **IPC 型安全化**: 別ライブラリは入れず、`src/shared/ipc-contract.ts` に「channel 名 → request/response 型」のマップを置き、Main / Preload / Renderer から共有する。
 - **ロギング**: 当面は `console`。Main プロセスのファイル ログが必要になったら Phase 07 で `electron-log` を検討。
