@@ -1,22 +1,16 @@
-import { Button } from "@/components/ui/button";
+import { AppShell } from "./components/app/AppShell";
 
+/**
+ * Renderer entry component.
+ *
+ * Phase 3 reduces `App` to a thin wrapper over the application shell so the
+ * shell itself can own state and effects without dragging React-tree noise
+ * along with it.
+ *
+ * @returns The rendered application.
+ */
 function App() {
-  const versions = window.mme.versions;
-
-  return (
-    <div className="mx-auto max-w-3xl p-8 text-center">
-      <h1 className="text-4xl font-bold leading-tight">Music Metadata Editor</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Phase 2 IPC scaffold.</p>
-      <div className="py-8">
-        <Button variant="outline">Ready</Button>
-      </div>
-      <div className="mt-8 space-y-1 text-sm text-muted-foreground">
-        <p>Electron: {versions.electron}</p>
-        <p>Chrome: {versions.chrome}</p>
-        <p>Node: {versions.node}</p>
-      </div>
-    </div>
-  );
+  return <AppShell />;
 }
 
 export default App;
