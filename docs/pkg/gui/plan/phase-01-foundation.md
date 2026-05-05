@@ -196,7 +196,7 @@ declare global {
 
 ## 参考資料
 
-- electron-starter: <https://github.com/akabekobeko/electron-starter> (ローカル: `/Users/akabeko/Documents/dev/akabeko/electron-starter`)
+- electron-starter: <https://github.com/akabekobeko/electron-starter> (必要に応じてローカル clone のパスをユーザーに確認)
 - Electron Context Isolation: <https://www.electronjs.org/docs/latest/tutorial/context-isolation>
 - shadcn/ui (Vite): <https://ui.shadcn.com/docs/installation/vite>
 - Tailwind v4 + Vite: <https://tailwindcss.com/docs/installation/using-vite>
