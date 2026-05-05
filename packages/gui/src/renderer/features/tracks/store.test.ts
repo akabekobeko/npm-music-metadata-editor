@@ -13,11 +13,10 @@ const fakeTrack = (title: string): Track => ({
   warnings: [],
 });
 
-const row = (filePath: string, title: string): TrackRow => ({
-  filePath,
-  track: fakeTrack(title),
-  dirty: false,
-});
+const row = (filePath: string, title: string): TrackRow => {
+  const track = fakeTrack(title);
+  return { filePath, track, origin: track, dirty: false };
+};
 
 it("flips `loading` to true on load:start", () => {
   const next = tracksReducer(initialTracksState, { type: "load:start" });

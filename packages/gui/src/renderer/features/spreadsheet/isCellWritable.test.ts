@@ -14,11 +14,10 @@ const fakeTrack = (audioFormat: AudioFormat): Track => ({
   warnings: [],
 });
 
-const row = (audioFormat: AudioFormat): TrackRow => ({
-  filePath: `/${audioFormat}.bin`,
-  track: fakeTrack(audioFormat),
-  dirty: false,
-});
+const row = (audioFormat: AudioFormat): TrackRow => {
+  const track = fakeTrack(audioFormat);
+  return { filePath: `/${audioFormat}.bin`, track, origin: track, dirty: false };
+};
 
 type SupportEntryArgs = {
   readonly format: AudioFormat;
