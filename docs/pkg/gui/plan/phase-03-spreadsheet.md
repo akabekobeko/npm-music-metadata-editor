@@ -242,7 +242,7 @@ export const isCellWritable: (row: TrackRow, columnId: ColumnId, support: ...) =
 - Glide Data Grid `provideEditor`: <https://docs.grid.glideapps.com/api/dataeditor#provideeditor>
 - AG Grid Community: <https://www.ag-grid.com/react-data-grid/>
 - RevoGrid: <https://github.com/revolist/revogrid>
-- core の `FormatSupport` 派生表 (Phase 2): `packages/gui/src/main/ipc/formatSupport/matrix.ts`
+- core の `FormatSupport` 派生表 (Phase 2): `packages/gui/src/main/ipc/formatSupport/buildFormatSupportMatrix.ts`
 - 先行 GUI のスプレッドシート: Mp3tag (Windows) のメイン ビュー、kid3 のリスト ビュー
 
 ## ライブラリ選定の結論 (PoC 後に記入)

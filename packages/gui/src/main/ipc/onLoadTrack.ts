@@ -1,0 +1,29 @@
+import { loadTrack } from "@akabeko/music-metadata-editor";
+import type { IpcResult, LoadTrackOk } from "./types.js";
+import { toIpcError } from "./utils/toIpcError.js";
+
+/**
+ * Channel handler for `mme:track:load`.
+ *
+ * Thin wrapper that defers all parsing to core's `loadTrack`. Errors are
+ * normalised with {@link toIpcError} so that the Renderer always receives a
+ * structured-clone-safe payload, and failures are mirrored to `console.error`
+ * so the caller can correlate them from the terminal without opening Devtools.
+ *
+ * @param _ev - Electron event object (unused).
+ * @param request - File path to load.
+ * @returns The loaded track, or a serialisable error.
+ */
+export const onLoadTrack = async (
+  _ev: Electron.IpcMainInvokeEvent,
+  request: { filePath: string },
+): Promise<IpcResult<LoadTrackOk>> => {
+  try {
+    const track = await loadTrack(request.filePath);
+    return { ok: true, value: { filePath: request.filePath, track } };
+  } catch (error) {
+    const ipcError = toIpcError(error);
+    console.error("[mme:track:load]", request.filePath, ipcError);
+    return { ok: false, error: ipcError };
+  }
+};
