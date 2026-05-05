@@ -1,0 +1,33 @@
+/** Props for {@link StatusBar}. */
+export type StatusBarProps = {
+  readonly fileCount: number;
+  readonly dirtyCount: number;
+  readonly warningCount: number;
+  /**
+   * Transient summary appended to the right of the bar (e.g. paste outcome).
+   * `null` hides the slot entirely.
+   */
+  readonly transient: string | null;
+};
+
+/**
+ * Bottom status bar showing aggregate counters and transient action summaries.
+ *
+ * Counters refresh every render; transient text fades out after the parent
+ * clears it (Phase 4 plan: 5 seconds after a paste).
+ *
+ * @returns The bar.
+ */
+export function StatusBar({ fileCount, dirtyCount, warningCount, transient }: StatusBarProps) {
+  return (
+    <footer
+      role="status"
+      className="flex h-7 shrink-0 items-center gap-3 border-t bg-background px-3 text-xs text-muted-foreground tabular-nums"
+    >
+      <span>{`${fileCount} ${fileCount === 1 ? "file" : "files"}`}</span>
+      <span>{`${dirtyCount} edited`}</span>
+      <span>{`${warningCount} ${warningCount === 1 ? "warning" : "warnings"}`}</span>
+      {transient !== null ? <span className="ml-auto text-foreground">{transient}</span> : null}
+    </footer>
+  );
+}

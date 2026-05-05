@@ -47,8 +47,8 @@ it("maps successful entries to rows with `dirty: false`", async () => {
 
   const result = await loadTracks(["/a.mp3", "/b.flac"]);
   expect(result.rows).toEqual([
-    { filePath: "/a.mp3", track: aTrack, dirty: false },
-    { filePath: "/b.flac", track: bTrack, dirty: false },
+    { filePath: "/a.mp3", track: aTrack, origin: aTrack, dirty: false },
+    { filePath: "/b.flac", track: bTrack, origin: bTrack, dirty: false },
   ]);
   expect(result.errors).toEqual([]);
 });

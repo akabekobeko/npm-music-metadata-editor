@@ -32,7 +32,16 @@ export const loadTracks = async (filePaths: readonly string[]): Promise<LoadTrac
   }
 
   const rows = response.value.flatMap<TrackRow>((entry) =>
-    entry.result.ok ? [{ filePath: entry.filePath, track: entry.result.value, dirty: false }] : [],
+    entry.result.ok
+      ? [
+          {
+            filePath: entry.filePath,
+            track: entry.result.value,
+            origin: entry.result.value,
+            dirty: false,
+          },
+        ]
+      : [],
   );
   const errors = response.value.flatMap<TrackLoadError>((entry) =>
     entry.result.ok ? [] : [{ filePath: entry.filePath, error: entry.result.error }],
