@@ -166,6 +166,7 @@ it("requests a paste with the selected column id when Cmd+V fires", async () => 
       clipboardText: "Alpha\nBeta",
       baseRowIndex: 0,
       maxRows: 2,
+      mode: "column",
     }),
   );
 });

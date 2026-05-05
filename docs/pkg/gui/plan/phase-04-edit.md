@@ -57,26 +57,31 @@ TrackRow = {
 
 1. ユーザーが **列ヘッダーをクリック**して列全体を選択、または **複数行 × 1 列を範囲選択**する。
 2. `Cmd/Ctrl+V` で `navigator.clipboard.readText()` を読み、**改行 (`\r\n` / `\n` / `\r`) で行に分割**する。`\t` 区切りでも 1 列扱い (= 先頭セルのみ採用) にする。
-3. 分割した値を **選択範囲の各行に順序通りに当てる**。
-   - クリップボード行数 > 選択行数: 余りは破棄。
-   - クリップボード行数 < 選択行数: 不足分は **何もしない** (上書きしない)。Excel 互換ではなく、**意図しない上書きを避ける** 方針。
+3. 分割した値を **選択範囲の各行に当てる**。
+   - **列選択 + クリップボード 1 値 → 全行に broadcast** (Numbers / Excel 互換の「列選択 = 全セル選択」を踏襲、artist 名一括修正のような典型ユース ケースを 1 アクションでカバー)。実装は `features/edit/expandColumnPaste.ts` の純関数。
+   - 列選択 + クリップボード 2 値以上 → 行 0 から 1:1 で当てる。クリップボード行数 > 選択行数なら余りを破棄、行数 < 選択行数なら **不足分は何もしない (上書きしない)**。Excel 互換のフィルではなく、複数値ペーストではあくまで「ユーザーが用意した分だけ」を尊重する方針。
+   - 単一セル選択 + クリップボード → 先頭 1 値のみそのセルへ。
 4. ペースト先のセルが **disabled (= フォーマット未対応 / `editable: "never"`)** の場合、そのセルは **空振り**して飛ばす。stderr にメッセージは出さないが、ペースト後に右下のステータス バーに `Pasted N values, skipped M unsupported cells` を表示する。
 5. ペースト先の各セルでも **入力検証**を通す。検証に失敗した値は飛ばし (空振り)、ステータス バーに `skipped M invalid values` を加算する。
 6. ペーストは 1 つのトランザクションとして扱い、Undo (`Cmd/Ctrl+Z`) で **一括戻し**できる。
+
+> **Note**: 列の値型ごとに「そもそも列選択を許可するか」「broadcast を許可するか」「Lyrics / Comment のような複数行値のための特殊クリップボード形式を入れるか」を分岐する設計拡張は、Phase 4 のスコープ外として **[`phase-08-column-selection.md`](phase-08-column-selection.md)** に切り出した。Phase 5 (Pictures / Lyrics modal) と並行 / 直後に着手する想定。
 
 実装責務:
 
 ```
 src/renderer/features/edit/
-  paste.ts            # parseClipboardText + applyPaste の純関数
+  paste.ts                # parseClipboardText + applyPaste の純関数
   paste.test.ts
+  expandColumnPaste.ts    # 列選択時の broadcast 規則 (純関数)
+  expandColumnPaste.test.ts
   validators.ts
   validators.test.ts
-  store.ts            # 編集トランザクション (apply / revert / undo)
+  store.ts                # 編集トランザクション (apply / revert / undo)
   store.test.ts
 ```
 
-`parseClipboardText(text): readonly string[]` と `applyPaste(rows, columnId, values, support): { applied, skippedUnsupported, skippedInvalid }` を純関数として切り、UI 層は呼び出すだけ。
+`parseClipboardText(text): readonly string[]` と `applyPaste(rows, columnId, values, support): { applied, skippedUnsupported, skippedInvalid }`、それに `expandColumnPaste({ values, mode, totalRows })` を純関数として切り、UI 層 (`AppShell.handlePaste`) は **parse → expand → apply** の順で組み合わせるだけにする。
 
 ### 行 (ファイル) のコピペ
 
@@ -156,6 +161,11 @@ export const editReducer: (state: EditState, action: EditAction) => EditState;
   - 値数 < 行数 → 不足分は元の値のまま、`applied = 値数`。
   - disabled 行 → `skippedUnsupported++`、その行の値は変えない。
   - 数値列 + 不正値 → `skippedInvalid++`。
+- `expandColumnPaste`:
+  - `mode: "column"` + 値数 1 → 全行 broadcast (totalRows 分の同値配列を返す)。
+  - `mode: "column"` + 値数 > 1 → 入力をそのまま返す (1:1 paste)。
+  - `mode: "cell"` → 入力をそのまま返す (broadcast しない)。
+  - `totalRows <= 0` / 値数 == 0 → 入力をそのまま返す (no-op)。
 - `editReducer`:
   - `commit` → `dirty: true` が立つ。
   - 同じ値で `commit` → `dirty` は origin と比較した結果で決まる。
@@ -171,9 +181,9 @@ export const editReducer: (state: EditState, action: EditAction) => EditState;
 - 編集対象のセルがダブル クリック / Enter / 文字入力で編集モードに入り、`Enter` でコミット / `Esc` でキャンセルできる。
 - disabled セル (フォーマット未対応 / `editable: "never"`) は編集モードに入らない。
 - セル単位の Undo (`Cmd/Ctrl+Z`) が動く。
-- 列選択 → `Cmd/Ctrl+V` で `navigator.clipboard.readText()` の内容を縦方向にペーストできる。disabled セルはスキップ、不正値はスキップ、結果サマリーがステータス バーに出る。
+- 列選択 → `Cmd/Ctrl+V` で `navigator.clipboard.readText()` の内容を縦方向にペーストできる。**クリップボード 1 値の場合は全行 broadcast**、複数値の場合は行 0 から 1:1。disabled セルはスキップ、不正値はスキップ、結果サマリーがステータス バーに出る。
 - `dirty` 行が fileName セルの先頭ドットで識別できる。
-- `validators` / `parseClipboardText` / `applyPaste` / `editReducer` の純関数に `*.test.ts` がある。
+- `validators` / `parseClipboardText` / `applyPaste` / `expandColumnPaste` / `editReducer` の純関数に `*.test.ts` がある。
 - `pnpm -r typecheck` / `pnpm -r test` / `pnpm check` が緑。
 
 ## 参考資料

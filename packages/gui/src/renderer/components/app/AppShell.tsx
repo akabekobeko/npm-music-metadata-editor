@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { expandColumnPaste } from "@/features/edit/expandColumnPaste";
 import { applyPaste, parseClipboardText } from "@/features/edit/paste";
 import { useEditStore } from "@/features/edit/store";
 import { buildColumns } from "@/features/spreadsheet/buildColumns";
@@ -94,12 +95,14 @@ export function AppShell() {
   }, [editDispatch]);
 
   const handlePaste = useCallback(
-    ({ columnId, clipboardText, baseRowIndex, maxRows }: PasteArgs): void => {
-      const values = parseClipboardText(clipboardText).slice(0, maxRows);
-      if (values.length === 0) {
+    ({ columnId, clipboardText, baseRowIndex, maxRows, mode }: PasteArgs): void => {
+      const parsed = parseClipboardText(clipboardText).slice(0, maxRows);
+      if (parsed.length === 0) {
         return;
       }
 
+      const totalRows = editState.rows.length - baseRowIndex;
+      const values = expandColumnPaste({ values: parsed, mode, totalRows });
       const slice = editState.rows.slice(baseRowIndex, baseRowIndex + values.length);
       const outcome = applyPaste({ rows: slice, columnId, values, support });
       const nextRows: readonly TrackRow[] = [

@@ -1,5 +1,6 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { PasteSelectionMode } from "@/features/edit/expandColumnPaste";
 import { isCellWritable } from "@/features/spreadsheet/isCellWritable";
 import type { ColumnDefinition, ColumnId, FormatSupportMap } from "@/features/spreadsheet/types";
 import type { TrackRow } from "@/features/tracks/types";
@@ -36,6 +37,12 @@ export type PasteArgs = {
   readonly clipboardText: string;
   readonly baseRowIndex: number;
   readonly maxRows: number;
+  /**
+   * Selection that triggered the paste. The host uses this to enable the
+   * Numbers-style "broadcast a single value across the column" behaviour for
+   * `column` selections (see `expandColumnPaste`).
+   */
+  readonly mode: PasteSelectionMode;
 };
 
 /** Props for {@link Spreadsheet}. */
@@ -359,6 +366,7 @@ const dispatchPaste = ({ selection, rowsLength, onPaste }: DispatchPasteArgs): v
         clipboardText: text,
         baseRowIndex: selection.rowIndex,
         maxRows: 1,
+        mode: "cell",
       });
       return;
     }
@@ -368,6 +376,7 @@ const dispatchPaste = ({ selection, rowsLength, onPaste }: DispatchPasteArgs): v
       clipboardText: text,
       baseRowIndex: 0,
       maxRows: rowsLength,
+      mode: "column",
     });
   });
 };

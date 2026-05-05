@@ -73,6 +73,7 @@ packages/gui/
 | 05 | [Pictures & Lyrics Modal](phase-05-extras.md)            | Pictures (画像 import/export/プレビュー) / Lyrics (text + LRC) モーダル        | TODO |
 | 06 | [Settings & Write](phase-06-settings-write.md)           | 列表示 ON/OFF 設定の永続化、saveTrack 呼び出し、書き込み中インジケーター        | TODO |
 | 07 | [Polish & Distribution](phase-07-polish.md)              | メニュー / D&D / 多言語 / electron-builder 配布物 / リリース手順              | TODO |
+| 08 | [Column Selection Type Branching](phase-08-column-selection.md) | `ColumnDefinition.selectable` で列選択 / broadcast の可否を列ごとに分岐 (Lyrics / Comment などの保護) | TODO |
 
 ## 進め方
 
