@@ -58,6 +58,53 @@ export type ShowOpenFilesRequest = {
 };
 
 /**
+ * Filter entry forwarded to `dialog.showSaveDialog`'s `filters` option.
+ *
+ * Defined locally instead of re-using Electron's `FileFilter` so the type can
+ * survive structured-clone IPC and be referenced from Renderer-side code that
+ * does not import the `electron` package.
+ */
+export type SaveFileFilter = {
+  readonly name: string;
+  readonly extensions: readonly string[];
+};
+
+/** Request payload for `mme:dialog:saveFile`. */
+export type ShowSaveFileRequest = {
+  /** Pre-filled file name (without directory). */
+  readonly defaultFileName?: string;
+  /** Save dialog filters; first entry wins as the default extension. */
+  readonly filters?: readonly SaveFileFilter[];
+};
+
+/**
+ * Successful payload of `mme:dialog:saveFile`.
+ *
+ * `null` indicates a user-cancelled dialog so callers can short-circuit
+ * without inspecting the wider `IpcResult.ok === false` failure path.
+ */
+export type ShowSaveFileOk = {
+  readonly filePath: string;
+} | null;
+
+/** Request payload for `mme:file:writeBytes`. */
+export type WriteBytesRequest = {
+  readonly filePath: string;
+  readonly bytes: Uint8Array;
+};
+
+/** Request payload for `mme:file:readBytes`. */
+export type ReadBytesRequest = {
+  readonly filePath: string;
+};
+
+/** Successful payload of `mme:file:readBytes`. */
+export type ReadBytesOk = {
+  readonly filePath: string;
+  readonly bytes: Uint8Array;
+};
+
+/**
  * Successful payload of `mme:track:load`.
  *
  * Carries the resolved file path back so Renderer can correlate the request
@@ -177,6 +224,7 @@ export type MmeBridge = {
   };
   readonly dialog: {
     readonly openFiles: (request?: ShowOpenFilesRequest) => Promise<IpcResult<readonly string[]>>;
+    readonly saveFile: (request?: ShowSaveFileRequest) => Promise<IpcResult<ShowSaveFileOk>>;
   };
   readonly track: {
     readonly load: (request: { filePath: string }) => Promise<IpcResult<LoadTrackOk>>;
@@ -184,6 +232,10 @@ export type MmeBridge = {
       filePaths: readonly string[];
     }) => Promise<IpcResult<readonly LoadManyEntry[]>>;
     readonly save: (request: SaveTrackRequest) => Promise<IpcResult<SaveTrackOk>>;
+  };
+  readonly file: {
+    readonly readBytes: (request: ReadBytesRequest) => Promise<IpcResult<ReadBytesOk>>;
+    readonly writeBytes: (request: WriteBytesRequest) => Promise<IpcResult<void>>;
   };
   readonly formatSupport: {
     readonly list: () => Promise<IpcResult<readonly FormatSupportEntry[]>>;
