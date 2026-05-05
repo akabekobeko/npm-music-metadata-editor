@@ -1,7 +1,9 @@
 import { type Dispatch, useReducer } from "react";
-import type { TagData } from "../../../main/ipc/types.js";
+import type { LyricsInfo, PictureInfo, TagData } from "../../../main/ipc/types.js";
 import type { TrackRow } from "../tracks/types.js";
 import { revertRow } from "./revertRow.js";
+import { setLyrics } from "./setLyrics.js";
+import { setPictures } from "./setPictures.js";
 import { setTagValue } from "./setTagValue.js";
 
 /**
@@ -32,6 +34,16 @@ export type EditAction =
       readonly filePath: string;
       readonly field: keyof TagData;
       readonly value: string | number | undefined;
+    }
+  | {
+      readonly type: "commitPictures";
+      readonly filePath: string;
+      readonly pictures: readonly PictureInfo[];
+    }
+  | {
+      readonly type: "commitLyrics";
+      readonly filePath: string;
+      readonly lyrics: LyricsInfo | undefined;
     }
   | { readonly type: "revert"; readonly filePath: string }
   | { readonly type: "applyChange"; readonly nextRows: readonly TrackRow[] }
@@ -96,6 +108,20 @@ export const editReducer = (state: EditState, action: EditAction): EditState => 
       row.filePath === action.filePath
         ? setTagValue({ row, field: action.field, value: action.value })
         : row,
+    );
+    return transitionRows(state, nextRows);
+  }
+
+  if (action.type === "commitPictures") {
+    const nextRows = state.rows.map((row) =>
+      row.filePath === action.filePath ? setPictures({ row, pictures: action.pictures }) : row,
+    );
+    return transitionRows(state, nextRows);
+  }
+
+  if (action.type === "commitLyrics") {
+    const nextRows = state.rows.map((row) =>
+      row.filePath === action.filePath ? setLyrics({ row, lyrics: action.lyrics }) : row,
     );
     return transitionRows(state, nextRows);
   }

@@ -22,11 +22,16 @@ const buildBridge = (): MmeBridge => ({
   },
   dialog: {
     openFiles: (request) => ipcRenderer.invoke(IpcKeys.ShowOpenFiles, request),
+    saveFile: (request) => ipcRenderer.invoke(IpcKeys.ShowSaveFile, request),
   },
   track: {
     load: (request) => ipcRenderer.invoke(IpcKeys.LoadTrack, request),
     loadMany: (request) => ipcRenderer.invoke(IpcKeys.LoadMany, request),
     save: (request) => ipcRenderer.invoke(IpcKeys.SaveTrack, request),
+  },
+  file: {
+    readBytes: (request) => ipcRenderer.invoke(IpcKeys.ReadBytes, request),
+    writeBytes: (request) => ipcRenderer.invoke(IpcKeys.WriteBytes, request),
   },
   formatSupport: {
     list: () => ipcRenderer.invoke(IpcKeys.ListFormatSupport),

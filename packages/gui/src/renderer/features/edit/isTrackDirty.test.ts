@@ -35,3 +35,34 @@ it("returns true when a tag is added", () => {
   const track: Track = { ...origin, tag: { ...origin.tag, artist: "New" } };
   expect(isTrackDirty(track, origin)).toBe(true);
 });
+
+it("returns true when a picture is added", () => {
+  const origin = baseTrack();
+  const track: Track = {
+    ...origin,
+    pictures: [{ mimeType: "image/jpeg", kind: 3, data: new Uint8Array(4) }],
+  };
+  expect(isTrackDirty(track, origin)).toBe(true);
+});
+
+it("returns false when picture descriptors match", () => {
+  const picture = { mimeType: "image/jpeg" as const, kind: 3 as const, data: new Uint8Array(4) };
+  const origin: Track = { ...baseTrack(), pictures: [picture] };
+  const track: Track = {
+    ...origin,
+    pictures: [{ mimeType: "image/jpeg", kind: 3, data: new Uint8Array(4) }],
+  };
+  expect(isTrackDirty(track, origin)).toBe(false);
+});
+
+it("returns true when lyrics differ", () => {
+  const origin = baseTrack();
+  const track: Track = { ...origin, lyrics: { unsynchronized: "Hi" } };
+  expect(isTrackDirty(track, origin)).toBe(true);
+});
+
+it("treats undefined lyrics and an empty LyricsInfo as equal", () => {
+  const origin = baseTrack();
+  const track: Track = { ...origin, lyrics: {} };
+  expect(isTrackDirty(track, origin)).toBe(false);
+});

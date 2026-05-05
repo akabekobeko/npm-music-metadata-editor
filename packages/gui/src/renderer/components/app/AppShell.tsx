@@ -10,11 +10,20 @@ import type { FormatSupportMap } from "@/features/spreadsheet/types";
 import { loadTracks } from "@/features/tracks/loadTracks";
 import { useTracksStore } from "@/features/tracks/store";
 import type { TrackRow } from "@/features/tracks/types";
+import type { LyricsInfo, PictureInfo } from "../../../main/ipc/types";
 
 import { EmptyState } from "./EmptyState";
 import { Header } from "./Header";
+import { LyricsDialog } from "./LyricsDialog/LyricsDialog";
+import { PicturesDialog } from "./PicturesDialog/PicturesDialog";
 import { type CommitArgs, type PasteArgs, Spreadsheet } from "./Spreadsheet/Spreadsheet";
 import { StatusBar } from "./StatusBar";
+
+/** Modal currently mounted on top of the spreadsheet. */
+type ActiveDialog =
+  | { readonly kind: "pictures"; readonly filePath: string }
+  | { readonly kind: "lyrics"; readonly filePath: string }
+  | null;
 
 /** Milliseconds the transient status text stays visible. */
 const TRANSIENT_STATUS_MS = 5000;
@@ -54,14 +63,7 @@ export function AppShell() {
 
   useOpenFilesShortcut(handleOpenFiles);
 
-  const handleOpenPictures = useCallback((row: TrackRow) => {
-    notifyPhase5(`Pictures editor for "${row.filePath}"`);
-  }, []);
-
-  const handleOpenLyrics = useCallback((row: TrackRow) => {
-    notifyPhase5(`Lyrics editor for "${row.filePath}"`);
-  }, []);
-
+  const [activeDialog, setActiveDialog] = useState<ActiveDialog>(null);
   const [transientStatus, setTransientStatus] = useState<string | null>(null);
   const transientTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -73,6 +75,65 @@ export function AppShell() {
 
     transientTimer.current = setTimeout(() => setTransientStatus(null), TRANSIENT_STATUS_MS);
   }, []);
+
+  const handleOpenPictures = useCallback(
+    (row: TrackRow): void => {
+      const entry = support.get(row.track.audioFormat);
+      if (entry !== undefined && !entry.supportsPictures) {
+        showTransientStatus(`${row.track.audioFormat.toUpperCase()} does not support pictures.`);
+        return;
+      }
+
+      setActiveDialog({ kind: "pictures", filePath: row.filePath });
+    },
+    [support, showTransientStatus],
+  );
+
+  const handleOpenLyrics = useCallback(
+    (row: TrackRow): void => {
+      const entry = support.get(row.track.audioFormat);
+      if (entry !== undefined && !entry.supportsLyrics) {
+        showTransientStatus(`${row.track.audioFormat.toUpperCase()} does not support lyrics.`);
+        return;
+      }
+
+      setActiveDialog({ kind: "lyrics", filePath: row.filePath });
+    },
+    [support, showTransientStatus],
+  );
+
+  const closeActiveDialog = useCallback((): void => {
+    setActiveDialog(null);
+  }, []);
+
+  const handleApplyPictures = useCallback(
+    (pictures: readonly PictureInfo[]): void => {
+      if (activeDialog?.kind !== "pictures") {
+        return;
+      }
+
+      editDispatch({ type: "commitPictures", filePath: activeDialog.filePath, pictures });
+      setActiveDialog(null);
+    },
+    [activeDialog, editDispatch],
+  );
+
+  const handleApplyLyrics = useCallback(
+    (lyrics: LyricsInfo | undefined): void => {
+      if (activeDialog?.kind !== "lyrics") {
+        return;
+      }
+
+      editDispatch({ type: "commitLyrics", filePath: activeDialog.filePath, lyrics });
+      setActiveDialog(null);
+    },
+    [activeDialog, editDispatch],
+  );
+
+  const activeRow =
+    activeDialog === null
+      ? null
+      : (editState.rows.find((row) => row.filePath === activeDialog.filePath) ?? null);
 
   useEffect(
     () => () => {
@@ -150,6 +211,24 @@ export function AppShell() {
           transient={transientStatus}
         />
       </div>
+      {activeDialog?.kind === "pictures" && activeRow !== null ? (
+        <PicturesDialog
+          filePath={activeRow.filePath}
+          initialPictures={activeRow.track.pictures}
+          onApply={handleApplyPictures}
+          onClose={closeActiveDialog}
+          onNotify={showTransientStatus}
+        />
+      ) : null}
+      {activeDialog?.kind === "lyrics" && activeRow !== null ? (
+        <LyricsDialog
+          filePath={activeRow.filePath}
+          initialLyrics={activeRow.track.lyrics}
+          onApply={handleApplyLyrics}
+          onClose={closeActiveDialog}
+          onNotify={showTransientStatus}
+        />
+      ) : null}
     </TooltipProvider>
   );
 }
@@ -202,19 +281,6 @@ const useOpenFilesShortcut = (onOpen: () => void): void => {
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [onOpen]);
-};
-
-/**
- * Show a placeholder notice for the Phase 5 modal flows.
- *
- * Keeps the UI wiring exercised end-to-end (cell → handler → user) while
- * leaving the actual editor implementation to a later phase.
- *
- * @param subject - The subject describing what would have opened.
- */
-const notifyPhase5 = (subject: string): void => {
-  // Replaced with a real modal in Phase 5; alert is acceptable per the plan.
-  globalThis.alert?.(`${subject} will open in Phase 5.`);
 };
 
 /**

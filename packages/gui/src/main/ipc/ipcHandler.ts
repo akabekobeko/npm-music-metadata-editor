@@ -5,9 +5,12 @@ import { onGetVersions } from "./onGetVersions.js";
 import { onListFormatSupport } from "./onListFormatSupport.js";
 import { onLoadMany } from "./onLoadMany.js";
 import { onLoadTrack } from "./onLoadTrack.js";
+import { onReadBytes } from "./onReadBytes.js";
 import { onSaveTrack } from "./onSaveTrack.js";
 import { onSetSettings } from "./onSetSettings.js";
 import { onShowOpenFiles } from "./onShowOpenFiles.js";
+import { onShowSaveFile } from "./onShowSaveFile.js";
+import { onWriteBytes } from "./onWriteBytes.js";
 
 /**
  * Tracks whether {@link initializeIpcEvents} has already wired the handlers.
@@ -34,9 +37,12 @@ export const initializeIpcEvents = (): void => {
   isInitialized = true;
   ipcMain.handle(IpcKeys.GetVersions, onGetVersions);
   ipcMain.handle(IpcKeys.ShowOpenFiles, onShowOpenFiles);
+  ipcMain.handle(IpcKeys.ShowSaveFile, onShowSaveFile);
   ipcMain.handle(IpcKeys.LoadTrack, onLoadTrack);
   ipcMain.handle(IpcKeys.LoadMany, onLoadMany);
   ipcMain.handle(IpcKeys.SaveTrack, onSaveTrack);
+  ipcMain.handle(IpcKeys.ReadBytes, onReadBytes);
+  ipcMain.handle(IpcKeys.WriteBytes, onWriteBytes);
   ipcMain.handle(IpcKeys.ListFormatSupport, onListFormatSupport);
   ipcMain.handle(IpcKeys.GetSettings, onGetSettings);
   ipcMain.handle(IpcKeys.SetSettings, onSetSettings);
@@ -57,9 +63,12 @@ export const releaseIpcEvents = (): void => {
 
   ipcMain.removeHandler(IpcKeys.GetVersions);
   ipcMain.removeHandler(IpcKeys.ShowOpenFiles);
+  ipcMain.removeHandler(IpcKeys.ShowSaveFile);
   ipcMain.removeHandler(IpcKeys.LoadTrack);
   ipcMain.removeHandler(IpcKeys.LoadMany);
   ipcMain.removeHandler(IpcKeys.SaveTrack);
+  ipcMain.removeHandler(IpcKeys.ReadBytes);
+  ipcMain.removeHandler(IpcKeys.WriteBytes);
   ipcMain.removeHandler(IpcKeys.ListFormatSupport);
   ipcMain.removeHandler(IpcKeys.GetSettings);
   ipcMain.removeHandler(IpcKeys.SetSettings);

@@ -10,9 +10,12 @@
 export const IpcKeys = {
   GetVersions: "mme:app:getVersions",
   ShowOpenFiles: "mme:dialog:openFiles",
+  ShowSaveFile: "mme:dialog:saveFile",
   LoadTrack: "mme:track:load",
   LoadMany: "mme:track:loadMany",
   SaveTrack: "mme:track:save",
+  ReadBytes: "mme:file:readBytes",
+  WriteBytes: "mme:file:writeBytes",
   ListFormatSupport: "mme:formatSupport:list",
   GetSettings: "mme:settings:get",
   SetSettings: "mme:settings:set",
