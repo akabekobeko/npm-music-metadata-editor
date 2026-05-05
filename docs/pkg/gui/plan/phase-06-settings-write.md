@@ -2,7 +2,9 @@
 
 ## 目的
 
-ユーザー設定 (列表示 ON/OFF など) を **Main プロセスのユーザー領域 (JSON)** に永続化し、`saveTrack` 経由でメタデータを **音楽ファイルへ書き戻す** フローを完成させる。書き込み中は Renderer 上にモーダル インジケーターを出して IPC 完了を待つ。
+ユーザー設定 (列表示 ON/OFF、列幅 (リサイズ) など) を **Main プロセスのユーザー領域 (JSON)** に永続化し、`saveTrack` 経由でメタデータを **音楽ファイルへ書き戻す** フローを完成させる。書き込み中は Renderer 上にモーダル インジケーターを出して IPC 完了を待つ。
+
+> **列リサイズ UI は Phase 3 では未実装** (Phase 3 確認時の指摘で確認済み)。Phase 6 で「ヘッダー境界のドラッグで列幅を変更 → `AppSettings.columns.widths` を `setSettings` で debounce 永続化」を一体化して導入する。実装の起点は `packages/gui/src/renderer/components/app/Spreadsheet/Spreadsheet.tsx` の `<col>` / `<th>` レイアウトに、ヘッダー右端のリサイズ ハンドル + `pointermove` ハンドラを足す形を想定。
 
 ## スコープ
 

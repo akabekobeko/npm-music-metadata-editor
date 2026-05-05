@@ -245,11 +245,19 @@ export const isCellWritable: (row: TrackRow, columnId: ColumnId, support: ...) =
 - core の `FormatSupport` 派生表 (Phase 2): `packages/gui/src/main/ipc/formatSupport/buildFormatSupportMatrix.ts`
 - 先行 GUI のスプレッドシート: Mp3tag (Windows) のメイン ビュー、kid3 のリスト ビュー
 
-## ライブラリ選定の結論 (PoC 後に記入)
+## ライブラリ選定の結論
 
-> Phase 3 開始時点で PoC を行い、以下を埋める。
->
-> - 採用ライブラリ: ___
-> - 理由: ___
-> - 不採用ライブラリの不採用理由: ___
-> - 後段フェーズへの含意 (例: コピペ実装の起点ファイル名): ___
+- **採用ライブラリ**: TanStack Table v8 (`@tanstack/react-table` ^8.21) + `@tanstack/react-virtual` ^3.13
+- **理由**:
+  1. ヘッドレス API なので cell renderer / editor を **任意の React コンポーネント**として返せる。Phase 4 の `inputKind === "custom"` (例: `<RatingEditor />`) を「列定義に書くだけ」で組み込める。
+  2. 列定義が型主導 (`columnHelper.accessor`) で、`TagData` の `keyof` から派生した `ColumnId` 型 + `COLUMN_REGISTRY` (`packages/gui/src/renderer/features/spreadsheet/constants.ts`) と素直に噛み合う。`tag.<field>` を増やす際、core 側で `TagData` を広げると型エラーで GUI 側に列追加を促せる構造になっている。
+  3. shadcn/ui (Tailwind v4) に **テーマ調整なし**で乗る。Phase 7 の light/dark 切り替えも Tailwind の CSS 変数 (`--background` / `--foreground` / `--muted-foreground` 等) だけで済む。
+- **不採用ライブラリ**:
+  - **react-data-grid (adazzle)** — 第二候補。要件は満たすが、内部 DOM が固定で shadcn/ui の `<Tooltip>` / `<Dialog>` を埋めにくい。Phase 5 でモーダル / オーバーレイ系を多用するため、editor の自由度を取って TanStack 側を選択。
+  - **AG Grid Community** — `agInit` の React アダプタを通すぶん「shadcn のコンポーネントをそのまま editor に置く」だけで済まない。テーマ上書きコストも他の 2 つより重い。
+  - **Glide Data Grid** — Canvas で描画するため Tailwind が editor overlay にしか効かず、Phase 5 のモーダル / Phase 7 の light/dark 切り替えでデザインを揃えづらい。
+  - **RevoGrid** — Web Components (Shadow DOM) なので Tailwind が境界で無効化される。要件と合わない。
+- **後段フェーズへの含意**:
+  - 範囲選択 + クリップボード ペースト (Phase 4) は **`Spreadsheet.tsx` (`features/spreadsheet/Spreadsheet/`) に `useState<SelectionRange>` + `onMouseDown` / `onMouseEnter` ハンドラ + `useEffect` の paste listener を追加**して実装する。純関数 `parseClipboardText` / `applyPaste` は `features/spreadsheet/` 配下に新規追加する想定。
+  - 列固定は `<col style={{ width }}>` + `position: sticky` で既に実装済み (`Spreadsheet.tsx`)。固定列を増やす場合は `ColumnDefinition.sticky` を `"left" | "right"` 等に拡張する。
+  - 仮想スクロールは `@tanstack/react-virtual` の `useVirtualizer` で 1k〜10k 行を現行のまま捌ける見込み。10k 行を超える要件が後段で出たら `Glide Data Grid` をフォールバックに再検討する。
