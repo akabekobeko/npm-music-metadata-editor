@@ -19,5 +19,11 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.13"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "electron",
+      "esbuild"
+    ]
   }
 }

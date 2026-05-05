@@ -1,0 +1,59 @@
+{
+  "name": "@akabeko/music-metadata-editor-gui",
+  "description": "Electron desktop application for @akabeko/music-metadata-editor.",
+  "version": "0.0.0",
+  "author": "akabeko (http://akabeko.me/)",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "main": "dist/main/main.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akabekobeko/npm-music-metadata-editor.git",
+    "directory": "packages/gui"
+  },
+  "bugs": {
+    "url": "https://github.com/akabekobeko/npm-music-metadata-editor/issues"
+  },
+  "homepage": "https://github.com/akabekobeko/npm-music-metadata-editor/tree/main/packages/gui#readme",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "pnpm build:main && pnpm build:preload && pnpm build:renderer",
+    "build:main": "vite build --config src/main/vite.config.ts",
+    "build:preload": "vite build --config src/preload/vite.config.ts",
+    "build:renderer": "vite build --config src/renderer/vite.config.ts",
+    "clean": "rm -rf dist release coverage",
+    "typecheck": "tsc --build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "package": "pnpm build && electron-builder",
+    "sync-targets": "node scripts/sync-electron-targets.mjs",
+    "shadcn": "node scripts/shadcn.mjs"
+  },
+  "dependencies": {
+    "@akabeko/music-metadata-editor": "workspace:*"
+  },
+  "devDependencies": {
+    "@base-ui/react": "^1.4.1",
+    "@tailwindcss/vite": "^4.2.4",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "electron": "^41.3.0",
+    "electron-builder": "^26.8.1",
+    "lucide-react": "^1.14.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "shadcn": "^4.6.0",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss": "^4.2.4",
+    "tw-animate-css": "^1.4.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.10",
+    "vitest": "^4.1.5"
+  }
+}

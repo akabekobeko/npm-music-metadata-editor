@@ -142,5 +142,8 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 
+# Electron builder output
+release/
+
 # Claude
 settings.local.json

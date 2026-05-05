@@ -1,0 +1,24 @@
+appId: net.akabekobeko.music-metadata-editor
+productName: Music Metadata Editor
+directories:
+  output: release
+  buildResources: build
+files:
+  - dist/**/*
+  - "!node_modules/**/*"
+asar: true
+mac:
+  target:
+    - dmg
+    - zip
+  artifactName: "${productName}-${version}-${arch}.${ext}"
+win:
+  target:
+    - nsis
+    - zip
+  artifactName: "${productName}-${version}-${arch}.${ext}"
+linux:
+  target:
+    - AppImage
+    - deb
+  artifactName: "${productName}-${version}-${arch}.${ext}"
