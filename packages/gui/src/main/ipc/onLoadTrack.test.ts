@@ -2,7 +2,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { handleLoadTrack } from "./handleLoadTrack.js";
+import { onLoadTrack } from "./onLoadTrack.js";
 
 /**
  * Build a tiny MP3-shaped buffer (single MPEG-1 Layer III frame, silence-padded).
@@ -23,10 +23,13 @@ const buildSilentMp3 = (): Uint8Array => {
   return buf;
 };
 
+/** Minimal event stub; `onLoadTrack` ignores `ev`. */
+const fakeEvent = {} as Electron.IpcMainInvokeEvent;
+
 let tempDir = "";
 
 beforeEach(async () => {
-  tempDir = await mkdtemp(join(tmpdir(), "mme-handleLoadTrack-"));
+  tempDir = await mkdtemp(join(tmpdir(), "mme-onLoadTrack-"));
 });
 
 afterEach(async () => {
@@ -35,12 +38,12 @@ afterEach(async () => {
   }
 });
 
-describe("handleLoadTrack", () => {
+describe("onLoadTrack", () => {
   it("returns the loaded track for a recognised MP3", async () => {
     const filePath = join(tempDir, "silent.mp3");
     await writeFile(filePath, buildSilentMp3());
 
-    const result = await handleLoadTrack({ filePath });
+    const result = await onLoadTrack(fakeEvent, { filePath });
 
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -52,7 +55,7 @@ describe("handleLoadTrack", () => {
   it("returns an IpcError when the file does not exist", async () => {
     const filePath = join(tempDir, "missing.mp3");
 
-    const result = await handleLoadTrack({ filePath });
+    const result = await onLoadTrack(fakeEvent, { filePath });
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
@@ -64,7 +67,7 @@ describe("handleLoadTrack", () => {
     const filePath = join(tempDir, "garbage.bin");
     await writeFile(filePath, new Uint8Array([0x00, 0x00, 0x00, 0x00]));
 
-    const result = await handleLoadTrack({ filePath });
+    const result = await onLoadTrack(fakeEvent, { filePath });
 
     expect(result.ok).toBe(false);
     if (!result.ok) {

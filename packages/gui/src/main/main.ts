@@ -1,7 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { app, BrowserWindow, ipcMain } from "electron";
-import { registerIpcHandlers } from "./ipc/register.js";
+import { app, BrowserWindow } from "electron";
+import { initializeIpcEvents, releaseIpcEvents } from "./ipc/ipcHandler.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -31,10 +31,7 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
-  registerIpcHandlers({
-    ipcMain,
-    getFocusedWindow: () => BrowserWindow.getFocusedWindow(),
-  });
+  initializeIpcEvents();
   createWindow();
 
   app.on("activate", () => {
@@ -42,6 +39,10 @@ app.whenReady().then(() => {
       createWindow();
     }
   });
+});
+
+app.on("will-quit", () => {
+  releaseIpcEvents();
 });
 
 app.on("window-all-closed", () => {

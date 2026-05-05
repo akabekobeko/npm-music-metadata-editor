@@ -11,7 +11,7 @@ export type Semaphore = {
 /**
  * Build a small async semaphore that caps the number of in-flight Promises.
  *
- * Used by `handleLoadMany` to bound the parallelism of `loadTrack` calls so a
+ * Used by `onLoadMany` to bound the parallelism of `loadTrack` calls so a
  * batch of hundreds of files cannot exhaust the OS file-descriptor budget. The
  * implementation is a FIFO queue plus a counter — no external dependency.
  *

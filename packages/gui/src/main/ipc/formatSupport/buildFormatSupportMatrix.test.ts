@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildFormatSupportMatrix } from "./matrix.js";
+import { buildFormatSupportMatrix } from "./buildFormatSupportMatrix.js";
 
 describe("buildFormatSupportMatrix", () => {
   it("matches the snapshot of supported formats", () => {

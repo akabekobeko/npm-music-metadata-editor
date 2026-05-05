@@ -1,5 +1,4 @@
-import type { AudioFormat, TagData } from "@akabeko/music-metadata-editor";
-import type { FormatSupportEntry } from "../../../shared/ipc-contract.js";
+import type { AudioFormat, FormatSupportEntry, TagData } from "../types.js";
 
 /**
  * Common `TagData` keys shared by every {@link AudioFormat} this package supports.
@@ -58,8 +57,8 @@ type FormatCapability = {
  * Capability table indexed by {@link AudioFormat}.
  *
  * The values reflect what `@akabeko/music-metadata-editor` core writes today.
- * Snapshot tests in `matrix.test.ts` pin the resolved matrix so any divergence
- * with a future core release surfaces as a visible diff.
+ * Snapshot tests in `buildFormatSupportMatrix.test.ts` pin the resolved matrix
+ * so any divergence with a future core release surfaces as a visible diff.
  */
 const CAPABILITIES: Readonly<Record<AudioFormat, FormatCapability>> = {
   mp3: { pictures: true, chapters: true, lyrics: true },

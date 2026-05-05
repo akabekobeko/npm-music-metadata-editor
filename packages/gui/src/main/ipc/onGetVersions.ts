@@ -1,22 +1,21 @@
 import { createRequire } from "node:module";
 import { app } from "electron";
-import type { IpcResponseOf } from "../../../shared/ipc-contract.js";
+import type { AppVersions } from "./types.js";
 
 /**
  * `require` shim used to read sibling `package.json` files at runtime.
  *
  * Vite's renderer bundle is ESM, but reading `package.json` from disk needs a
- * CommonJS resolver to honour the workspace `node_modules` layout. `createRequire`
- * gives us one without dragging in `node:fs` boilerplate.
+ * CommonJS resolver to honour the workspace `node_modules` layout.
+ * `createRequire` gives us one without dragging in `node:fs` boilerplate.
  */
 const requireFromHere = createRequire(import.meta.url);
 
 /**
  * Lazy-resolved version of `@akabeko/music-metadata-editor`.
  *
- * Computed on first access so unit tests can stub `requireFromHere` (via module
- * mocking) without paying the disk read on the happy path. The result is
- * cached because the version cannot change at runtime.
+ * Cached because it cannot change at runtime; lazy so unit tests can stub
+ * `require` resolution without paying the disk read on the happy path.
  */
 let coreVersionCache: string | undefined;
 
@@ -43,9 +42,10 @@ const readPackageVersion = (packageName: string): string => {
  * own `app.getVersion()` (= the Electron app's `package.json` version, which
  * mirrors the GUI release).
  *
+ * @param _ev - Electron event object (unused).
  * @returns A snapshot of the runtime stack versions.
  */
-export const handleGetVersions = async (): Promise<IpcResponseOf<"mme:app:getVersions">> => {
+export const onGetVersions = async (_ev: Electron.IpcMainInvokeEvent): Promise<AppVersions> => {
   if (coreVersionCache === undefined) {
     coreVersionCache = readPackageVersion("@akabeko/music-metadata-editor");
   }

@@ -2,9 +2,9 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { handleLoadMany } from "./handleLoadMany.js";
+import { onLoadMany } from "./onLoadMany.js";
 
-/** Minimal MPEG-1 Layer III frame; identical to the helper in `handleLoadTrack.test.ts`. */
+/** Minimal MPEG-1 Layer III frame; identical to the helper in `onLoadTrack.test.ts`. */
 const buildSilentMp3 = (): Uint8Array => {
   const buf = new Uint8Array(104);
   buf[0] = 0xff;
@@ -14,10 +14,13 @@ const buildSilentMp3 = (): Uint8Array => {
   return buf;
 };
 
+/** Minimal event stub; `onLoadMany` ignores `ev`. */
+const fakeEvent = {} as Electron.IpcMainInvokeEvent;
+
 let tempDir = "";
 
 beforeEach(async () => {
-  tempDir = await mkdtemp(join(tmpdir(), "mme-handleLoadMany-"));
+  tempDir = await mkdtemp(join(tmpdir(), "mme-onLoadMany-"));
 });
 
 afterEach(async () => {
@@ -26,14 +29,14 @@ afterEach(async () => {
   }
 });
 
-describe("handleLoadMany", () => {
+describe("onLoadMany", () => {
   it("returns ok results for each file when all succeed", async () => {
     const aPath = join(tempDir, "a.mp3");
     const bPath = join(tempDir, "b.mp3");
     await writeFile(aPath, buildSilentMp3());
     await writeFile(bPath, buildSilentMp3());
 
-    const response = await handleLoadMany({ filePaths: [aPath, bPath] });
+    const response = await onLoadMany(fakeEvent, { filePaths: [aPath, bPath] });
 
     expect(response.ok).toBe(true);
     if (!response.ok) {
@@ -53,7 +56,7 @@ describe("handleLoadMany", () => {
     await writeFile(goodPath, buildSilentMp3());
     await writeFile(badPath, new Uint8Array([0, 0, 0, 0]));
 
-    const response = await handleLoadMany({ filePaths: [goodPath, badPath] });
+    const response = await onLoadMany(fakeEvent, { filePaths: [goodPath, badPath] });
 
     expect(response.ok).toBe(true);
     if (!response.ok) {
@@ -70,7 +73,7 @@ describe("handleLoadMany", () => {
     await writeFile(aPath, new Uint8Array([0]));
     await writeFile(bPath, new Uint8Array([0]));
 
-    const response = await handleLoadMany({ filePaths: [aPath, bPath] });
+    const response = await onLoadMany(fakeEvent, { filePaths: [aPath, bPath] });
 
     expect(response.ok).toBe(true);
     if (!response.ok) {
@@ -81,7 +84,7 @@ describe("handleLoadMany", () => {
   });
 
   it("returns an empty list when no paths are passed", async () => {
-    const response = await handleLoadMany({ filePaths: [] });
+    const response = await onLoadMany(fakeEvent, { filePaths: [] });
 
     expect(response.ok).toBe(true);
     if (response.ok) {

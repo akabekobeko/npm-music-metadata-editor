@@ -1,5 +1,5 @@
 import { isMmeError } from "@akabeko/music-metadata-editor";
-import type { IpcError } from "../../../shared/ipc-contract.js";
+import type { IpcError } from "../types.js";
 
 /**
  * Normalize an arbitrary thrown value into an {@link IpcError}.
@@ -9,7 +9,7 @@ import type { IpcError } from "../../../shared/ipc-contract.js";
  * failures through this helper to produce a Plain Object the Renderer can read.
  *
  * Branches:
- * - {@link MmeError} → keeps `name` / `code` / `message`; drops `cause` because
+ * - `MmeError` → keeps `name` / `code` / `message`; drops `cause` because
  *   Renderer cannot meaningfully consume the underlying chain.
  * - generic `Error` → keeps `name` / `message`; `code` is omitted.
  * - anything else (`null`, `123`, plain object, ...) → wraps as
