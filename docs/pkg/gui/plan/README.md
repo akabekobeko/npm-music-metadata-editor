@@ -33,12 +33,18 @@ packages/gui/
   src/
     main/                     # Electron Main プロセス
       main.ts
-      ipc/                    # IPC ハンドラ (channels)
+      ipc/                    # IPC ハンドラ + IpcKeys / 型定義 / 共通 utils
+        ipcKeys.ts            # channel 名定数
+        types.ts              # MmeBridge / IpcResult 等。core 型もここで集約
+        ipcHandler.ts         # initializeIpcEvents / releaseIpcEvents
+        on*.ts                # 1 channel 1 ファイル
+        formatSupport/        # 対応マトリックス (純関数)
+        utils/                # toIpcError / semaphore など
       core/                   # core wrapper (loadTrack / saveTrack 呼び出し)
       settings/               # JSON 永続化 (userData)
       vite.config.ts
     preload/
-      preload.ts              # contextBridge で window.mme を expose
+      preload.ts              # IpcKeys を import + contextBridge で window.mme を expose
       vite.config.ts
     renderer/
       App.tsx
@@ -48,12 +54,8 @@ packages/gui/
         ui/                   # shadcn/ui (生成物)
       features/               # ドメイン単位の hooks / state (tracks / pictures / lyrics / settings)
       libs/                   # Renderer 内ユーティリティ
-      ipc/                    # window.mme 呼び出しの薄い型付きラッパー
-      vite-env.d.ts
+      vite-env.d.ts           # window.mme 型 (`MmeBridge`) を declare global
       vite.config.ts
-    shared/                   # Main / Preload / Renderer で共有する型と IPC 定義
-      ipc-contract.ts
-      settings.ts
   tsconfig.json               # composite root (project references)
   tsconfig.node.json          # main / preload
   tsconfig.web.json           # renderer
@@ -85,7 +87,7 @@ packages/gui/
 - **UI コンポーネント**: shadcn/ui (electron-starter と同じ。`pnpm shadcn add ...` で追加)。
 - **スプレッドシート**: Phase 03 で評価し決定する。要件は **(a) セルのインライン編集、(b) セルごとに input type を切り替え (列ごとに任意の React コンポーネントを editor として置ける)、(c) 列範囲選択 → クリップボード ペースト**。第一候補は **TanStack Table v8 + `@tanstack/react-virtual`** (ヘッドレス、editor が完全に React、shadcn/ui の `Input` / `Select` / `Textarea` をそのまま editor に使える、MIT)。対抗馬として **react-data-grid (adazzle)** (`renderEditCell` で React editor が素直、列固定や仮想スクロールが標準で内蔵)、スケール保険として **Glide Data Grid** (Canvas ベース、10k 行超で前 2 つが詰まった場合のフォールバック)。Phase 03 で PoC して 1 つ採用し、以降のフェーズはそれを前提に書く。
 - **状態管理**: 当面は React の `useReducer` + Context で済ます。スプレッドシート × ファイル数で状態が爆発する兆候が見えたら **Zustand** を検討 (Phase 04 までに結論)。
-- **IPC 型安全化**: 別ライブラリは入れず、`src/shared/ipc-contract.ts` に「channel 名 → request/response 型」のマップを置き、Main / Preload / Renderer から共有する。
+- **IPC 型安全化**: 別ライブラリは入れず、`src/main/ipc/types.ts` に `MmeBridge` 等の型を集約し、`src/main/ipc/ipcKeys.ts` に channel 名定数を置く。Preload と Renderer は `import type` で main/ipc/ を参照する (Renderer の `window.mme` 型は `src/renderer/vite-env.d.ts` で `declare global` する)。`src/shared/` のような共有レイヤーは作らず、ライブラリーや Electron への value 依存は **Main プロセスのみ** に閉じる。
 - **ロギング**: 当面は `console`。Main プロセスのファイル ログが必要になったら Phase 07 で `electron-log` を検討。
 
 ## ライセンスと公開方針

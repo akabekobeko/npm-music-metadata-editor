@@ -166,7 +166,10 @@ export const loadSettingsSync: (userDataDir: string) => AppSettings;
 export const saveSettings: (userDataDir: string, settings: AppSettings) => Promise<void>;
 export const mergeSettings: (current: AppSettings, patch: DeepPartial<AppSettings>) => AppSettings;
 
-export const handleSaveTrack: (req: SaveTrackRequest) => Promise<IpcResult<{ filePath: string; warnings: readonly Warning[] }>>;
+export const onSaveTrack: (
+  ev: Electron.IpcMainInvokeEvent,
+  req: SaveTrackRequest,
+) => Promise<IpcResult<{ filePath: string; warnings: readonly Warning[] }>>;
 
 // Renderer
 export const useSettings: () => readonly [AppSettings, (patch: DeepPartial<AppSettings>) => void];
@@ -187,7 +190,7 @@ export const saveDirtyRows: (rows: readonly TrackRow[], onProgress: (p: SaveProg
 - `loadSettingsSync` / `saveSettings`:
   - 一時ディレクトリ (`os.tmpdir()`) を用意して読み書き ラウンドトリップ。
   - 不正 JSON (壊れたファイル) → defaults を返し、上書き保存で healed されることを確認。
-- `handleSaveTrack`:
+- `onSaveTrack`:
   - core の `saveTrack` を mock し、(a) 成功 (b) `MmeError` 発生 (c) 不明 Error の 3 ケース。
   - request に Pictures が含まれるケースで Renderer が送ってきた `Uint8Array` が壊れずに core まで届くことを確認 (Electron の構造化クローンに任せる)。
 - Renderer 側 `saveDirtyRows`:
@@ -203,7 +206,7 @@ export const saveDirtyRows: (rows: readonly TrackRow[], onProgress: (p: SaveProg
 - 書き込み中はモーダル ダイアログ + 進捗バー + 現在処理中のファイル名が表示される。
 - 書き込み終了後に `loadMany` で全 dirty 行が再読み込みされ、`dirty: false` に戻る。warnings 列も最新化される。
 - 書き込み失敗 (`MmeError`) は行ごとにエラー アイコン + 詳細表示。
-- `mergeSettings` / `loadSettingsSync` / `saveSettings` / `handleSaveTrack` / `saveDirtyRows` の純関数 / IPC ハンドラに `*.test.ts` がある。
+- `mergeSettings` / `loadSettingsSync` / `saveSettings` / `onSaveTrack` / `saveDirtyRows` の純関数 / IPC ハンドラに `*.test.ts` がある。
 - `pnpm -r typecheck` / `pnpm -r test` / `pnpm check` が緑。
 
 ## 参考資料

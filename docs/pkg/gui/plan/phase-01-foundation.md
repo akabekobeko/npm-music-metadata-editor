@@ -138,7 +138,7 @@
 - `class` を使わず Plain Object + factory function を維持 (`docs/rules/code-style.md`)。Electron / React コンポーネントは関数で書く (React class component は使わない)。
 - Main プロセスでは **`process.exit` を直接呼ばない**。エラーは `app.quit()` または `BrowserWindow` 上の Toast で見せる。
 - shadcn/ui の生成物は手で書き換えない (基本)。書き換える場合はファイル先頭に `// CUSTOMIZED:` コメントを付け、`pnpm shadcn add` で再生成しても上書きされる前提で diff を残せるようにする。
-- Renderer / Main / Preload で共有する型は **`src/shared/`** に集約する。Phase 1 では `src/shared/index.ts` を空のスタブで作成し、Phase 2 から本格的に増やす。
+- Renderer / Main / Preload で共有する型は **Main プロセス側 (`src/main/ipc/types.ts`) を単一のソース オブ トゥルース** とし、Preload / Renderer は `import type` で参照する。Phase 1 では `MmeBridge` 型を `src/renderer/vite-env.d.ts` 内に直接定義する (Phase 2 で `src/main/ipc/types.ts` を起点とした構成に移行する)。共有レイヤー (`src/shared/`) は作らない。
 
 ## 主要な内部 API (案)
 
@@ -152,8 +152,8 @@ contextBridge.exposeInMainWorld("mme", {
   },
 } satisfies MmeBridge);
 
-// src/shared/bridge.ts (Phase 1 で型のみ。Phase 2 で IPC を追加していく)
-export type MmeBridge = {
+// src/renderer/vite-env.d.ts (Phase 1 で型のみ。Phase 2 で MmeBridge を main/ipc/types.ts に移し、ここでは type-only import に切り替える)
+type MmeBridge = {
   readonly versions: {
     readonly node: string;
     readonly chrome: string;

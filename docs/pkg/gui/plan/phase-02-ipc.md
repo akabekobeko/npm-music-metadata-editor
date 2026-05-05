@@ -8,12 +8,12 @@ Main プロセスが core (`@akabeko/music-metadata-editor`) を呼び出し、R
 
 ### IPC 設計の原則
 
-1. **Renderer は core を import しない**。Renderer 側に Node 専用 API (`fs` 等) が混ざるのを防ぎ、Electron の context isolation 前提を崩さないため。
-2. **チャンネル名は `mme:<resource>:<verb>` の 3 段**で揃える。例: `mme:track:load` / `mme:track:save` / `mme:settings:get` / `mme:dialog:openFiles`。
-3. **invoke / handle のみを使う**。Renderer から `ipcRenderer.invoke` で呼び、Main は `ipcMain.handle` で応答する。`ipcRenderer.send` (一方向) は **Main → Renderer の進捗通知だけ** に限定する。
-4. **request / response 型を `src/shared/ipc-contract.ts` に集約**する。Main / Preload / Renderer の 3 層で同じ型を import し、ハンドラ実装と Bridge 公開と Renderer 呼び出しを 1 箇所のソース オブ トゥルースで縛る。
-5. **Bridge は `window.mme.<resource>.<verb>(args)`** の形に整える。`ipcRenderer.invoke("mme:track:load", args)` の生呼び出しは Renderer で書かない。
-6. **エラーは IPC 境界で `MmeError` 互換オブジェクトに正規化**する。`Error` は構造化クローンで失われる情報が多いので、Plain Object に詰め替えて返す。
+1. **Renderer / Preload は core も electron も value で import しない**。Renderer 側に Node 専用 API (`fs` 等) が混ざるのを防ぎ、Electron の context isolation 前提を崩さないため。`@akabeko/music-metadata-editor` を value import するのは **Main プロセスのみ** とし、Preload と Renderer は `src/main/ipc/types.ts` から `import type` で型のみ取得する。
+2. **チャンネル名は `mme:<resource>:<verb>` の 3 段**で揃える。例: `mme:track:load` / `mme:track:save` / `mme:settings:get` / `mme:dialog:openFiles`。文字列リテラルは `src/main/ipc/ipcKeys.ts` に定数として集約し、Main と Preload で同じ識別子を参照する。
+3. **invoke / handle のみを使う**。Renderer から `ipcRenderer.invoke` で呼び、Main は `ipcMain.handle` で応答する。`ipcRenderer.send` (一方向) は **Main → Renderer の進捗通知だけ** に限定する (`mme:progress:save`)。
+4. **Main + Preload に IPC を寄せる**。Renderer 側に「IPC 呼び出しの薄いラッパー」レイヤー (例: `getBridge`) は作らない。Renderer は `window.mme.<group>.<verb>(args)` を直接呼ぶ。Preload は `IpcKeys` を `../main/ipc/ipcKeys` から import し、`contextBridge.exposeInMainWorld("mme", api)` で公開する。
+5. **MmeBridge の型は `src/main/ipc/types.ts` を単一のソース オブ トゥルース** とする。Preload は `import type` でこの型を取得し、Renderer 用には `src/renderer/vite-env.d.ts` で `declare global { interface Window { readonly mme: MmeBridge } }` する。`src/shared/` のような共有レイヤーは作らない。
+6. **エラーは IPC 境界で `MmeError` 互換オブジェクトに正規化**する。`Error` は構造化クローンで失われる情報が多いので、`{ name, code?, message }` の Plain Object (`IpcError`) に詰め替えて返す。Renderer は `IpcResult<T>` (`{ ok: true, value } | { ok: false, error }`) を受け取って分岐する。
 
 ### IPC コントラクト (Phase 2 で定義する範囲)
 
@@ -21,35 +21,51 @@ Main プロセスが core (`@akabeko/music-metadata-editor`) を呼び出し、R
 
 | Channel                   | 用途                                                            | Phase |
 | ------------------------- | --------------------------------------------------------------- | ----- |
-| `mme:app:getVersions`     | core / cli / electron / chrome / node のバージョン取得          | 2     |
+| `mme:app:getVersions`     | core / gui / electron / chrome / node のバージョン取得          | 2     |
 | `mme:dialog:openFiles`    | ファイル選択ダイアログ。複数音楽ファイルのフルパス配列を返す    | 2     |
 | `mme:track:load`          | フルパス → `Track` (core の `loadTrack` を Main で実行)         | 2     |
 | `mme:track:loadMany`      | フルパス配列 → 並列 `Track[]`、失敗ファイルは `error` 付きで返す | 2     |
-| `mme:track:save`          | `{ source: filePath, tag, pictures, chapters, lyrics }` を保存  | 2 (空実装 → 6 で本実装) |
-| `mme:formatSupport:list`  | 各 `AudioFormat` ごとの「書き込み可能フィールド」マトリックス     | 2     |
+| `mme:track:save`          | `{ filePath, tag, pictures, chapters, lyrics }` を保存         | 2 (空実装 → 6 で本実装) |
+| `mme:formatSupport:list`  | 各 `AudioFormat` ごとの「書き込み可能フィールド」マトリックス    | 2     |
 | `mme:settings:get`        | ユーザー設定 JSON 全体の取得                                    | 2 (空実装 → 6 で本実装) |
 | `mme:settings:set`        | パーシャル更新 (deep merge)                                     | 2 (空実装 → 6 で本実装) |
 | `mme:progress:save` (1way)| Main → Renderer の保存進捗通知                                  | 6 で本実装 (Phase 2 では契約のみ) |
 
-### `src/shared/ipc-contract.ts`
+### `src/main/ipc/ipcKeys.ts`
 
-`channel → { request, response }` のマップを 1 ファイルにまとめる。Renderer / Preload / Main が同じ型を import する。
+channel 名定数を **`as const` の Plain Object** で公開する。リネーム時に Main / Preload を一括追従できる。
+
+```ts
+export const IpcKeys = {
+  GetVersions: "mme:app:getVersions",
+  ShowOpenFiles: "mme:dialog:openFiles",
+  LoadTrack: "mme:track:load",
+  LoadMany: "mme:track:loadMany",
+  SaveTrack: "mme:track:save",
+  ListFormatSupport: "mme:formatSupport:list",
+  GetSettings: "mme:settings:get",
+  SetSettings: "mme:settings:set",
+  ProgressSave: "mme:progress:save",
+} as const;
+```
+
+### `src/main/ipc/types.ts`
+
+`MmeBridge` (= `window.mme` 型) と各 channel の request / response 型、共通の `IpcError` / `IpcResult<T>` を集約する。core の型 (`Track`, `TagData`, `PictureInfo` 等) は **このファイルが唯一の経由地** で、`export type { Track, TagData, ... }` の type-only re-export を通じて Renderer / Preload に伝搬させる。
 
 ```ts
 import type {
   AudioFormat,
-  Track,
-  TagData,
-  PictureInfo,
   ChapterInfo,
   LyricsInfo,
+  PictureInfo,
+  TagData,
+  Track,
   Warning,
 } from "@akabeko/music-metadata-editor";
 
-/**
- * Plain-object form of an `Error` that survives Electron's structured clone
- * across IPC. Always use this in IPC responses; never throw across the bridge.
- */
+export type { AudioFormat, ChapterInfo, LyricsInfo, PictureInfo, TagData, Track, Warning };
+
 export type IpcError = {
   readonly name: string;
   readonly code?: string;
@@ -60,17 +76,15 @@ export type IpcResult<T> =
   | { readonly ok: true; readonly value: T }
   | { readonly ok: false; readonly error: IpcError };
 
-export type LoadTrackResponse = IpcResult<{
+export type LoadTrackOk = {
   readonly filePath: string;
   readonly track: Track;
-}>;
+};
 
-export type LoadManyResponse = IpcResult<
-  ReadonlyArray<{
-    readonly filePath: string;
-    readonly result: IpcResult<Track>;
-  }>
->;
+export type LoadManyEntry = {
+  readonly filePath: string;
+  readonly result: IpcResult<Track>;
+};
 
 export type SaveTrackRequest = {
   readonly filePath: string;
@@ -80,39 +94,54 @@ export type SaveTrackRequest = {
   readonly lyrics?: LyricsInfo;
 };
 
+export type SaveTrackOk = {
+  readonly filePath: string;
+  readonly warnings: readonly Warning[];
+};
+
 export type FormatSupportEntry = {
   readonly format: AudioFormat;
-  /** `tag` フィールド毎に書き込み可否を持つ。`true` のキーだけ列挙する。 */
-  readonly writableTagFields: ReadonlySet<keyof TagData>;
+  readonly writableTagFields: ReadonlyArray<keyof TagData>;
   readonly supportsPictures: boolean;
   readonly supportsChapters: boolean;
   readonly supportsLyrics: boolean;
 };
 
-export type IpcContract = {
-  "mme:app:getVersions": {
-    request: void;
-    response: { core: string; gui: string; electron: string; chrome: string; node: string };
+export type AppVersions = {
+  readonly core: string;
+  readonly gui: string;
+  readonly electron: string;
+  readonly chrome: string;
+  readonly node: string;
+};
+
+export type SettingsSnapshot = Readonly<Record<string, unknown>>;
+export type SetSettingsRequest = { readonly patch: SettingsSnapshot };
+
+export type ProgressSavePayload = {
+  readonly filePath: string;
+  readonly progress: number;
+  readonly stage: "start" | "writing" | "done" | "error";
+};
+
+export type MmeBridge = {
+  readonly versions: { readonly node: string; readonly chrome: string; readonly electron: string };
+  readonly app: { readonly getVersions: () => Promise<AppVersions> };
+  readonly dialog: {
+    readonly openFiles: (request?: { multiple?: boolean }) => Promise<IpcResult<readonly string[]>>;
   };
-  "mme:dialog:openFiles": {
-    request: { multiple?: boolean };
-    response: IpcResult<readonly string[]>;
+  readonly track: {
+    readonly load: (request: { filePath: string }) => Promise<IpcResult<LoadTrackOk>>;
+    readonly loadMany: (request: { filePaths: readonly string[] }) => Promise<IpcResult<readonly LoadManyEntry[]>>;
+    readonly save: (request: SaveTrackRequest) => Promise<IpcResult<SaveTrackOk>>;
   };
-  "mme:track:load": {
-    request: { filePath: string };
-    response: LoadTrackResponse;
+  readonly formatSupport: { readonly list: () => Promise<IpcResult<readonly FormatSupportEntry[]>> };
+  readonly settings: {
+    readonly get: () => Promise<IpcResult<SettingsSnapshot>>;
+    readonly set: (request: SetSettingsRequest) => Promise<IpcResult<SettingsSnapshot>>;
   };
-  "mme:track:loadMany": {
-    request: { filePaths: readonly string[] };
-    response: LoadManyResponse;
-  };
-  "mme:track:save": {
-    request: SaveTrackRequest;
-    response: IpcResult<{ filePath: string; warnings: readonly Warning[] }>;
-  };
-  "mme:formatSupport:list": {
-    request: void;
-    response: IpcResult<readonly FormatSupportEntry[]>;
+  readonly progress: {
+    readonly onSave: (listener: (payload: ProgressSavePayload) => void) => () => void;
   };
 };
 ```
@@ -121,59 +150,82 @@ export type IpcContract = {
 
 ```
 src/main/
-  main.ts                       # app whenReady → registerIpcHandlers
+  main.ts                       # app whenReady → initializeIpcEvents、will-quit → releaseIpcEvents
   ipc/
-    register.ts                 # 全 channel の ipcMain.handle を一括登録
-    track/
-      handleLoadTrack.ts        # mme:track:load
-      handleLoadMany.ts         # mme:track:loadMany (Promise.allSettled)
-      handleSaveTrack.ts        # mme:track:save (Phase 6 で本実装)
-    dialog/
-      handleOpenFiles.ts        # showOpenDialog → 拡張子フィルタ付き
+    ipcKeys.ts                  # channel 定数
+    types.ts                    # MmeBridge / IpcResult / payload 型 + core 型 re-export
+    ipcHandler.ts               # initializeIpcEvents / releaseIpcEvents
+    onGetVersions.ts            # mme:app:getVersions
+    onShowOpenFiles.ts          # mme:dialog:openFiles (BrowserWindow.fromWebContents で親解決)
+    onLoadTrack.ts              # mme:track:load
+    onLoadMany.ts               # mme:track:loadMany (semaphore で 8 並列)
+    onSaveTrack.ts              # mme:track:save (Phase 6 で本実装、Phase 2 は NotImplemented)
+    onListFormatSupport.ts      # mme:formatSupport:list
+    onGetSettings.ts            # mme:settings:get (Phase 6 で本実装)
+    onSetSettings.ts            # mme:settings:set (Phase 6 で本実装)
     formatSupport/
-      handleList.ts             # core の対応マトリックスを返す
-      matrix.ts                 # 純関数: AudioFormat → FormatSupportEntry
-    app/
-      handleGetVersions.ts
-    errors/
+      buildFormatSupportMatrix.ts  # 純関数: AudioFormat → FormatSupportEntry の集合
+    utils/
       toIpcError.ts             # Error / MmeError → IpcError
+      semaphore.ts              # FIFO セマフォ (外部依存なし)
 ```
 
-- 各 handler は **副作用込みの薄いラッパー**で、ロジックは純関数 (`*.test.ts` で単体テストできる粒度) に切り出す。
-- `Promise.allSettled` で `loadMany` を並列化するが、**同時実行数は OS のファイル ディスクリプタ枯渇を避けて 8 を上限**にセマフォで制限する (素朴に semaphore を実装。外部依存は入れない)。
+- 各 `onX.ts` は **`(ev: Electron.IpcMainInvokeEvent, request) => Promise<response>`** のシグネチャに揃える (参考: `audio-player/src/main/ipc/onShowOpenDialog.ts`)。副作用込みの薄いラッパーで、テストしたいロジックは純関数 (`buildFormatSupportMatrix` / `toIpcError` / `createSemaphore` 等) に切り出す。
+- `Promise.allSettled` 相当の処理は `onLoadMany` で行うが、**同時実行数は OS のファイル ディスクリプタ枯渇を避けて 8 を上限**にセマフォで制限する (素朴に semaphore を実装。外部依存は入れない)。
+- `ipcHandler.ts` に `initializeIpcEvents()` / `releaseIpcEvents()` を持たせ、`main.ts` の `app.whenReady` / `will-quit` から呼ぶ。`isInitialized` フラグで二重登録をガードする。
 
 ### Preload (`src/preload/preload.ts`)
 
-`contextBridge.exposeInMainWorld("mme", bridge)` で **`window.mme.<group>.<verb>(args)`** をユーザー空間に出す。Bridge オブジェクトは Phase 2 で次の形に固定する:
+`contextBridge.exposeInMainWorld("mme", bridge)` で `window.mme.<group>.<verb>(args)` を Renderer に出す。`IpcKeys` (value) と `MmeBridge` / `ProgressSavePayload` (type-only) を `../main/ipc/...` から import し、ライブラリーへの直接依存は持たない。
 
 ```ts
-const bridge: MmeBridge = {
-  versions: { ... },
-  app: {
-    getVersions: () => invoke("mme:app:getVersions"),
-  },
-  dialog: {
-    openFiles: (req) => invoke("mme:dialog:openFiles", req),
-  },
+import { contextBridge, ipcRenderer } from "electron";
+import { IpcKeys } from "../main/ipc/ipcKeys.js";
+import type { MmeBridge, ProgressSavePayload } from "../main/ipc/types.js";
+
+const buildBridge = (): MmeBridge => ({
+  versions: { node: process.versions.node, chrome: process.versions.chrome, electron: process.versions.electron },
+  app: { getVersions: () => ipcRenderer.invoke(IpcKeys.GetVersions) },
+  dialog: { openFiles: (req) => ipcRenderer.invoke(IpcKeys.ShowOpenFiles, req) },
   track: {
-    load: (req) => invoke("mme:track:load", req),
-    loadMany: (req) => invoke("mme:track:loadMany", req),
-    save: (req) => invoke("mme:track:save", req),
+    load: (req) => ipcRenderer.invoke(IpcKeys.LoadTrack, req),
+    loadMany: (req) => ipcRenderer.invoke(IpcKeys.LoadMany, req),
+    save: (req) => ipcRenderer.invoke(IpcKeys.SaveTrack, req),
   },
-  formatSupport: {
-    list: () => invoke("mme:formatSupport:list"),
+  formatSupport: { list: () => ipcRenderer.invoke(IpcKeys.ListFormatSupport) },
+  settings: {
+    get: () => ipcRenderer.invoke(IpcKeys.GetSettings),
+    set: (req) => ipcRenderer.invoke(IpcKeys.SetSettings, req),
   },
-  // settings は Phase 2 で型のみ、ハンドラは Phase 6 で本実装
-};
+  progress: {
+    onSave: (listener) => {
+      const wrapped = (_event: unknown, payload: ProgressSavePayload): void => listener(payload);
+      ipcRenderer.on(IpcKeys.ProgressSave, wrapped);
+      return () => ipcRenderer.off(IpcKeys.ProgressSave, wrapped);
+    },
+  },
+});
+
+contextBridge.exposeInMainWorld("mme", buildBridge());
 ```
 
-`invoke` の中身は `(channel, request) => ipcRenderer.invoke(channel, request)` を `ipc-contract.ts` の型に合うようにキャストするヘルパー。
+### Renderer (`src/renderer/vite-env.d.ts` + 各画面)
 
-### Renderer 側のラッパー
+- `vite-env.d.ts` で `Window.mme: MmeBridge` を `declare global` で注入する。`MmeBridge` は `import type "../main/ipc/types"` で取得する (型解決のみ。runtime には main コードが入らない)。
 
-- `src/renderer/ipc/index.ts` で `window.mme` を参照し、テスト時に差し替えやすいよう **モジュール スコープのシングルトン**として `getBridge(): MmeBridge` をエクスポートする。
-- `window.mme` が未定義 (= context isolation 失敗 / preload 未ロード) の場合は **明示的な error を投げる**。silent fallback (mock) は導入しない。
-- Renderer のロジック層 (Phase 3 以降) は `import { getBridge } from "@/ipc"` のみを通って IPC を呼ぶ。`window.mme` を直接触るコードは書かない。
+  ```ts
+  /// <reference types="vite/client" />
+
+  import type { MmeBridge } from "../main/ipc/types";
+
+  declare global {
+    interface Window {
+      readonly mme: MmeBridge;
+    }
+  }
+  ```
+
+- Renderer のロジック層 (Phase 3 以降) は **`window.mme.<group>.<verb>(args)` を直接呼ぶ**。`getBridge()` のような中間ラッパや「IPC モジュール スコープのシングルトン」は導入しない。テスト時のモックは `vi.stubGlobal("window", { mme: ... })` か、`window.mme.x.y` を直接 spy する。
 
 ### `MmeError` の伝搬
 
@@ -189,28 +241,37 @@ const bridge: MmeBridge = {
 ### File ダイアログのフィルタ
 
 - `mme:dialog:openFiles` で表示する filter は core の `AudioFormat` 列挙に対応させる:
-  - `Audio (*.mp3 *.flac *.m4a *.mp4 *.ogg *.opus *.wav *.aiff *.wma *.ape)`
+  - `Audio (*.mp3 *.flac *.m4a *.mp4 *.ogg *.opus *.wav *.aiff *.aif *.wma *.ape)`
   - `All Files`
 - `multiple: true` を既定 (スプレッドシートに複数ファイル投入する想定)。
+- 親ウィンドウは `BrowserWindow.fromWebContents(ev.sender)` で解決する (modal を正しい window に attach するため)。
 - Phase 3 で D&D も追加するが、Phase 2 では dialog 経由のみ。
 
 ## 設計方針
 
 - IPC 境界は **「ロジック層 (純関数)」と「Electron 接着層 (副作用)」** の 2 層で分ける。前者は単体テストで網羅し、後者は薄く保つ。
-- core への直接依存は **Main プロセスのみ**。`packages/gui/src/main/**/*.ts` 以外から `@akabeko/music-metadata-editor` の値を import しない (型は `src/shared/` 経由なら OK)。`tsconfig.web.json` の `paths` でも core を resolve させないよう lint で監視できるならする。
-- IPC contract は `Map<channel, { request; response }>` の形なので、ハンドラ登録漏れが TypeScript で検出できる。`registerIpcHandlers` は `IpcContract` の `keyof` を `Object.keys` でループせず、明示列挙にすることで「足し忘れ」を型エラーにする。
+- core への value 依存は **Main プロセスのみ**。`packages/gui/src/preload/**/*.ts` と `packages/gui/src/renderer/**/*.{ts,tsx}` から `@akabeko/music-metadata-editor` を import するのは禁止 (型のみは `src/main/ipc/types.ts` 経由で参照する)。`tsconfig.web.json` の `include` を `src/renderer/**/*` に絞ることで、Renderer の compile 単位から `main/` を外しつつ、`import type` の解決は通る。
+- `ipcHandler.ts` の `initializeIpcEvents` は **チャンネル名と `onX` のペアを明示列挙**することで、`IpcKeys` を増やしたときに wire 漏れがレビューで検出できるようにする。
 
 ## 主要な内部 API (案)
 
 ```ts
 // Main 側
-export const registerIpcHandlers: (ipcMain: IpcMain) => void;
-export const handleLoadTrack: (req: { filePath: string }) => Promise<LoadTrackResponse>;
-export const handleLoadMany: (req: { filePaths: readonly string[] }) => Promise<LoadManyResponse>;
+export const initializeIpcEvents: () => void;
+export const releaseIpcEvents: () => void;
+export const onLoadTrack: (
+  ev: Electron.IpcMainInvokeEvent,
+  req: { filePath: string },
+) => Promise<IpcResult<LoadTrackOk>>;
+export const onLoadMany: (
+  ev: Electron.IpcMainInvokeEvent,
+  req: { filePaths: readonly string[] },
+) => Promise<IpcResult<readonly LoadManyEntry[]>>;
 export const buildFormatSupportMatrix: () => readonly FormatSupportEntry[]; // 純関数
 
-// 共通
+// 共通 utility
 export const toIpcError: (error: unknown) => IpcError;
+export const createSemaphore: (limit: number) => Semaphore;
 ```
 
 ## 依存
@@ -220,25 +281,31 @@ export const toIpcError: (error: unknown) => IpcError;
 
 ## テスト方針
 
-- `toIpcError` は (a) `MmeError` → `{ name, code, message }` (b) 一般 `Error` → `{ name, message }` (c) 不明値 (`null`, `123`) → `{ name: "Error", message: String(value) }` を網羅。
-- `buildFormatSupportMatrix` は core の対応表と整合することをスナップショットで固定。core 側の対応マトリックスが変わったら snapshot が破れるので、レビュー時に GUI 側の表示を更新できる。
-- `handleLoadTrack` は `tests/fixtures/` に置いた MP3 / FLAC fixture を使った integration テスト 1 ケース。fixtures は core の物を直接参照せず、scripts で生成する (Phase 3 で本格化)。
-- `handleLoadMany` は (a) 全部成功 (b) 一部失敗 (壊れたファイル) (c) すべて失敗 を確認。
-- IPC contract の型整合: Renderer 側の `getBridge` が返す Bridge の型と、Main 側の `registerIpcHandlers` が登録するチャンネルの型が一致することを **`expectTypeOf`** (vitest) で型レベル assertion。
+- テスト ファイルは **対象ソースと 1 対 1 対応**。1 関数 1 ファイルなので **`describe` ラッパは付けず `it` をフラットに並べる** (`docs/rules/testing.md`)。`beforeEach` / `afterEach` も describe なしでファイル全体に効く。
+- `toIpcError` は (a) `MmeError` → `{ name, code, message }` (b) 一般 `Error` → `{ name, message }` (c) 不明値 (`null`, `123`, plain object) → `{ name: "Error", message: String(value) }` (d) `name` が空文字の Error → `"Error"` にフォールバック を網羅。
+- `createSemaphore` は (a) limit 不正 (0 / 負 / 小数) で `RangeError` (b) limit 超過しないこと (c) 戻り値が伝搬すること (d) throw 時もスロットが解放されること を確認。
+- `buildFormatSupportMatrix` は core の対応表と整合することをスナップショット (`toMatchInlineSnapshot`) で固定する。core 側の対応マトリックスが変わったら snapshot が破れるので、レビュー時に GUI 側の表示を更新できる。
+- `onLoadTrack` は `os.tmpdir()` 配下に最小 MP3 buffer (silent frame) を書いて呼び出す integration テストで (a) 成功 (b) 存在しないファイル → ENOENT (c) 不正フォーマット → `MmeError` (`unsupported-format`) を確認。Phase 3 以降で本格的なフィクスチャが整ったら差し替える (Phase 2 ではテスト内で buffer を組み立てる軽量実装で良い)。
+- `onLoadMany` は (a) 全部成功 (b) 一部失敗 (壊れたファイル) (c) すべて失敗 (d) 空 list を確認。
+- `onSaveTrack` / `onGetSettings` / `onSetSettings` は Phase 2 では `NotImplemented` の `IpcError` を返すスタブなので、その応答だけテストする。
 - IPC E2E テストは Phase 2 では入れない (`spectron` 系の代替は重い。Renderer の動作は Phase 4 以降で React Testing Library で IPC を mock してテスト)。
 
 ## 完了条件 (DoD)
 
-- `src/shared/ipc-contract.ts` に Phase 2 ぶんのチャンネル契約が定義され、Main / Preload / Renderer から共有されている。
+- `src/main/ipc/types.ts` に Phase 2 ぶんの型 (`MmeBridge` / `IpcResult` / 各 payload) が定義され、Main / Preload / Renderer から `import type` で参照されている。
+- `src/main/ipc/ipcKeys.ts` に channel 定数が定義され、Main の `ipcHandler.ts` と Preload の `preload.ts` の双方が同じ識別子を使っている。
 - `mme:app:getVersions` / `mme:dialog:openFiles` / `mme:track:load` / `mme:track:loadMany` / `mme:formatSupport:list` が動作する。
 - `mme:track:save` / `mme:settings:*` の channel と Bridge は宣言済みだが、Main 側ハンドラはスタブで `{ ok: false, error: { name: "NotImplemented", message: "..." } }` を返して良い。
-- 各 channel の純関数部分に `*.test.ts` がある。
+- `src/renderer/vite-env.d.ts` で `Window.mme` が型付けされ、Renderer から `window.mme.x.y(args)` を直接呼べる。`src/shared/` や `src/renderer/ipc/` のような中間レイヤーは存在しない。
+- 各 channel の純関数部分 / 各 `onX` ハンドラに `*.test.ts` がある (フラット記述)。
 - Renderer Devtools のコンソールから `await window.mme.app.getVersions()` を叩いて応答が返る (手動確認 OK)。
 - `pnpm -r typecheck` / `pnpm -r test` / `pnpm check` が緑。
+- Renderer / Preload の bundle に `@akabeko/music-metadata-editor` の文字列が含まれないこと (= type-only import が正しく erase されていること) を `grep` で確認 (手動)。
 
 ## 参考資料
 
 - Electron `ipcMain.handle` / `ipcRenderer.invoke`: <https://www.electronjs.org/docs/latest/tutorial/ipc#pattern-2-renderer-to-main-two-way>
 - Context Isolation: <https://www.electronjs.org/docs/latest/tutorial/context-isolation>
+- 参考実装 (Main + Preload 寄せ IPC、`vite-env.d.ts` での型注入): `akabekobeko/audio-player` (必要に応じてローカル clone のパスをユーザーに確認)
 - core 公開 API: `packages/core/src/api/{loadTrack,saveTrack,readMetadata,writeMetadata}.ts`
 - core の `Track` / `TagData` / `MmeError`: `packages/core/src/types.ts`、`packages/core/src/errors/`
