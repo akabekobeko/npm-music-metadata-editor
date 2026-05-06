@@ -1,4 +1,4 @@
-import type { LyricsInfo } from "../../../main/ipc/types.js";
+import type { LyricsInfo } from "@mme/ipc";
 
 /** Discriminator for the lyrics cell display. */
 export type LyricsKind = "none" | "text" | "synced";

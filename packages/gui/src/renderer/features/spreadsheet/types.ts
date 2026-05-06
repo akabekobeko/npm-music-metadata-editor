@@ -1,5 +1,5 @@
+import type { AudioFormat, FormatSupportEntry, TagData } from "@mme/ipc";
 import type { ReactNode } from "react";
-import type { AudioFormat, FormatSupportEntry, TagData } from "../../../main/ipc/types.js";
 import type { TrackRow } from "../tracks/types.js";
 
 /** Columns that don't map to a `TagData` field. */

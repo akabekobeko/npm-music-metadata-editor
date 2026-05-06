@@ -1,4 +1,4 @@
-import type { PictureInfo, Track } from "../../../main/ipc/types.js";
+import type { PictureInfo, Track } from "@mme/ipc";
 import type { TrackRow } from "../tracks/types.js";
 import { isTrackDirty } from "./isTrackDirty.js";
 

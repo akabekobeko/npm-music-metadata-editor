@@ -1,6 +1,6 @@
 import { app } from "electron";
+import type { Locale } from "../../shared/locales/types.js";
 import type { MenuActionPayload, MenuStateSnapshot } from "../ipc/types.js";
-import type { Locale } from "../locales/types.js";
 import { installAppMenu } from "./installAppMenu.js";
 import type { MenuState } from "./types.js";
 

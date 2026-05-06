@@ -1,4 +1,4 @@
-import type { IpcError } from "../../../main/ipc/types.js";
+import type { IpcError } from "@mme/ipc";
 
 /**
  * Per-file outcome reported by `saveDirtyRows`.

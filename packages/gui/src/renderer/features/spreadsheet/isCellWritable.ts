@@ -1,4 +1,4 @@
-import type { TagData } from "../../../main/ipc/types.js";
+import type { TagData } from "@mme/ipc";
 import type { TrackRow } from "../tracks/types.js";
 import type { ColumnId, FormatSupportMap } from "./types.js";
 

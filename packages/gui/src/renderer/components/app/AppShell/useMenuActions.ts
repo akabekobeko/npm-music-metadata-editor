@@ -1,3 +1,4 @@
+import type { MenuAction, MenuActionPayload } from "@mme/ipc";
 import { type Dispatch, useEffect } from "react";
 import type { EditAction } from "@/features/edit/store";
 import { touchRecentFile } from "@/features/settings/touchRecentFile";
@@ -5,7 +6,6 @@ import type { UpdateSettings } from "@/features/settings/types";
 import type { ColumnId } from "@/features/spreadsheet/types";
 import { loadTracks } from "@/features/tracks/loadTracks";
 import type { TracksAction } from "@/features/tracks/store";
-import type { MenuAction, MenuActionPayload } from "../../../../main/ipc/types.js";
 
 /** Args for {@link useMenuActions}. */
 type Args = {

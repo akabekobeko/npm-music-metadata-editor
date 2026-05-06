@@ -1,5 +1,5 @@
+import type { Locale } from "../../shared/locales/types.js";
 import type { MenuAction } from "../ipc/types.js";
-import type { Locale } from "../locales/types.js";
 
 /**
  * Inputs that drive {@link buildAppMenu}.

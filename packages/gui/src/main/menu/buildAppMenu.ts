@@ -1,5 +1,5 @@
-import { t } from "../locales/t.js";
-import type { Locale } from "../locales/types.js";
+import { t } from "../../shared/locales/t.js";
+import type { Locale } from "../../shared/locales/types.js";
 import { basename } from "./basename.js";
 import type { MenuItemTemplate, MenuState, MenuTemplate } from "./types.js";
 

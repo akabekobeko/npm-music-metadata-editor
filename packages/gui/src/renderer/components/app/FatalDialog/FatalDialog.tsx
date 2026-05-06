@@ -1,3 +1,4 @@
+import type { FatalPayload } from "@mme/ipc";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,7 +9,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useLocale } from "@/features/i18n/useLocale";
-import type { FatalPayload } from "../../../../main/ipc/types.js";
 
 /** Props for {@link FatalDialog}. */
 export type FatalDialogProps = {

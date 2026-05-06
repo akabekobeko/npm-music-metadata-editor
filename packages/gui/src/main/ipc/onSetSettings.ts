@@ -1,4 +1,4 @@
-import { resolveLocale } from "../locales/resolveLocale.js";
+import { resolveLocale } from "../../shared/locales/resolveLocale.js";
 import { applyMenuLocale } from "../menu/menuController.js";
 import { applySettingsPatch } from "../settings/settings.js";
 import type { IpcResult, SetSettingsRequest, SettingsSnapshot } from "./types.js";

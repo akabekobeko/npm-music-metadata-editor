@@ -20,7 +20,7 @@ vi.mock("@tanstack/react-virtual", () => ({
   }),
 }));
 
-import type { AudioFormat, FormatSupportEntry, TagData, Track } from "../../../../main/ipc/types";
+import type { AudioFormat, FormatSupportEntry, TagData, Track } from "@mme/ipc";
 import { TooltipProvider } from "../../../components/ui/tooltip";
 import { buildColumns } from "../../../features/spreadsheet/buildColumns";
 import type { ColumnId, FormatSupportMap } from "../../../features/spreadsheet/types";

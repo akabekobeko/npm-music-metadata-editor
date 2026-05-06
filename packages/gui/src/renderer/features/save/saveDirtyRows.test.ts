@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
+import type { Track } from "@mme/ipc";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import type { Track } from "../../../main/ipc/types.js";
 import type { TrackRow } from "../tracks/types.js";
 import { saveDirtyRows } from "./saveDirtyRows.js";
 import type { SaveProgress } from "./types.js";

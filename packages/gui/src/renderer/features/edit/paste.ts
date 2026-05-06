@@ -1,4 +1,4 @@
-import type { TagData } from "../../../main/ipc/types.js";
+import type { TagData } from "@mme/ipc";
 import { isCellWritable } from "../spreadsheet/isCellWritable.js";
 import type { ColumnId, FormatSupportMap } from "../spreadsheet/types.js";
 import type { TrackRow } from "../tracks/types.js";

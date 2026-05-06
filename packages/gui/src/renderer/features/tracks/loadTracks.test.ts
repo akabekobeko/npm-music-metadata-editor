@@ -1,5 +1,5 @@
+import type { IpcResult, LoadManyEntry, Track } from "@mme/ipc";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import type { IpcResult, LoadManyEntry, Track } from "../../../main/ipc/types.js";
 import { loadTracks } from "./loadTracks";
 
 const fakeTrack = (audioFormat: Track["audioFormat"], title: string): Track => ({

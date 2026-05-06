@@ -1,3 +1,4 @@
+import type { PictureInfo } from "@mme/ipc";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,8 +9,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { basename } from "@/libs/basename";
-
-import type { PictureInfo } from "../../../../main/ipc/types";
 import { PictureForm } from "./PictureForm";
 import { PictureList } from "./PictureList";
 import { PicturePreview } from "./PicturePreview";

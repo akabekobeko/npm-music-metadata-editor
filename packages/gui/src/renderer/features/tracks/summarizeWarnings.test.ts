@@ -1,5 +1,5 @@
+import type { Warning } from "@mme/ipc";
 import { expect, it } from "vitest";
-import type { Warning } from "../../../main/ipc/types.js";
 import { summarizeWarnings } from "./summarizeWarnings";
 
 it("returns a zero-count summary for an empty list", () => {

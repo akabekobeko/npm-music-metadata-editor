@@ -1,7 +1,7 @@
+import type { MenuStateSnapshot } from "@mme/ipc";
 import { useEffect } from "react";
 import type { ColumnDefinition } from "@/features/spreadsheet/types";
 import type { ResolvedTheme } from "@/features/theme/types";
-import type { MenuStateSnapshot } from "../../../../main/ipc/types.js";
 
 /** Args for {@link useMenuStatePush}. */
 type Args = {

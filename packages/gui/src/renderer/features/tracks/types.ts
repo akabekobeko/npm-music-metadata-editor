@@ -1,4 +1,4 @@
-import type { IpcError, Track } from "../../../main/ipc/types.js";
+import type { IpcError, Track } from "@mme/ipc";
 
 /**
  * One row in the spreadsheet.

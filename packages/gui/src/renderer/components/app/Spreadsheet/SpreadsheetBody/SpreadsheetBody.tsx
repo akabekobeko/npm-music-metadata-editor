@@ -1,10 +1,8 @@
+import type { TagData } from "@mme/ipc";
 import type { Virtualizer } from "@tanstack/react-virtual";
-
 import type { ColumnDefinition, ColumnId, FormatSupportMap } from "@/features/spreadsheet/types";
 import type { TrackRow } from "@/features/tracks/types";
 import { cn } from "@/libs/utils";
-
-import type { TagData } from "../../../../../main/ipc/types";
 import type { EditingState, Selection } from "../types.js";
 import { EditableCell } from "./cells/EditableCell";
 import { renderCell } from "./renderCell";

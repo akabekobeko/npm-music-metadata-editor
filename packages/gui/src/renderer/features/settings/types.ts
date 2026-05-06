@@ -1,4 +1,4 @@
-import type { AppSettings, DeepPartial } from "../../../main/ipc/types.js";
+import type { AppSettings, DeepPartial } from "@mme/ipc";
 
 export type { AppSettings, DeepPartial };
 

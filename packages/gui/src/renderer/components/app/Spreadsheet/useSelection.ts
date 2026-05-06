@@ -1,11 +1,9 @@
+import type { TagData } from "@mme/ipc";
 import { useCallback, useState } from "react";
-
 import { isCellWritable } from "@/features/spreadsheet/isCellWritable";
 import { isColumnSelectable } from "@/features/spreadsheet/isColumnSelectable";
 import type { ColumnDefinition, ColumnId, FormatSupportMap } from "@/features/spreadsheet/types";
 import type { TrackRow } from "@/features/tracks/types";
-
-import type { TagData } from "../../../../main/ipc/types";
 import { readCellAsString } from "./readCellAsString.js";
 import type { CommitArgs, EditingState, Selection, StartEditTarget } from "./types.js";
 

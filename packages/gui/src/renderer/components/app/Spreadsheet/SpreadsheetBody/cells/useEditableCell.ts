@@ -1,3 +1,4 @@
+import type { TagData } from "@mme/ipc";
 import {
   type ChangeEvent,
   type KeyboardEvent,
@@ -6,10 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-
 import { validateTagValue } from "@/features/edit/validators";
-
-import type { TagData } from "../../../../../../main/ipc/types";
 
 /** Args for {@link useEditableCell}. */
 type Args = {

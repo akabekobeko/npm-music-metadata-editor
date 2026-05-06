@@ -1,4 +1,4 @@
-import type { Warning } from "../../../main/ipc/types.js";
+import type { Warning } from "@mme/ipc";
 
 /** Severity order used to pick the most serious entry in a warning list. */
 const SEVERITY_RANK = { info: 0, warn: 1, error: 2 } as const;

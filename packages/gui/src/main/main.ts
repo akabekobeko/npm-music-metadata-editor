@@ -1,11 +1,11 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { app, BrowserWindow } from "electron";
+import { resolveLocale } from "../shared/locales/resolveLocale.js";
 import { setupFatalHandlers } from "./fatal/setupFatalHandlers.js";
 import { initializeIpcEvents, releaseIpcEvents } from "./ipc/ipcHandler.js";
 import { IpcKeys } from "./ipc/ipcKeys.js";
 import type { MenuActionPayload, MenuStateSnapshot } from "./ipc/types.js";
-import { resolveLocale } from "./locales/resolveLocale.js";
 import { initializeMenuController, releaseMenuController } from "./menu/menuController.js";
 import { getSettings, initializeSettings, releaseSettings } from "./settings/settings.js";
 

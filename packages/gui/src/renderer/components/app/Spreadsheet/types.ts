@@ -1,8 +1,7 @@
+import type { TagData } from "@mme/ipc";
 import type { PasteSelectionMode } from "@/features/edit/expandColumnPaste";
 import type { ColumnId } from "@/features/spreadsheet/types";
 import type { TrackRow } from "@/features/tracks/types";
-
-import type { TagData } from "../../../../main/ipc/types";
 
 /** Arguments passed to the spreadsheet's commit callback. */
 export type CommitArgs = {

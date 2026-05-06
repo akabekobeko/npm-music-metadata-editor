@@ -1,5 +1,5 @@
+import type { IpcError, LyricsInfo, PictureInfo, TagData } from "@mme/ipc";
 import { type Dispatch, useReducer } from "react";
-import type { IpcError, LyricsInfo, PictureInfo, TagData } from "../../../main/ipc/types.js";
 import type { TrackRow } from "../tracks/types.js";
 import { revertRow } from "./revertRow.js";
 import { setLyrics } from "./setLyrics.js";

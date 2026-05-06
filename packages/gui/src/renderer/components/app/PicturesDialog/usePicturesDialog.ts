@@ -1,13 +1,11 @@
+import type { PictureInfo } from "@mme/ipc";
 import { type ChangeEvent, type DragEvent, useCallback, useMemo, useRef, useState } from "react";
-
 import { PICTURE_FILE_EXTENSIONS, PICTURE_SIZE_WARNING_BYTES } from "@/features/pictures/constants";
 import { draftsToPictureInfos, pictureInfosToDrafts } from "@/features/pictures/draftConversions";
 import { extensionForMime } from "@/features/pictures/extensionForMime";
 import { fileToPicture } from "@/features/pictures/fileToPicture";
 import type { PictureDraft } from "@/features/pictures/types";
 import { basename } from "@/libs/basename";
-
-import type { PictureInfo } from "../../../../main/ipc/types";
 
 /** Args for {@link usePicturesDialog}. */
 type Args = {

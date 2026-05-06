@@ -1,4 +1,4 @@
-import type { PictureInfo } from "../../../main/ipc/types.js";
+import type { PictureInfo } from "@mme/ipc";
 
 /**
  * Picture-kind options surfaced in the Pictures dialog `<Select>`.

@@ -1,4 +1,4 @@
-import type { TagData } from "../../../main/ipc/types.js";
+import type { TagData } from "@mme/ipc";
 
 /**
  * Outcome of validating one cell input.

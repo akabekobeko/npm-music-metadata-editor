@@ -1,6 +1,6 @@
 import { Menu, type MenuItemConstructorOptions, shell } from "electron";
+import type { Locale } from "../../shared/locales/types.js";
 import type { MenuActionPayload } from "../ipc/types.js";
-import type { Locale } from "../locales/types.js";
 import { buildAppMenu } from "./buildAppMenu.js";
 import type { MenuItemTemplate, MenuState, MenuTemplate } from "./types.js";
 

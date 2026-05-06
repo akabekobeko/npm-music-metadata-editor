@@ -1,8 +1,6 @@
+import type { AppVersions } from "@mme/ipc";
 import { useEffect, useState } from "react";
-
 import { useLocale } from "@/features/i18n/useLocale";
-
-import type { AppVersions } from "../../../../main/ipc/types.js";
 
 /** Args for {@link useAboutDialog}. */
 type Args = {

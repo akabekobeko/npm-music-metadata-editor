@@ -1,11 +1,9 @@
+import type { LyricsInfo } from "@mme/ipc";
 import { useCallback, useMemo, useState } from "react";
-
 import { buildLyricsInfoFromDraft } from "@/features/lyrics/buildLyricsInfoFromDraft";
 import { lyricsInfoToDraft } from "@/features/lyrics/lyricsInfoToDraft";
 import type { LyricsDraft, SyncedLine } from "@/features/lyrics/types";
 import { basename } from "@/libs/basename";
-
-import type { LyricsInfo } from "../../../../main/ipc/types";
 import type { SyncedLineEntry } from "./useSynchronizedTab.js";
 
 /** Args for {@link useLyricsDialog}. */

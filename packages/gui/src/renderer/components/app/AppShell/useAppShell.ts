@@ -1,3 +1,4 @@
+import type { FatalPayload } from "@mme/ipc";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDragAndDrop } from "@/features/dnd/useDragAndDrop";
 import { useEditStore } from "@/features/edit/store";
@@ -10,7 +11,6 @@ import { useTheme } from "@/features/theme/useTheme";
 import { loadTracks } from "@/features/tracks/loadTracks";
 import { useTracksStore } from "@/features/tracks/store";
 import type { TrackRow } from "@/features/tracks/types";
-import type { FatalPayload } from "../../../../main/ipc/types.js";
 import type { ColumnSettings } from "./useColumnSettings.js";
 import { useColumnSettings } from "./useColumnSettings.js";
 import type { DialogState } from "./useDialogState.js";

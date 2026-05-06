@@ -1,3 +1,4 @@
+import type { LyricsInfo } from "@mme/ipc";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,8 +11,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { basename } from "@/libs/basename";
-
-import type { LyricsInfo } from "../../../../main/ipc/types";
 import { LrcExportButton } from "./LrcExportButton";
 import { LrcImportButton } from "./LrcImportButton";
 import { PlainTextTab } from "./PlainTextTab";
