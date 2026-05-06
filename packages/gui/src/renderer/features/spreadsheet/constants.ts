@@ -127,6 +127,7 @@ export const COLUMN_REGISTRY: Readonly<Record<ColumnId, ColumnDefinition>> = {
     title: "Pictures",
     width: 110,
     editable: "modal",
+    selectable: "cell-only",
     readValue: (row) => summarizePictures(row.track.pictures).label,
   },
   lyrics: {
@@ -134,6 +135,7 @@ export const COLUMN_REGISTRY: Readonly<Record<ColumnId, ColumnDefinition>> = {
     title: "Lyrics",
     width: 96,
     editable: "modal",
+    selectable: "cell-only",
     readValue: (row) => summarizeLyrics(row.track.lyrics).label,
   },
   chapters: {
