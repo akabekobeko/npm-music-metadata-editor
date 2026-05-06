@@ -1,10 +1,14 @@
 import { ipcMain } from "electron";
 import { IpcKeys } from "./ipcKeys.js";
+import { onExpandPaths } from "./onExpandPaths.js";
+import { onFatalReport } from "./onFatalReport.js";
 import { onGetSettings } from "./onGetSettings.js";
 import { onGetVersions } from "./onGetVersions.js";
 import { onListFormatSupport } from "./onListFormatSupport.js";
 import { onLoadMany } from "./onLoadMany.js";
 import { onLoadTrack } from "./onLoadTrack.js";
+import { onLogForward } from "./onLogForward.js";
+import { onMenuSetState } from "./onMenuSetState.js";
 import { onReadBytes } from "./onReadBytes.js";
 import { onSaveTrack } from "./onSaveTrack.js";
 import { onSetSettings } from "./onSetSettings.js";
@@ -46,6 +50,10 @@ export const initializeIpcEvents = (): void => {
   ipcMain.handle(IpcKeys.ListFormatSupport, onListFormatSupport);
   ipcMain.handle(IpcKeys.GetSettings, onGetSettings);
   ipcMain.handle(IpcKeys.SetSettings, onSetSettings);
+  ipcMain.handle(IpcKeys.ExpandPaths, onExpandPaths);
+  ipcMain.on(IpcKeys.MenuSetState, onMenuSetState);
+  ipcMain.on(IpcKeys.LogForward, onLogForward);
+  ipcMain.on(IpcKeys.FatalReport, onFatalReport);
 };
 
 /**
@@ -72,5 +80,9 @@ export const releaseIpcEvents = (): void => {
   ipcMain.removeHandler(IpcKeys.ListFormatSupport);
   ipcMain.removeHandler(IpcKeys.GetSettings);
   ipcMain.removeHandler(IpcKeys.SetSettings);
+  ipcMain.removeHandler(IpcKeys.ExpandPaths);
+  ipcMain.removeAllListeners(IpcKeys.MenuSetState);
+  ipcMain.removeAllListeners(IpcKeys.LogForward);
+  ipcMain.removeAllListeners(IpcKeys.FatalReport);
   isInitialized = false;
 };

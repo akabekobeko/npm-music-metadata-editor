@@ -77,3 +77,14 @@ it("forwards locale only when explicitly set", () => {
   const cleared = mergeSettings(next, {});
   expect(cleared.locale).toBe("ja");
 });
+
+it("forwards theme only when explicitly set", () => {
+  const next = mergeSettings(baseSettings, { theme: "dark" });
+  expect(next.theme).toBe("dark");
+
+  const carried = mergeSettings(next, { window: { width: 1024 } });
+  expect(carried.theme).toBe("dark");
+
+  const overridden = mergeSettings(carried, { theme: "light" });
+  expect(overridden.theme).toBe("light");
+});

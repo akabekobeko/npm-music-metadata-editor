@@ -1,19 +1,29 @@
-import { useEffect } from "react";
-
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useDragAndDrop } from "@/features/dnd/useDragAndDrop";
 import { useEditStore } from "@/features/edit/store";
 import { useSettings } from "@/features/settings/store";
-import type { FormatSupportMap } from "@/features/spreadsheet/types";
+import { touchRecentFile } from "@/features/settings/touchRecentFile";
+import { COLUMN_REGISTRY } from "@/features/spreadsheet/constants";
+import type { ColumnDefinition, FormatSupportMap } from "@/features/spreadsheet/types";
+import type { ResolvedTheme } from "@/features/theme/types";
+import { useTheme } from "@/features/theme/useTheme";
+import { loadTracks } from "@/features/tracks/loadTracks";
 import { useTracksStore } from "@/features/tracks/store";
 import type { TrackRow } from "@/features/tracks/types";
+import type { FatalPayload } from "../../../../main/ipc/types.js";
 import type { ColumnSettings } from "./useColumnSettings.js";
 import { useColumnSettings } from "./useColumnSettings.js";
 import type { DialogState } from "./useDialogState.js";
 import { useDialogState } from "./useDialogState.js";
+import { useFatalHandler } from "./useFatalHandler.js";
 import { useFileOpen } from "./useFileOpen.js";
 import { useFormatSupport } from "./useFormatSupport.js";
 import { useGlobalShortcuts } from "./useGlobalShortcuts.js";
 import type { GridHandlers } from "./useGridHandlers.js";
 import { useGridHandlers } from "./useGridHandlers.js";
+import { useLogForwarder } from "./useLogForwarder.js";
+import { useMenuActions } from "./useMenuActions.js";
+import { useMenuStatePush } from "./useMenuStatePush.js";
 import type { SaveAllControls } from "./useSaveAll.js";
 import { useSaveAll } from "./useSaveAll.js";
 import type { TransientStatus } from "./useTransientStatus.js";
@@ -31,6 +41,18 @@ export type AppShellModel = {
   readonly warningCount: number;
   /** Format support matrix (passed through for cell-disable decisions). */
   readonly support: FormatSupportMap;
+  /** Resolved theme actually applied to the document (`light` / `dark`). */
+  readonly theme: ResolvedTheme;
+  /** `true` while the About dialog is mounted. */
+  readonly aboutOpen: boolean;
+  /** Hides the About dialog when `false`; passed to the modal. */
+  readonly setAboutOpen: (open: boolean) => void;
+  /** Latest fatal payload, or `null` when no fatal is pending. */
+  readonly fatal: FatalPayload | null;
+  /** Reload the renderer in response to a fatal. */
+  readonly onReloadFromFatal: () => void;
+  /** Quit the application in response to a fatal. */
+  readonly onQuitFromFatal: () => void;
   readonly columns: ColumnSettings;
   readonly dialogs: DialogState;
   readonly save: SaveAllControls;
@@ -61,6 +83,10 @@ export const useAppShell = (): AppShellModel => {
   const [settings, setSettings] = useSettings();
   const support = useFormatSupport();
   const status = useTransientStatus();
+  const theme = useTheme();
+  useLogForwarder();
+  const [fatal, dismissFatal] = useFatalHandler();
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   // Mirror the load result into the edit reducer so undo history resets when
   // the user opens a fresh batch of files.
@@ -95,8 +121,71 @@ export const useAppShell = (): AppShellModel => {
 
   useGlobalShortcuts({ onOpenFiles, onSaveAll: save.saveAll, saveDisabled: save.saving });
 
+  const onCloseAll = useCallback(() => {
+    tracksDispatch({ type: "clear" });
+    editDispatch({ type: "load", rows: [] });
+  }, [tracksDispatch, editDispatch]);
+
+  const onSelectAll = useCallback(() => {
+    // v1: selection model is not implemented yet — the Edit menu's Select All
+    // is wired so the accelerator does not fall through to the OS, but it has
+    // no spreadsheet-level effect.
+  }, []);
+
+  const onDropPaths = useCallback(
+    async (paths: readonly string[]): Promise<void> => {
+      if (paths.length === 0) {
+        return;
+      }
+
+      tracksDispatch({ type: "load:start" });
+      const result = await loadTracks(paths);
+      tracksDispatch({
+        type: "load:done",
+        payload: { rows: result.rows, errors: result.errors },
+      });
+
+      if (result.rows.length > 0) {
+        const next = touchRecentFile(
+          settings.recentFiles,
+          result.rows.map((row) => row.filePath),
+        );
+        setSettings({ recentFiles: next });
+      }
+    },
+    [tracksDispatch, setSettings, settings.recentFiles],
+  );
+
+  useDragAndDrop({ onPaths: onDropPaths, disabled: tracksState.loading || save.saving });
+
+  useMenuActions({
+    onOpenFiles,
+    onSaveAll: save.saveAll,
+    onDiscardChanges: save.discardChanges,
+    onCloseAll,
+    onSelectAll,
+    onShowAbout: () => setAboutOpen(true),
+    onToggleColumn: columns.toggleColumn,
+    visibleColumnIds: columns.visibleIds,
+    themePreference: settings.theme,
+    setSettings,
+    tracksDispatch,
+    editDispatch,
+    recentFiles: settings.recentFiles,
+  });
+
+  const allColumns: readonly ColumnDefinition[] = useMemo(() => Object.values(COLUMN_REGISTRY), []);
+
   const dirtyCount = editState.rows.filter((row) => row.dirty).length;
   const warningCount = editState.rows.reduce((sum, row) => sum + row.track.warnings.length, 0);
+
+  useMenuStatePush({
+    hasDirty: dirtyCount > 0,
+    recentFiles: settings.recentFiles,
+    theme,
+    visibleColumnIds: columns.visibleIds as readonly string[],
+    allColumns,
+  });
 
   return {
     rows: editState.rows,
@@ -104,6 +193,18 @@ export const useAppShell = (): AppShellModel => {
     dirtyCount,
     warningCount,
     support,
+    theme,
+    aboutOpen,
+    setAboutOpen,
+    fatal,
+    onReloadFromFatal: () => {
+      dismissFatal();
+      window.location.reload();
+    },
+    onQuitFromFatal: () => {
+      dismissFatal();
+      window.close();
+    },
     columns,
     dialogs,
     save,

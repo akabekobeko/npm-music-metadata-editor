@@ -1,5 +1,7 @@
 import { TooltipProvider } from "@/components/ui/tooltip";
 
+import { AboutDialog } from "../AboutDialog/AboutDialog";
+import { FatalDialog } from "../FatalDialog/FatalDialog";
 import { Spreadsheet } from "../Spreadsheet/Spreadsheet";
 import { ActiveDialogs } from "./ActiveDialogs";
 import { EmptyState } from "./EmptyState";
@@ -71,6 +73,12 @@ export function AppShell() {
         progress={save.progress}
         errorCount={save.errorCount}
         onCancel={save.cancelSave}
+      />
+      <AboutDialog open={model.aboutOpen} onClose={() => model.setAboutOpen(false)} />
+      <FatalDialog
+        fatal={model.fatal}
+        onReload={model.onReloadFromFatal}
+        onQuit={model.onQuitFromFatal}
       />
     </TooltipProvider>
   );

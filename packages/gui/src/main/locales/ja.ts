@@ -1,0 +1,58 @@
+import type { Dictionary } from "./types.js";
+
+/**
+ * Japanese translation table.
+ *
+ * Mirrors the key set defined by `en`. New keys are added in `en.ts` first
+ * and then translated here; `t.test.ts` enforces parity so a missing key is
+ * caught before runtime.
+ */
+export const ja: Dictionary = {
+  "app.name": "Music Metadata Editor",
+  "menu.app.about": "Music Metadata Editor について",
+  "menu.app.preferences": "環境設定…",
+  "menu.app.quit": "終了",
+  "menu.app.services": "サービス",
+  "menu.app.hide": "Music Metadata Editor を隠す",
+  "menu.app.hideOthers": "ほかを隠す",
+  "menu.app.unhide": "すべてを表示",
+  "menu.file": "ファイル",
+  "menu.file.openFiles": "音楽ファイルを開く…",
+  "menu.file.openRecent": "最近開いた項目",
+  "menu.file.openRecent.empty": "最近開いた項目はありません",
+  "menu.file.openRecent.clear": "履歴を消去",
+  "menu.file.save": "保存",
+  "menu.file.saveAll": "すべて保存",
+  "menu.file.discardChanges": "変更を破棄",
+  "menu.file.closeAll": "すべて閉じる",
+  "menu.file.close": "ウインドウを閉じる",
+  "menu.edit": "編集",
+  "menu.edit.undo": "取り消す",
+  "menu.edit.redo": "やり直す",
+  "menu.edit.cut": "カット",
+  "menu.edit.copy": "コピー",
+  "menu.edit.paste": "ペースト",
+  "menu.edit.selectAll": "すべてを選択",
+  "menu.view": "表示",
+  "menu.view.columns": "列",
+  "menu.view.toggleTheme": "ダーク モードを切り替え",
+  "menu.view.reload": "再読み込み",
+  "menu.view.toggleDevTools": "開発者ツールを切り替え",
+  "menu.help": "ヘルプ",
+  "menu.help.website": "プロジェクト Web サイトを開く",
+  "menu.help.about": "バージョン情報",
+  "fatal.title": "問題が発生しました",
+  "fatal.description":
+    "予期しないエラーが発生しました。ウインドウを再読み込みするか、アプリを終了できます。",
+  "fatal.reload": "再読み込み",
+  "fatal.quit": "終了",
+  "about.title": "Music Metadata Editor について",
+  "about.version": "バージョン",
+  "about.core": "コア ライブラリ",
+  "about.electron": "Electron",
+  "about.chrome": "Chromium",
+  "about.node": "Node.js",
+  "about.license": "MIT License で配布しています。",
+  "about.repository": "リポジトリ",
+  "about.close": "閉じる",
+};

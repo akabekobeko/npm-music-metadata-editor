@@ -1,3 +1,5 @@
+import { resolveLocale } from "../locales/resolveLocale.js";
+import { applyMenuLocale } from "../menu/menuController.js";
 import { applySettingsPatch } from "../settings/settings.js";
 import type { IpcResult, SetSettingsRequest, SettingsSnapshot } from "./types.js";
 import { toIpcError } from "./utils/toIpcError.js";
@@ -9,6 +11,10 @@ import { toIpcError } from "./utils/toIpcError.js";
  * The disk flush is debounced (see `applySettingsPatch`) so a burst of patches
  * — typical of a column resize drag — coalesces into a single write.
  *
+ * Side effect: when the merged snapshot changes the active locale, the
+ * native menu is rebuilt so labels track the new language without waiting
+ * for the next `mme:menu:setState` push from the Renderer.
+ *
  * @param _ev - Electron event object (unused).
  * @param request - Patch to deep-merge onto the current settings.
  * @returns The merged snapshot, or a serialisable error.
@@ -19,6 +25,10 @@ export const onSetSettings = async (
 ): Promise<IpcResult<SettingsSnapshot>> => {
   try {
     const next = applySettingsPatch(request.patch);
+    if (request.patch.locale !== undefined) {
+      applyMenuLocale(resolveLocale({ preference: next.locale, systemLocale: undefined }));
+    }
+
     return { ok: true, value: next };
   } catch (error) {
     const ipcError = toIpcError(error);
