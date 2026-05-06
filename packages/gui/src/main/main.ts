@@ -54,7 +54,7 @@ function createWindow(): BrowserWindow {
     window.loadFile(path.join(__dirname, "../renderer/index.html"));
   }
 
-  if (process.env.MME_DEV === "1" || process.env.VITE_DEV_SERVER_URL !== undefined) {
+  if (process.env.MME_DEV === "1") {
     window.webContents.openDevTools({ mode: "detach" });
   }
 
