@@ -1,12 +1,6 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import {
-  type PointerEvent as ReactPointerEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useMemo, useRef } from "react";
+
 import type { PasteSelectionMode } from "@/features/edit/expandColumnPaste";
 import { isCellWritable } from "@/features/spreadsheet/isCellWritable";
 import { isColumnSelectable } from "@/features/spreadsheet/isColumnSelectable";
@@ -18,19 +12,9 @@ import type { TagData } from "../../../../main/ipc/types";
 import { EditableCell } from "./cells/EditableCell";
 import { renderCell } from "./renderCell";
 import { renderHeader } from "./renderHeader";
-
-/** What the user has highlighted on the grid. */
-type Selection =
-  | { readonly kind: "none" }
-  | { readonly kind: "cell"; readonly rowIndex: number; readonly columnId: ColumnId }
-  | { readonly kind: "column"; readonly columnId: ColumnId };
-
-/** Active editor state — `null` when no cell is being edited. */
-type EditingState = {
-  readonly rowIndex: number;
-  readonly columnId: ColumnId;
-  readonly initialValue: string;
-};
+import { useColumnResize } from "./useColumnResize.js";
+import { useSpreadsheetKeyboard } from "./useSpreadsheetKeyboard.js";
+import { useSpreadsheetSelection } from "./useSpreadsheetSelection.js";
 
 /** Arguments passed to {@link SpreadsheetProps.onCommit}. */
 export type CommitArgs = {
@@ -77,15 +61,19 @@ export type SpreadsheetProps = {
 const ROW_HEIGHT = 32;
 /** How many rows past the viewport to keep mounted, smoothing scroll. */
 const VIRTUAL_OVERSCAN = 8;
-/** Lower bound enforced while dragging a column resize handle. */
-const MIN_RESIZE_WIDTH = 48;
 
 /**
  * Virtualized grid with cell selection, inline editing, undo, and column
  * paste.
  *
- * Selection lives in component-local state because it is purely a UI concern;
- * mutations propagate upward through the `onCommit` / `onPaste` / `onUndo`
+ * Behaviour is split across three colocated hooks:
+ *   - `useSpreadsheetSelection` owns selection / editing state and the
+ *     pointer-driven cell + header click handlers.
+ *   - `useSpreadsheetKeyboard` wires document-level shortcuts (undo, paste,
+ *     enter / type-to-edit) to the selection.
+ *   - `useColumnResize` drives the header drag-resize gripper.
+ *
+ * Mutations propagate upward through the `onCommit` / `onPaste` / `onUndo`
  * callbacks so the edit store stays the single source of truth for rows.
  *
  * @returns The rendered grid.
@@ -103,13 +91,33 @@ export function Spreadsheet({
   onColumnResize,
 }: SpreadsheetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [selection, setSelection] = useState<Selection>({ kind: "none" });
-  const [editing, setEditing] = useState<EditingState | null>(null);
   const { liveWidths, beginResize } = useColumnResize({
     baseWidths: columnWidths,
     onColumnResize,
   });
   const widthOf = (id: ColumnId): number => liveWidths[id] ?? columnWidths[id] ?? 0;
+
+  const {
+    selection,
+    editing,
+    findColumn,
+    startEditAt,
+    commitFromEditor,
+    cancelEditor,
+    handleCellClick,
+    handleCellDoubleClick,
+    handleColumnHeaderClick,
+  } = useSpreadsheetSelection({ columns, rows, support, onCommit });
+
+  useSpreadsheetKeyboard({
+    editing,
+    selection,
+    rows,
+    findColumn,
+    startEditAt,
+    onPaste,
+    onUndo,
+  });
 
   const virtualizer = useVirtualizer({
     count: rows.length,
@@ -117,139 +125,6 @@ export function Spreadsheet({
     estimateSize: () => ROW_HEIGHT,
     overscan: VIRTUAL_OVERSCAN,
   });
-
-  const findColumn = useCallback(
-    (id: ColumnId): ColumnDefinition | undefined => columns.find((column) => column.id === id),
-    [columns],
-  );
-
-  const startEditAt = useCallback(
-    (target: {
-      readonly rowIndex: number;
-      readonly columnId: ColumnId;
-      readonly seed: string;
-    }): void => {
-      const { rowIndex, columnId, seed } = target;
-      const row = rows[rowIndex];
-      const column = findColumn(columnId);
-      if (!row || !column || column.editable !== "tag") {
-        return;
-      }
-
-      if (!isCellWritable({ row, columnId, support })) {
-        return;
-      }
-
-      setEditing({ rowIndex, columnId, initialValue: seed });
-    },
-    [rows, findColumn, support],
-  );
-
-  const commitFromEditor = useCallback(
-    (value: string | number | undefined): void => {
-      if (!editing) {
-        return;
-      }
-
-      const row = rows[editing.rowIndex];
-      const column = findColumn(editing.columnId);
-      if (!row || !column || column.editable !== "tag") {
-        setEditing(null);
-        return;
-      }
-
-      const field = column.id.slice("tag.".length) as keyof TagData;
-      onCommit({ row, field, value });
-      setEditing(null);
-    },
-    [editing, rows, findColumn, onCommit],
-  );
-
-  const cancelEditor = useCallback((): void => {
-    setEditing(null);
-  }, []);
-
-  const handleCellClick = useCallback((rowIndex: number, columnId: ColumnId): void => {
-    setSelection({ kind: "cell", rowIndex, columnId });
-    setEditing(null);
-  }, []);
-
-  const handleCellDoubleClick = useCallback(
-    (rowIndex: number, columnId: ColumnId): void => {
-      const row = rows[rowIndex];
-      const initial = row ? readCellAsString(row, findColumn(columnId)) : "";
-      startEditAt({ rowIndex, columnId, seed: initial });
-    },
-    [rows, findColumn, startEditAt],
-  );
-
-  const handleColumnHeaderClick = useCallback(
-    (columnId: ColumnId): void => {
-      const column = findColumn(columnId);
-      if (!column || !isColumnSelectable(column)) {
-        return;
-      }
-
-      setSelection({ kind: "column", columnId });
-      setEditing(null);
-    },
-    [findColumn],
-  );
-
-  useEffect(() => {
-    const handler = (event: globalThis.KeyboardEvent): void => {
-      if (editing) {
-        return;
-      }
-
-      // Defer to inputs / textareas so the user can paste / undo inside them.
-      const target = event.target;
-      if (
-        target instanceof HTMLInputElement ||
-        target instanceof HTMLTextAreaElement ||
-        (target instanceof HTMLElement && target.isContentEditable)
-      ) {
-        return;
-      }
-
-      const usingMeta = event.metaKey || event.ctrlKey;
-      if (usingMeta && event.key.toLowerCase() === "z") {
-        event.preventDefault();
-        onUndo();
-        return;
-      }
-
-      if (usingMeta && event.key.toLowerCase() === "v") {
-        event.preventDefault();
-        dispatchPaste({ selection, rowsLength: rows.length, onPaste });
-        return;
-      }
-
-      if (selection.kind !== "cell") {
-        return;
-      }
-
-      const { rowIndex, columnId } = selection;
-      const row = rows[rowIndex];
-      const column = findColumn(columnId);
-      if (!row || !column) {
-        return;
-      }
-
-      if (event.key === "Enter") {
-        event.preventDefault();
-        startEditAt({ rowIndex, columnId, seed: readCellAsString(row, column) });
-        return;
-      }
-
-      if (event.key.length === 1 && !usingMeta && !event.altKey) {
-        event.preventDefault();
-        startEditAt({ rowIndex, columnId, seed: event.key });
-      }
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [editing, selection, rows, findColumn, startEditAt, onPaste, onUndo]);
 
   const headerEntries = useMemo(
     () =>
@@ -372,134 +247,3 @@ export function Spreadsheet({
     </div>
   );
 }
-
-/**
- * Project a row's value for the given column to the string the editor seeds
- * itself with.
- *
- * @param row - Row currently entering edit mode.
- * @param column - Column definition of the cell being edited.
- * @returns Display string for the cell's current value, or `""` when the
- *   column is missing or the value is undefined.
- */
-const readCellAsString = (row: TrackRow, column: ColumnDefinition | undefined): string => {
-  if (!column) {
-    return "";
-  }
-
-  const value = column.readValue(row);
-  return value === undefined ? "" : String(value);
-};
-
-type DispatchPasteArgs = {
-  readonly selection: Selection;
-  readonly rowsLength: number;
-  readonly onPaste: (args: PasteArgs) => void;
-};
-
-type UseColumnResizeArgs = {
-  /** Persisted widths from settings, indexed by column id. */
-  readonly baseWidths: Readonly<Record<ColumnId, number>>;
-  /** Persistence callback fired once per drag end. */
-  readonly onColumnResize: (columnId: ColumnId, width: number) => void;
-};
-
-/**
- * Drive the column-resize interaction.
- *
- * Owns two pieces of state:
- *   1. `liveWidths` — what the grid renders during a drag (one column's
- *      width is "in flight" until pointerup commits it).
- *   2. The transient pointer-listener bound to `window` while the user is
- *      actively dragging.
- *
- * Persistence is debounced one step further upstream — `onColumnResize`
- * arrives in the host, which feeds `setSettings({ columns: { widths } })`,
- * and the Main process collapses the bursts into a single disk write.
- *
- * @returns `liveWidths` for render and a `beginResize(event, columnId)`
- *   handler to attach to each header's resize gripper.
- */
-const useColumnResize = ({
-  baseWidths,
-  onColumnResize,
-}: UseColumnResizeArgs): {
-  readonly liveWidths: Readonly<Record<ColumnId, number>>;
-  readonly beginResize: (event: ReactPointerEvent<HTMLElement>, columnId: ColumnId) => void;
-} => {
-  const [override, setOverride] = useState<{
-    readonly columnId: ColumnId;
-    readonly width: number;
-  } | null>(null);
-
-  const liveWidths = useMemo(() => {
-    if (override === null) {
-      return baseWidths;
-    }
-
-    return { ...baseWidths, [override.columnId]: override.width };
-  }, [baseWidths, override]);
-
-  const beginResize = useCallback(
-    (event: ReactPointerEvent<HTMLElement>, columnId: ColumnId): void => {
-      event.preventDefault();
-      event.stopPropagation();
-      const startX = event.clientX;
-      const startWidth = baseWidths[columnId] ?? 100;
-      let lastWidth = startWidth;
-      const handleMove = (moveEvent: globalThis.PointerEvent): void => {
-        const delta = moveEvent.clientX - startX;
-        lastWidth = Math.max(MIN_RESIZE_WIDTH, startWidth + delta);
-        setOverride({ columnId, width: lastWidth });
-      };
-      const handleUp = (): void => {
-        window.removeEventListener("pointermove", handleMove);
-        window.removeEventListener("pointerup", handleUp);
-        setOverride(null);
-        if (lastWidth !== startWidth) {
-          onColumnResize(columnId, Math.round(lastWidth));
-        }
-      };
-      window.addEventListener("pointermove", handleMove);
-      window.addEventListener("pointerup", handleUp);
-    },
-    [baseWidths, onColumnResize],
-  );
-
-  return { liveWidths, beginResize };
-};
-
-/**
- * Translate the current selection into a paste request to the host.
- *
- * Skips when nothing is selected; for a single cell the host receives `1` as
- * the maximum row count so only the first clipboard line is consumed.
- *
- * @param args - Selection, total row count, and the host callback.
- */
-const dispatchPaste = ({ selection, rowsLength, onPaste }: DispatchPasteArgs): void => {
-  if (selection.kind === "none") {
-    return;
-  }
-
-  void navigator.clipboard.readText().then((text) => {
-    if (selection.kind === "cell") {
-      onPaste({
-        columnId: selection.columnId,
-        clipboardText: text,
-        baseRowIndex: selection.rowIndex,
-        maxRows: 1,
-        mode: "cell",
-      });
-      return;
-    }
-
-    onPaste({
-      columnId: selection.columnId,
-      clipboardText: text,
-      baseRowIndex: 0,
-      maxRows: rowsLength,
-      mode: "column",
-    });
-  });
-};
