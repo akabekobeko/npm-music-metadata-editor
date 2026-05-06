@@ -1,8 +1,8 @@
-import { type ChangeEvent, type KeyboardEvent, useEffect, useRef, useState } from "react";
-import { validateTagValue } from "@/features/edit/validators";
 import type { InputKind } from "@/features/spreadsheet/types";
 import { cn } from "@/libs/utils";
+
 import type { TagData } from "../../../../../main/ipc/types";
+import { useEditableCell } from "./useEditableCell.js";
 
 /** Props for {@link EditableCell}. */
 export type EditableCellProps = {
@@ -37,41 +37,12 @@ export function EditableCell({
   onCommit,
   onCancel,
 }: EditableCellProps) {
-  const [value, setValue] = useState(initialValue);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    inputRef.current?.focus();
-    inputRef.current?.select();
-  }, []);
-
-  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      const result = validateTagValue(field, value);
-      if (result.ok) {
-        setErrorMessage(null);
-        onCommit(result.value);
-        return;
-      }
-
-      setErrorMessage(result.message);
-      return;
-    }
-
-    if (event.key === "Escape") {
-      event.preventDefault();
-      onCancel();
-    }
-  };
-
-  const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    setValue(event.target.value);
-    if (errorMessage !== null) {
-      setErrorMessage(null);
-    }
-  };
+  const { inputRef, value, errorMessage, handleKeyDown, handleChange } = useEditableCell({
+    field,
+    initialValue,
+    onCommit,
+    onCancel,
+  });
 
   return (
     <input

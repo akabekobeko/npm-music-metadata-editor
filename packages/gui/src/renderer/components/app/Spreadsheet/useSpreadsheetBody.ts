@@ -6,7 +6,7 @@ import type { TrackRow } from "@/features/tracks/types";
 
 import type { EditingState, Selection } from "./types.js";
 
-/** Args for {@link useCellState}. */
+/** Args for {@link useSpreadsheetBody}. */
 type Args = {
   /** Current selection — feeds the highlight predicate. */
   readonly selection: Selection;
@@ -26,7 +26,7 @@ export type CellState = {
   readonly isEditingCell: boolean;
 };
 
-/** Argument shape for the resolver returned by {@link useCellState}. */
+/** Argument shape for the resolver returned by {@link useSpreadsheetBody}. */
 type CellStateInput = {
   /** Row's grid index. */
   readonly rowIndex: number;
@@ -45,7 +45,7 @@ type CellStateInput = {
  * @param args - Selection / editing state and the format support matrix.
  * @returns Resolver that yields the {@link CellState} for a given cell.
  */
-export const useCellState = ({
+export const useSpreadsheetBody = ({
   selection,
   editing,
   support,

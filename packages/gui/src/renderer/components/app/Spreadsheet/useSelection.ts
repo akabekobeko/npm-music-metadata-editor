@@ -9,7 +9,7 @@ import type { TagData } from "../../../../main/ipc/types";
 import { readCellAsString } from "./readCellAsString.js";
 import type { CommitArgs, EditingState, Selection, StartEditTarget } from "./types.js";
 
-/** Args for {@link useSpreadsheetSelection}. */
+/** Args for {@link useSelection}. */
 type Args = {
   /** Visible columns; supplies `findColumn` and gates per-column edit policy. */
   readonly columns: readonly ColumnDefinition[];
@@ -21,8 +21,8 @@ type Args = {
   readonly onCommit: (args: CommitArgs) => void;
 };
 
-/** Public surface returned by {@link useSpreadsheetSelection}. */
-export type SpreadsheetSelection = {
+/** Public surface returned by {@link useSelection}. */
+export type SelectionState = {
   /** Current selection — feeds visual highlight and keyboard dispatch. */
   readonly selection: Selection;
   /** Active editor state, or `null` when no cell is being edited. */
@@ -49,7 +49,7 @@ export type SpreadsheetSelection = {
  * Selection lives in component-local state because it is purely a UI concern;
  * mutations propagate upward through `onCommit` so the edit store stays the
  * single source of truth for rows. `findColumn` and `startEditAt` are
- * exposed because the keyboard layer (see `useSpreadsheetKeyboard`) needs to
+ * exposed because the keyboard layer (see `useKeyboard`) needs to
  * promote a selected cell into edit mode without going through the click
  * handlers.
  *
@@ -57,12 +57,7 @@ export type SpreadsheetSelection = {
  * @returns Selection / editing state plus pointer-driven interaction handlers
  *   and an explicit `startEditAt` for keyboard-driven edits.
  */
-export const useSpreadsheetSelection = ({
-  columns,
-  rows,
-  support,
-  onCommit,
-}: Args): SpreadsheetSelection => {
+export const useSelection = ({ columns, rows, support, onCommit }: Args): SelectionState => {
   const [selection, setSelection] = useState<Selection>({ kind: "none" });
   const [editing, setEditing] = useState<EditingState | null>(null);
 

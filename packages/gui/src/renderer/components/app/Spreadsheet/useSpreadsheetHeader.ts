@@ -6,7 +6,7 @@ import type { TrackRow } from "@/features/tracks/types";
 
 import { renderHeader } from "./renderHeader";
 
-/** Args for {@link useHeaderEntries}. */
+/** Args for {@link useSpreadsheetHeader}. */
 type Args = {
   /** Visible columns in display order. */
   readonly columns: readonly ColumnDefinition[];
@@ -35,7 +35,7 @@ export type HeaderEntry = {
  * @param args - Columns, rows, and the format support matrix.
  * @returns One {@link HeaderEntry} per visible column.
  */
-export const useHeaderEntries = ({ columns, rows, support }: Args): readonly HeaderEntry[] =>
+export const useSpreadsheetHeader = ({ columns, rows, support }: Args): readonly HeaderEntry[] =>
   useMemo(
     () =>
       columns.map((column) => ({

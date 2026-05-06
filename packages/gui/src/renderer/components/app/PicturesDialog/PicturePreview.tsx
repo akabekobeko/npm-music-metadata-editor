@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { usePicturePreview } from "./usePicturePreview.js";
 
 /** Props for {@link PicturePreview}. */
 export type PicturePreviewProps = {
@@ -19,20 +19,7 @@ export type PicturePreviewProps = {
  * @returns The preview markup.
  */
 export function PicturePreview({ bytes, mimeType }: PicturePreviewProps) {
-  const [src, setSrc] = useState<string | null>(null);
-  const [errored, setErrored] = useState(false);
-
-  useEffect(() => {
-    setErrored(false);
-    const buffer = new ArrayBuffer(bytes.byteLength);
-    new Uint8Array(buffer).set(bytes);
-    const blob = new Blob([buffer], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    setSrc(url);
-    return () => {
-      URL.revokeObjectURL(url);
-    };
-  }, [bytes, mimeType]);
+  const { src, errored, handleError } = usePicturePreview({ bytes, mimeType });
 
   if (errored) {
     return (
@@ -50,7 +37,7 @@ export function PicturePreview({ bytes, mimeType }: PicturePreviewProps) {
     <img
       src={src}
       alt="Embedded artwork"
-      onError={() => setErrored(true)}
+      onError={handleError}
       className="max-h-64 w-full rounded-md border bg-muted/50 object-contain"
     />
   );

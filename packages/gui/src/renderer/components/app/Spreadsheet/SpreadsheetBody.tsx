@@ -8,7 +8,7 @@ import type { TagData } from "../../../../main/ipc/types";
 import { EditableCell } from "./cells/EditableCell";
 import { renderCell } from "./renderCell";
 import type { EditingState, Selection } from "./types.js";
-import { useCellState } from "./useCellState.js";
+import { useSpreadsheetBody } from "./useSpreadsheetBody.js";
 
 /** Props for {@link SpreadsheetBody}. */
 export type SpreadsheetBodyProps = {
@@ -44,7 +44,7 @@ export type SpreadsheetBodyProps = {
  * Renders the spreadsheet's `<tbody>` with virtualized row windowing. Each
  * cell is either an inline editor (when the cell is being edited) or the
  * column's read-only renderer chosen by `renderCell`. Per-cell flags are
- * resolved by `useCellState`.
+ * resolved by `useSpreadsheetBody`.
  *
  * @returns The rendered table body.
  */
@@ -63,7 +63,7 @@ export function SpreadsheetBody({
   onOpenPictures,
   onOpenLyrics,
 }: SpreadsheetBodyProps) {
-  const resolveCellState = useCellState({ selection, editing, support });
+  const resolveCellState = useSpreadsheetBody({ selection, editing, support });
 
   return (
     <tbody style={{ height: virtualizer.getTotalSize() }} className="relative block">

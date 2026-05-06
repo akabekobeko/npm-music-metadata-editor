@@ -1,15 +1,10 @@
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { useRef } from "react";
-
 import type { ColumnDefinition, ColumnId, FormatSupportMap } from "@/features/spreadsheet/types";
 import type { TrackRow } from "@/features/tracks/types";
 
 import { SpreadsheetBody } from "./SpreadsheetBody";
 import { SpreadsheetHeader } from "./SpreadsheetHeader";
 import type { CommitArgs, PasteArgs } from "./types.js";
-import { useColumnResize } from "./useColumnResize.js";
-import { useSpreadsheetKeyboard } from "./useSpreadsheetKeyboard.js";
-import { useSpreadsheetSelection } from "./useSpreadsheetSelection.js";
+import { useSpreadsheet } from "./useSpreadsheet.js";
 
 /** Props for {@link Spreadsheet}. */
 export type SpreadsheetProps = {
@@ -39,25 +34,14 @@ export type SpreadsheetProps = {
   readonly onColumnResize: (columnId: ColumnId, width: number) => void;
 };
 
-/** Estimated row height (px) used by the virtualizer to size the spacer. */
-const ROW_HEIGHT = 32;
-/** How many rows past the viewport to keep mounted, smoothing scroll. */
-const VIRTUAL_OVERSCAN = 8;
-
 /**
  * Virtualized grid with cell selection, inline editing, undo, and column
  * paste.
  *
- * Behaviour is split across three colocated hooks:
- *   - `useSpreadsheetSelection` owns selection / editing state and the
- *     pointer-driven cell + header click handlers.
- *   - `useSpreadsheetKeyboard` wires document-level shortcuts (undo, paste,
- *     enter / type-to-edit) to the selection.
- *   - `useColumnResize` drives the header drag-resize gripper.
- *
- * Rendering is split into `SpreadsheetHeader` (`<thead>`) and
- * `SpreadsheetBody` (virtualized `<tbody>`) so this component only has to
- * own the scroll container, the colgroup, and the virtualizer wiring.
+ * All state and side-effects live in `useSpreadsheet` (which composes
+ * `useColumnResize`, `useSelection`, and `useKeyboard`); this component only
+ * arranges the JSX. Rendering itself is split into `SpreadsheetHeader`
+ * (`<thead>`) and `SpreadsheetBody` (virtualized `<tbody>`).
  *
  * Mutations propagate upward through the `onCommit` / `onPaste` / `onUndo`
  * callbacks so the edit store stays the single source of truth for rows.
@@ -76,40 +60,27 @@ export function Spreadsheet({
   onUndo,
   onColumnResize,
 }: SpreadsheetProps) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const { liveWidths, beginResize } = useColumnResize({
-    baseWidths: columnWidths,
-    onColumnResize,
-  });
-  const widthOf = (id: ColumnId): number => liveWidths[id] ?? columnWidths[id] ?? 0;
-
   const {
+    containerRef,
+    virtualizer,
     selection,
     editing,
-    findColumn,
-    startEditAt,
-    commitFromEditor,
-    cancelEditor,
+    widthOf,
+    beginResize,
     handleCellClick,
     handleCellDoubleClick,
     handleColumnHeaderClick,
-  } = useSpreadsheetSelection({ columns, rows, support, onCommit });
-
-  useSpreadsheetKeyboard({
-    editing,
-    selection,
+    commitFromEditor,
+    cancelEditor,
+  } = useSpreadsheet({
+    columns,
     rows,
-    findColumn,
-    startEditAt,
+    support,
+    columnWidths,
+    onCommit,
     onPaste,
     onUndo,
-  });
-
-  const virtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => containerRef.current,
-    estimateSize: () => ROW_HEIGHT,
-    overscan: VIRTUAL_OVERSCAN,
+    onColumnResize,
   });
 
   return (

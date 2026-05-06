@@ -6,7 +6,7 @@ import type { TrackRow } from "@/features/tracks/types";
 import { readCellAsString } from "./readCellAsString.js";
 import type { EditingState, PasteArgs, Selection, StartEditTarget } from "./types.js";
 
-/** Args for {@link useSpreadsheetKeyboard}. */
+/** Args for {@link useKeyboard}. */
 type Args = {
   /** Active editor state; the listener no-ops while an editor has focus. */
   readonly editing: EditingState | null;
@@ -14,7 +14,7 @@ type Args = {
   readonly selection: Selection;
   /** Track rows backing the grid; selections index into this array. */
   readonly rows: readonly TrackRow[];
-  /** Look up a column definition by id (sourced from `useSpreadsheetSelection`). */
+  /** Look up a column definition by id (sourced from `useSelection`). */
   readonly findColumn: (id: ColumnId) => ColumnDefinition | undefined;
   /** Open the inline editor for the given target. */
   readonly startEditAt: (target: StartEditTarget) => void;
@@ -40,10 +40,10 @@ type Args = {
  *      current cell value.
  *
  * @param args - Selection / editing state, row data, the column lookup, the
- *   `startEditAt` action exposed by `useSpreadsheetSelection`, and the host's
+ *   `startEditAt` action exposed by `useSelection`, and the host's
  *   paste / undo callbacks.
  */
-export const useSpreadsheetKeyboard = ({
+export const useKeyboard = ({
   editing,
   selection,
   rows,

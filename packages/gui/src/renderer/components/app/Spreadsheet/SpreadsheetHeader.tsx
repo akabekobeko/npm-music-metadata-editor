@@ -5,7 +5,7 @@ import type { TrackRow } from "@/features/tracks/types";
 import { cn } from "@/libs/utils";
 
 import type { Selection } from "./types.js";
-import { useHeaderEntries } from "./useHeaderEntries.js";
+import { useSpreadsheetHeader } from "./useSpreadsheetHeader.js";
 
 /** Props for {@link SpreadsheetHeader}. */
 export type SpreadsheetHeaderProps = {
@@ -26,8 +26,8 @@ export type SpreadsheetHeaderProps = {
 /**
  * Renders the spreadsheet's `<thead>` row, including the per-column resize
  * gripper. Header cell content is delegated to `renderHeader` (via
- * `useHeaderEntries`), which knows the registry-specific affordances such as
- * status badges and sort markers.
+ * `useSpreadsheetHeader`), which knows the registry-specific affordances such
+ * as status badges and sort markers.
  *
  * @returns The rendered table header.
  */
@@ -39,7 +39,7 @@ export function SpreadsheetHeader({
   onHeaderClick,
   onBeginResize,
 }: SpreadsheetHeaderProps) {
-  const headerEntries = useHeaderEntries({ columns, rows, support });
+  const headerEntries = useSpreadsheetHeader({ columns, rows, support });
 
   return (
     <thead className="sticky top-0 z-20 bg-background">
