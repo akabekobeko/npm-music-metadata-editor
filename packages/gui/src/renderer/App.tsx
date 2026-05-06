@@ -1,4 +1,4 @@
-import { AppShell } from "./components/app/AppShell";
+import { AppShell } from "./components/app/AppShell/AppShell";
 import { SettingsProvider } from "./features/settings/store";
 
 /**
