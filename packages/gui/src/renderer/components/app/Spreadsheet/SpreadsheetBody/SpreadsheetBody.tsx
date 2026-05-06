@@ -4,10 +4,10 @@ import type { ColumnDefinition, ColumnId, FormatSupportMap } from "@/features/sp
 import type { TrackRow } from "@/features/tracks/types";
 import { cn } from "@/libs/utils";
 
-import type { TagData } from "../../../../main/ipc/types";
+import type { TagData } from "../../../../../main/ipc/types";
+import type { EditingState, Selection } from "../types.js";
 import { EditableCell } from "./cells/EditableCell";
 import { renderCell } from "./renderCell";
-import type { EditingState, Selection } from "./types.js";
 import { useSpreadsheetBody } from "./useSpreadsheetBody.js";
 
 /** Props for {@link SpreadsheetBody}. */

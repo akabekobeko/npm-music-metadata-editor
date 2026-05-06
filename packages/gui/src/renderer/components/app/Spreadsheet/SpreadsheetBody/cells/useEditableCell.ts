@@ -9,7 +9,7 @@ import {
 
 import { validateTagValue } from "@/features/edit/validators";
 
-import type { TagData } from "../../../../../main/ipc/types";
+import type { TagData } from "../../../../../../main/ipc/types";
 
 /** Args for {@link useEditableCell}. */
 type Args = {

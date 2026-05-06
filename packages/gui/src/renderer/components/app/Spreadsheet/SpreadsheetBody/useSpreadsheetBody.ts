@@ -4,7 +4,7 @@ import { isCellWritable } from "@/features/spreadsheet/isCellWritable";
 import type { ColumnDefinition, FormatSupportMap } from "@/features/spreadsheet/types";
 import type { TrackRow } from "@/features/tracks/types";
 
-import type { EditingState, Selection } from "./types.js";
+import type { EditingState, Selection } from "../types.js";
 
 /** Args for {@link useSpreadsheetBody}. */
 type Args = {

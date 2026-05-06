@@ -1,7 +1,7 @@
 import type { InputKind } from "@/features/spreadsheet/types";
 import { cn } from "@/libs/utils";
 
-import type { TagData } from "../../../../../main/ipc/types";
+import type { TagData } from "../../../../../../main/ipc/types";
 import { useEditableCell } from "./useEditableCell.js";
 
 /** Props for {@link EditableCell}. */

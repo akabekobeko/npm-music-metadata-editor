@@ -3,13 +3,13 @@ import type { ReactNode } from "react";
 import type { ColumnDefinition } from "@/features/spreadsheet/types";
 import type { TrackRow } from "@/features/tracks/types";
 
+import { FileNameCell } from "../fileName/FileNameCell";
 import { DurationCell } from "./cells/DurationCell";
 import { LyricsSummaryCell } from "./cells/LyricsSummaryCell";
 import { NumberCell } from "./cells/NumberCell";
 import { PicturesSummaryCell } from "./cells/PicturesSummaryCell";
 import { TextCell } from "./cells/TextCell";
 import { WarningsCell } from "./cells/WarningsCell";
-import { FileNameCell } from "./fileName/FileNameCell";
 
 /** Handlers for cells that delegate user intent back to the page (modal opens). */
 export type CellHandlers = {
