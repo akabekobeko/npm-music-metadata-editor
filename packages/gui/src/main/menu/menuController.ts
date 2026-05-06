@@ -8,6 +8,7 @@ import type { MenuState } from "./types.js";
 type InitArgs = {
   /** Initial values, typically derived from `getSettings()` at startup. */
   readonly initialSnapshot: MenuStateSnapshot;
+  /** Active UI locale used by the first menu install. */
   readonly locale: Locale;
   /** Forwards `mme:menu:action` payloads to the focused renderer. */
   readonly emit: (payload: MenuActionPayload) => void;
@@ -23,8 +24,11 @@ type InitArgs = {
  * the menu without requiring callers to re-pass the static fields.
  */
 type ControllerState = {
+  /** Latest merged menu state; rebuilt on every snapshot push. */
   state: MenuState;
+  /** Active UI locale used for menu strings. */
   locale: Locale;
+  /** Forwards `mme:menu:action` payloads to the focused renderer. */
   emit: (payload: MenuActionPayload) => void;
 };
 

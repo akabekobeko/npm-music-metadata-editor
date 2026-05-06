@@ -19,16 +19,22 @@ import type {
  * that migration hooks exist before they are needed.
  */
 export type AppSettings = {
+  /** Schema generation; bump to enable a future migration step. */
   readonly version: 1;
+  /** Spreadsheet column visibility and width preferences. */
   readonly columns: {
     /** Visible column ids in display order. `fileName` is always present. */
     readonly visibleIds: readonly string[];
     /** Column widths in pixels keyed by column id. Missing keys fall back to the registry default. */
     readonly widths: Readonly<Record<string, number>>;
   };
+  /** Last-known window geometry — restored at app launch. */
   readonly window: {
+    /** Window width in pixels. */
     readonly width: number;
+    /** Window height in pixels. */
     readonly height: number;
+    /** Whether the window was maximized when last closed. */
     readonly maximized: boolean;
   };
   /** Most-recently-opened file paths. Newest first, capped at 10. */
@@ -66,8 +72,11 @@ export type { AudioFormat, ChapterInfo, LyricsInfo, PictureInfo, TagData, Track,
  * across IPC. Always use this in IPC responses; never throw across the bridge.
  */
 export type IpcError = {
+  /** Error class name (e.g., `"Error"`, `"TypeError"`). */
   readonly name: string;
+  /** Optional Node-style error code (e.g., `"ENOENT"`). */
   readonly code?: string;
+  /** Human-readable error message. */
   readonly message: string;
 };
 
@@ -90,15 +99,21 @@ export type IpcResult<T> =
  * `process.versions` for support / bug-report purposes.
  */
 export type AppVersions = {
+  /** Version of `@akabeko/music-metadata-editor`. */
   readonly core: string;
+  /** Version of the Electron GUI app's own `package.json`. */
   readonly gui: string;
+  /** Version of the bundled Electron runtime. */
   readonly electron: string;
+  /** Version of the bundled Chromium runtime. */
   readonly chrome: string;
+  /** Version of the bundled Node runtime. */
   readonly node: string;
 };
 
 /** Request payload for `mme:dialog:openFiles`. */
 export type ShowOpenFilesRequest = {
+  /** Whether the picker permits selecting more than one file. */
   readonly multiple?: boolean;
 };
 
@@ -110,7 +125,9 @@ export type ShowOpenFilesRequest = {
  * does not import the `electron` package.
  */
 export type SaveFileFilter = {
+  /** Human-readable label shown in the dialog (e.g., `"Lyrics"`). */
   readonly name: string;
+  /** File extensions associated with this filter, sans dot (e.g., `["lrc"]`). */
   readonly extensions: readonly string[];
 };
 
@@ -129,23 +146,29 @@ export type ShowSaveFileRequest = {
  * without inspecting the wider `IpcResult.ok === false` failure path.
  */
 export type ShowSaveFileOk = {
+  /** Absolute path the user chose. */
   readonly filePath: string;
 } | null;
 
 /** Request payload for `mme:file:writeBytes`. */
 export type WriteBytesRequest = {
+  /** Absolute destination path. */
   readonly filePath: string;
+  /** Bytes to write atomically. */
   readonly bytes: Uint8Array;
 };
 
 /** Request payload for `mme:file:readBytes`. */
 export type ReadBytesRequest = {
+  /** Absolute source path. */
   readonly filePath: string;
 };
 
 /** Successful payload of `mme:file:readBytes`. */
 export type ReadBytesOk = {
+  /** Absolute path that was read; echoed back to correlate batch reads. */
   readonly filePath: string;
+  /** File contents. */
   readonly bytes: Uint8Array;
 };
 
@@ -156,7 +179,9 @@ export type ReadBytesOk = {
  * even when several loads run in parallel.
  */
 export type LoadTrackOk = {
+  /** Absolute path that was loaded; echoed back to correlate parallel loads. */
   readonly filePath: string;
+  /** Parsed track metadata. */
   readonly track: Track;
 };
 
@@ -167,7 +192,9 @@ export type LoadTrackOk = {
  * single bad file does not poison the rest of the batch.
  */
 export type LoadManyEntry = {
+  /** Absolute path of this batch entry. */
   readonly filePath: string;
+  /** Per-file outcome — failures are isolated to this entry. */
   readonly result: IpcResult<Track>;
 };
 
@@ -178,10 +205,15 @@ export type LoadManyEntry = {
  * unspecified fields are preserved by the underlying `writeMetadata`.
  */
 export type SaveTrackRequest = {
+  /** Absolute path of the file to update. */
   readonly filePath: string;
+  /** Tag fields to persist; unspecified keys are preserved. */
   readonly tag: Partial<TagData>;
+  /** New picture set; omit to leave existing pictures untouched. */
   readonly pictures?: readonly PictureInfo[];
+  /** New chapter list; omit to leave existing chapters untouched. */
   readonly chapters?: readonly ChapterInfo[];
+  /** New lyrics payload; omit to leave existing lyrics untouched. */
   readonly lyrics?: LyricsInfo;
 };
 
@@ -192,7 +224,9 @@ export type SaveTrackRequest = {
  * while the file was rebuilt.
  */
 export type SaveTrackOk = {
+  /** Absolute path that was saved; echoed for correlation. */
   readonly filePath: string;
+  /** Non-fatal diagnostics collected during the rebuild (e.g., dropped fields). */
   readonly warnings: readonly Warning[];
 };
 
@@ -205,11 +239,15 @@ export type SaveTrackOk = {
  * format cannot represent.
  */
 export type FormatSupportEntry = {
+  /** Audio format this entry describes. */
   readonly format: AudioFormat;
   /** Names of `TagData` fields the format can persist. */
   readonly writableTagFields: ReadonlyArray<keyof TagData>;
+  /** Whether the format can carry embedded pictures. */
   readonly supportsPictures: boolean;
+  /** Whether the format can carry chapter markers. */
   readonly supportsChapters: boolean;
+  /** Whether the format can carry lyrics. */
   readonly supportsLyrics: boolean;
 };
 
@@ -232,6 +270,7 @@ export type SettingsSnapshot = AppSettings;
  * wholesale — see `mergeSettings`.
  */
 export type SetSettingsRequest = {
+  /** Deeply-partial settings patch; arrays inside the patch replace wholesale. */
   readonly patch: DeepPartial<AppSettings>;
 };
 
@@ -245,7 +284,9 @@ export type SetSettingsRequest = {
  * progress bar.
  */
 export type ProgressSavePayload = {
+  /** File the notification is about. */
   readonly filePath: string;
+  /** Lifecycle stage of this file's save — `"writing"` brackets the core call. */
   readonly phase: "start" | "writing" | "done";
 };
 
@@ -268,12 +309,19 @@ export type ProgressSaveSubscriber = (
  * change at runtime.
  */
 export type MenuStateSnapshot = {
+  /** Whether the workspace has unsaved edits — gates Save / Discard items. */
   readonly hasDirty: boolean;
+  /** Most-recently-opened file paths, newest first; drives the Recent submenu. */
   readonly recentFiles: readonly string[];
+  /** Resolved color theme — drives the toggle item's check state. */
   readonly theme: "light" | "dark";
+  /** Visible / hidden state of every spreadsheet column for the Columns submenu. */
   readonly columns: ReadonlyArray<{
+    /** Column id — matches the registry. */
     readonly id: string;
+    /** Localised label shown in the menu. */
     readonly label: string;
+    /** Whether the column is currently visible in the grid. */
     readonly visible: boolean;
   }>;
 };
@@ -306,7 +354,9 @@ export type MenuAction =
  * typed at the IPC boundary; consumers narrow it on the action discriminant.
  */
 export type MenuActionPayload = {
+  /** Identifier of the menu item that fired. */
   readonly action: MenuAction;
+  /** Action-specific payload — narrowed by the consumer on the action discriminant. */
   readonly data?: unknown;
 };
 
@@ -325,8 +375,11 @@ export type MenuActionSubscriber = (listener: (payload: MenuActionPayload) => vo
  * expects the same shape from both directions.
  */
 export type FatalPayload = {
+  /** Process that observed the failure. */
   readonly source: "main" | "renderer";
+  /** Error message, already coerced to string. */
   readonly message: string;
+  /** Optional stack trace for diagnostics. */
   readonly stack?: string;
 };
 
@@ -345,7 +398,9 @@ export type LogLevel = "info" | "warn" | "error";
 
 /** Request payload for `mme:log:forward`. */
 export type LogForwardRequest = {
+  /** Severity of the entry. */
   readonly level: LogLevel;
+  /** Primary log message. */
   readonly message: string;
   /** Optional auxiliary detail (Error stack, JSON snippet, …). */
   readonly detail?: string;
@@ -359,11 +414,13 @@ export type LogForwardRequest = {
  * are returned unchanged when their extension matches.
  */
 export type ExpandPathsOk = {
+  /** Absolute audio file paths that survived recursion + extension filtering. */
   readonly filePaths: readonly string[];
 };
 
 /** Request payload for `mme:dialog:expandPaths`. */
 export type ExpandPathsRequest = {
+  /** Mix of file and directory paths — directories are walked recursively. */
   readonly paths: readonly string[];
 };
 
@@ -376,40 +433,65 @@ export type ExpandPathsRequest = {
  * of a flat catalog of channel names.
  */
 export type MmeBridge = {
+  /** Static runtime versions exposed synchronously for splash screens. */
   readonly versions: {
+    /** Node runtime version. */
     readonly node: string;
+    /** Chromium runtime version. */
     readonly chrome: string;
+    /** Electron runtime version. */
     readonly electron: string;
   };
+  /** App-level metadata channels. */
   readonly app: {
+    /** Resolve the full {@link AppVersions} report. */
     readonly getVersions: () => Promise<AppVersions>;
   };
+  /** Native dialog wrappers. */
   readonly dialog: {
+    /** Show the open-files picker. */
     readonly openFiles: (request?: ShowOpenFilesRequest) => Promise<IpcResult<readonly string[]>>;
+    /** Show the save-file picker. */
     readonly saveFile: (request?: ShowSaveFileRequest) => Promise<IpcResult<ShowSaveFileOk>>;
   };
+  /** Track load / save channels backed by the core library. */
   readonly track: {
+    /** Load a single audio file. */
     readonly load: (request: { filePath: string }) => Promise<IpcResult<LoadTrackOk>>;
+    /** Load a batch of audio files; failures are isolated per entry. */
     readonly loadMany: (request: {
       filePaths: readonly string[];
     }) => Promise<IpcResult<readonly LoadManyEntry[]>>;
+    /** Persist edits back to disk. */
     readonly save: (request: SaveTrackRequest) => Promise<IpcResult<SaveTrackOk>>;
   };
+  /** Raw file I/O for sidecar workflows (LRC import / export, etc.). */
   readonly file: {
+    /** Read bytes from disk. */
     readonly readBytes: (request: ReadBytesRequest) => Promise<IpcResult<ReadBytesOk>>;
+    /** Write bytes to disk atomically. */
     readonly writeBytes: (request: WriteBytesRequest) => Promise<IpcResult<void>>;
   };
+  /** Format-capability metadata used to gate writable cells. */
   readonly formatSupport: {
+    /** Enumerate per-format support entries. */
     readonly list: () => Promise<IpcResult<readonly FormatSupportEntry[]>>;
   };
+  /** Persisted-settings channels. */
   readonly settings: {
+    /** Read the current settings snapshot. */
     readonly get: () => Promise<IpcResult<SettingsSnapshot>>;
+    /** Apply a deeply-partial patch and return the merged snapshot. */
     readonly set: (request: SetSettingsRequest) => Promise<IpcResult<SettingsSnapshot>>;
   };
+  /** Long-running progress notifications. */
   readonly progress: {
+    /** Subscribe to per-file save progress events. */
     readonly onSave: ProgressSaveSubscriber;
   };
+  /** Drag-and-drop helpers. */
   readonly dnd: {
+    /** Recursively resolve dropped paths to audio file paths. */
     readonly expandPaths: (request: ExpandPathsRequest) => Promise<IpcResult<ExpandPathsOk>>;
     /**
      * Resolve the absolute filesystem path of a `File` produced by HTML drag
@@ -419,15 +501,23 @@ export type MmeBridge = {
      */
     readonly pathFor: (file: File) => string;
   };
+  /** Native application-menu channels. */
   readonly menu: {
+    /** Subscribe to menu-action events fired by Main. */
     readonly onAction: MenuActionSubscriber;
+    /** Push the latest menu-relevant state so Main can rebuild the menu. */
     readonly setState: (snapshot: MenuStateSnapshot) => void;
   };
+  /** Fatal-error reporting channels. */
   readonly fatal: {
+    /** Subscribe to fatal-error notifications from Main. */
     readonly onError: FatalSubscriber;
+    /** Report a Renderer-side fatal error to Main. */
     readonly report: (payload: FatalPayload) => void;
   };
+  /** Log-forwarding channel for Renderer `console` output. */
   readonly log: {
+    /** Forward a single log entry to Main's logger. */
     readonly forward: (request: LogForwardRequest) => void;
   };
 };

@@ -22,35 +22,53 @@ const HISTORY_LIMIT = 50;
  * ring buffer of past `rows` snapshots; `undo` walks one step back.
  */
 export type EditState = {
+  /** Live, edit-applied view of every open file. */
   readonly rows: readonly TrackRow[];
+  /** Bounded ring buffer of past `rows` snapshots for undo. */
   readonly history: readonly (readonly TrackRow[])[];
 };
 
 /** Discriminated union of every action the edit reducer accepts. */
 export type EditAction =
+  /** Replace the row set wholesale and clear undo history. */
   | { readonly type: "load"; readonly rows: readonly TrackRow[] }
+  /** Commit a single tag-cell edit. */
   | {
       readonly type: "commit";
+      /** Row identified by absolute path. */
       readonly filePath: string;
+      /** `TagData` field being patched. */
       readonly field: keyof TagData;
+      /** New value, or `undefined` to clear the field. */
       readonly value: string | number | undefined;
     }
+  /** Commit the result of the pictures dialog for one row. */
   | {
       readonly type: "commitPictures";
+      /** Row identified by absolute path. */
       readonly filePath: string;
+      /** Replacement picture list. */
       readonly pictures: readonly PictureInfo[];
     }
+  /** Commit the result of the lyrics dialog for one row. */
   | {
       readonly type: "commitLyrics";
+      /** Row identified by absolute path. */
       readonly filePath: string;
+      /** Replacement lyrics, or `undefined` to clear them. */
       readonly lyrics: LyricsInfo | undefined;
     }
+  /** Revert one row's track to its origin snapshot. */
   | { readonly type: "revert"; readonly filePath: string }
+  /** Replace the entire row array (used by paste). */
   | { readonly type: "applyChange"; readonly nextRows: readonly TrackRow[] }
+  /** Attach / clear sticky save errors after a Save All run. */
   | {
       readonly type: "markSaveErrors";
+      /** Per-path error map; `undefined` clears the prior flag. */
       readonly errors: ReadonlyMap<string, IpcError | undefined>;
     }
+  /** Walk one step back through the history stack. */
   | { readonly type: "undo" };
 
 /** Empty initial state — no rows, empty history. */

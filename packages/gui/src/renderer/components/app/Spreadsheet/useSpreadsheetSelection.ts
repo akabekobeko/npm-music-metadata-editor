@@ -11,22 +11,35 @@ import type { CommitArgs, EditingState, Selection, StartEditTarget } from "./typ
 
 /** Args for {@link useSpreadsheetSelection}. */
 type Args = {
+  /** Visible columns; supplies `findColumn` and gates per-column edit policy. */
   readonly columns: readonly ColumnDefinition[];
+  /** Track rows backing the grid; selections / edits index into this array. */
   readonly rows: readonly TrackRow[];
+  /** Format support matrix used to gate writable cells. */
   readonly support: FormatSupportMap;
+  /** Forward a successful inline-editor commit to the host's edit store. */
   readonly onCommit: (args: CommitArgs) => void;
 };
 
 /** Public surface returned by {@link useSpreadsheetSelection}. */
 export type SpreadsheetSelection = {
+  /** Current selection — feeds visual highlight and keyboard dispatch. */
   readonly selection: Selection;
+  /** Active editor state, or `null` when no cell is being edited. */
   readonly editing: EditingState | null;
+  /** Look up a column definition by id. Memoised against `columns`. */
   readonly findColumn: (id: ColumnId) => ColumnDefinition | undefined;
+  /** Promote a cell into edit mode with an explicit seed value. */
   readonly startEditAt: (target: StartEditTarget) => void;
+  /** Commit the value held by the editor and clear the editor state. */
   readonly commitFromEditor: (value: string | number | undefined) => void;
+  /** Discard the editor without committing. */
   readonly cancelEditor: () => void;
+  /** Single-click handler — selects the cell and exits edit mode. */
   readonly handleCellClick: (rowIndex: number, columnId: ColumnId) => void;
+  /** Double-click handler — selects the cell and opens the inline editor. */
   readonly handleCellDoubleClick: (rowIndex: number, columnId: ColumnId) => void;
+  /** Header click handler — selects the column when it permits column-wide ops. */
   readonly handleColumnHeaderClick: (columnId: ColumnId) => void;
 };
 

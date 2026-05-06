@@ -2,7 +2,9 @@ import { Textarea } from "@/components/ui/textarea";
 
 /** Props for {@link PlainTextTab}. */
 export type PlainTextTabProps = {
+  /** Current unsynchronized lyrics text. */
   readonly value: string;
+  /** Receive every keystroke; the parent owns the draft state. */
   readonly onChange: (value: string) => void;
 };
 

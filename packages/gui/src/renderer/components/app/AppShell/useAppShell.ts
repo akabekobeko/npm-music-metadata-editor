@@ -53,10 +53,15 @@ export type AppShellModel = {
   readonly onReloadFromFatal: () => void;
   /** Quit the application in response to a fatal. */
   readonly onQuitFromFatal: () => void;
+  /** Column visibility / width view model from `useColumnSettings`. */
   readonly columns: ColumnSettings;
+  /** Pictures / Lyrics modal state from `useDialogState`. */
   readonly dialogs: DialogState;
+  /** Save All / Discard Changes controls from `useSaveAll`. */
   readonly save: SaveAllControls;
+  /** Grid commit / paste / undo callbacks from `useGridHandlers`. */
   readonly grid: GridHandlers;
+  /** Transient status bar text from `useTransientStatus`. */
   readonly status: TransientStatus;
   /** Open Files handler (header button + Cmd/Ctrl+O). */
   readonly onOpenFiles: () => void;

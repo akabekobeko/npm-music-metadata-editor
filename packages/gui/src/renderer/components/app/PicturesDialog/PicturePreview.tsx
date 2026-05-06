@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 
 /** Props for {@link PicturePreview}. */
 export type PicturePreviewProps = {
+  /** Raw image bytes; used to mint the object URL. */
   readonly bytes: Uint8Array;
+  /** MIME type passed to the `Blob` so the browser decodes correctly. */
   readonly mimeType: string;
 };
 

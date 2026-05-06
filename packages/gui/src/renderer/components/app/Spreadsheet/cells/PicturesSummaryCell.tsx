@@ -6,8 +6,11 @@ import { cn } from "@/libs/utils";
 
 /** Props for {@link PicturesSummaryCell}. */
 export type PicturesSummaryCellProps = {
+  /** Row whose pictures are summarised. */
   readonly row: TrackRow;
+  /** Render the cell muted and gate the double-click handler. */
   readonly disabled?: boolean;
+  /** Open the pictures editor for the row on double-click. */
   readonly onOpen: (row: TrackRow) => void;
 };
 

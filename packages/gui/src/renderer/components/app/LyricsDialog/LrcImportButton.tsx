@@ -6,7 +6,9 @@ import type { SyncedLine } from "@/features/lyrics/types";
 
 /** Props for {@link LrcImportButton}. */
 export type LrcImportButtonProps = {
+  /** Receive the synchronized lines parsed from the chosen file. */
   readonly onImport: (lines: readonly SyncedLine[]) => void;
+  /** Surface a user-facing error message (toast). */
   readonly onError: (message: string) => void;
 };
 

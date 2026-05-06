@@ -2,7 +2,9 @@ import { cn } from "@/libs/utils";
 
 /** Props for {@link NumberCell}. */
 export type NumberCellProps = {
+  /** Numeric value or its stringified form to display. */
   readonly value: string | number | undefined;
+  /** Render the cell muted to signal the field cannot be edited for this row. */
   readonly disabled?: boolean;
 };
 

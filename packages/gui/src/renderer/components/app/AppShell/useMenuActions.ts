@@ -9,18 +9,31 @@ import type { MenuAction, MenuActionPayload } from "../../../../main/ipc/types.j
 
 /** Args for {@link useMenuActions}. */
 type Args = {
+  /** Forwarded to `openFiles` / `saveSelected` (= Save All in v1). */
   readonly onOpenFiles: () => void;
+  /** Forwarded to `saveAll`. */
   readonly onSaveAll: () => void;
+  /** Forwarded to `discardChanges`. */
   readonly onDiscardChanges: () => void;
+  /** Forwarded to `closeAll`. */
   readonly onCloseAll: () => void;
+  /** Forwarded to `selectAll` (no-op in v1 — no row-selection model yet). */
   readonly onSelectAll: () => void;
+  /** Forwarded to `showAbout`. */
   readonly onShowAbout: () => void;
+  /** Forwarded to `toggleColumn` after the action's `data` is decoded as a column id. */
   readonly onToggleColumn: (id: ColumnId, visible: boolean) => void;
+  /** Visible column ids — used to invert the toggle action. */
   readonly visibleColumnIds: readonly ColumnId[];
+  /** Persisted theme preference; `toggleTheme` flips between light/dark from this. */
   readonly themePreference: "light" | "dark" | "system" | undefined;
+  /** Settings patch helper used by toggle / openRecent actions. */
   readonly setSettings: UpdateSettings;
+  /** Tracks reducer dispatch for `openRecent` loads. */
   readonly tracksDispatch: Dispatch<TracksAction>;
+  /** Edit reducer dispatch for `openRecent` loads. */
   readonly editDispatch: Dispatch<EditAction>;
+  /** Current `recentFiles` list — passed into `touchRecentFile` to dedupe. */
   readonly recentFiles: readonly string[];
 };
 

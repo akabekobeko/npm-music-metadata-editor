@@ -13,7 +13,9 @@ import type { AppVersions } from "../../../../main/ipc/types.js";
 
 /** Props for {@link AboutDialog}. */
 export type AboutDialogProps = {
+  /** Whether the modal is currently mounted. */
   readonly open: boolean;
+  /** Close handler — flips `open` back to `false`. */
   readonly onClose: () => void;
 };
 

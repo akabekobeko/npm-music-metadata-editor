@@ -17,10 +17,15 @@ type Args = {
 
 /** Public surface returned by {@link useColumnSettings}. */
 export type ColumnSettings = {
+  /** Visible column ids in display order, narrowed to the registry's discriminator. */
   readonly visibleIds: readonly ColumnId[];
+  /** Memoised column definitions matching `visibleIds`. */
   readonly columns: readonly ColumnDefinition[];
+  /** Effective per-column pixel widths, including registry fallbacks. */
   readonly columnWidths: Readonly<Record<ColumnId, number>>;
+  /** Toggle a column's visibility and persist the change. */
   readonly toggleColumn: (id: ColumnId, visible: boolean) => void;
+  /** Persist a new width for the resized column. */
   readonly resizeColumn: (id: ColumnId, width: number) => void;
 };
 

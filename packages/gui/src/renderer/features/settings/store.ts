@@ -11,7 +11,9 @@ import { defaultSettings } from "./defaults.js";
 import type { AppSettings, DeepPartial, SettingsState, UpdateSettings } from "./types.js";
 
 type ContextValue = {
+  /** Current settings snapshot plus the `loaded` flag. */
   readonly state: SettingsState;
+  /** Patch helper exposed by `useSettings`. */
   readonly update: UpdateSettings;
 };
 

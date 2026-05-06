@@ -55,7 +55,9 @@ export type InputKind = "text" | "number" | "select" | "date" | "custom";
 
 /** Option entry for `inputKind === "select"` columns. */
 export type SelectOption = {
+  /** Underlying value committed to the tag field. */
   readonly value: string;
+  /** Human-readable label shown in the dropdown. */
   readonly label: string;
 };
 
@@ -67,10 +69,15 @@ export type SelectOption = {
  * model.
  */
 export type CellEditorProps = {
+  /** Row whose cell is being edited. */
   readonly row: TrackRow;
+  /** Current cell value (already projected through `readValue`). */
   readonly value: string | number | undefined;
+  /** Commit a new value and exit edit mode. */
   readonly commit: (next: string | number | undefined) => void;
+  /** Discard the editor without committing. */
   readonly cancel: () => void;
+  /** When `true`, the editor renders read-only. */
   readonly disabled: boolean;
 };
 
@@ -81,9 +88,13 @@ export type CellEditorProps = {
  * The renderer ignores them for `"never"` / `"modal"` columns.
  */
 export type ColumnDefinition = {
+  /** Stable column identifier. */
   readonly id: ColumnId;
+  /** Header label shown in the grid. */
   readonly title: string;
+  /** Default column width in pixels (registry default; overridden by settings). */
   readonly width: number;
+  /** How the column behaves in edit mode. */
   readonly editable: ColumnEditability;
   /** When `"left"`, the column is pinned to the left edge of the viewport. */
   readonly sticky?: "left";
@@ -94,9 +105,13 @@ export type ColumnDefinition = {
    * `pictures`).
    */
   readonly selectable?: ColumnSelectability;
+  /** Project a row to the cell's display value. */
   readonly readValue: (row: TrackRow) => string | number | undefined;
+  /** Editor flavour used when `editable === "tag"`. */
   readonly inputKind?: InputKind;
+  /** Suggestion list for `inputKind === "select"`. */
   readonly options?: readonly SelectOption[];
+  /** Optional custom React editor — overrides the default `inputKind` editor. */
   readonly editor?: (props: CellEditorProps) => ReactNode;
 };
 

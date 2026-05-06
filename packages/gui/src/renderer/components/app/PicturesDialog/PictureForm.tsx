@@ -15,9 +15,13 @@ import type { PictureDraft } from "@/features/pictures/types";
 
 /** Props for {@link PictureForm}. */
 export type PictureFormProps = {
+  /** Currently-selected picture being edited. */
   readonly draft: PictureDraft;
+  /** Update the picture's kind (cover, back, …). */
   readonly onChangeKind: (kind: PictureDraft["kind"]) => void;
+  /** Update the picture's MIME type. */
   readonly onChangeMimeType: (mimeType: string) => void;
+  /** Update the picture's description string. */
   readonly onChangeDescription: (description: string) => void;
 };
 

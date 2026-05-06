@@ -6,8 +6,11 @@ import { cn } from "@/libs/utils";
 
 /** Props for {@link LyricsSummaryCell}. */
 export type LyricsSummaryCellProps = {
+  /** Row whose lyrics are summarised. */
   readonly row: TrackRow;
+  /** Render the cell muted and gate the double-click handler. */
   readonly disabled?: boolean;
+  /** Open the lyrics editor for the row on double-click. */
   readonly onOpen: (row: TrackRow) => void;
 };
 

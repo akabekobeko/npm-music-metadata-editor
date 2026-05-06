@@ -1,5 +1,6 @@
 /** Props for {@link FileNameHeaderCell}. */
 export type FileNameHeaderCellProps = {
+  /** Total number of loaded rows shown alongside the column title. */
   readonly fileCount: number;
 };
 

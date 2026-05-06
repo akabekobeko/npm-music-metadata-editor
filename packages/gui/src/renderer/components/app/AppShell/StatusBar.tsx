@@ -1,7 +1,10 @@
 /** Props for {@link StatusBar}. */
 export type StatusBarProps = {
+  /** Total number of loaded rows. */
   readonly fileCount: number;
+  /** Number of rows with unsaved edits. */
   readonly dirtyCount: number;
+  /** Number of rows reporting at least one warning after load. */
   readonly warningCount: number;
   /**
    * Transient summary appended to the right of the bar (e.g. paste outcome).

@@ -11,7 +11,9 @@ export type LyricsKind = "none" | "text" | "synced";
  * an em-dash without re-checking the kind.
  */
 export type LyricsSummary = {
+  /** Discriminator picking the richer of synced / text / none. */
   readonly kind: LyricsKind;
+  /** Cell label, or `undefined` when there are no lyrics. */
   readonly label: string | undefined;
 };
 

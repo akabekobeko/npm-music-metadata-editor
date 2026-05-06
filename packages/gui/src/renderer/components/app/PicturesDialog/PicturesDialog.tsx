@@ -23,10 +23,15 @@ import { PicturePreview } from "./PicturePreview";
 
 /** Props for {@link PicturesDialog}. */
 export type PicturesDialogProps = {
+  /** Absolute path of the row being edited; used as the title's subtitle. */
   readonly filePath: string;
+  /** Picture set to seed the dialog with. */
   readonly initialPictures: readonly PictureInfo[];
+  /** Commit the edited picture set back to the edit store. */
   readonly onApply: (pictures: readonly PictureInfo[]) => void;
+  /** Close the dialog without applying. */
   readonly onClose: () => void;
+  /** Surface a transient status message (toast). */
   readonly onNotify: (message: string) => void;
 };
 

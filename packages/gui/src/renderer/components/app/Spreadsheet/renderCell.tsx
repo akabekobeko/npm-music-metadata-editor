@@ -13,7 +13,9 @@ import { FileNameCell } from "./fileName/FileNameCell";
 
 /** Handlers for cells that delegate user intent back to the page (modal opens). */
 export type CellHandlers = {
+  /** Open the picture-management dialog for the given row. */
   readonly onOpenPictures: (row: TrackRow) => void;
+  /** Open the lyrics editor dialog for the given row. */
   readonly onOpenLyrics: (row: TrackRow) => void;
 };
 

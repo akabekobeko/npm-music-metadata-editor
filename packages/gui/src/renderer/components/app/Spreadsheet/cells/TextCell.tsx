@@ -2,7 +2,9 @@ import { cn } from "@/libs/utils";
 
 /** Props for {@link TextCell}. */
 export type TextCellProps = {
+  /** Free-form text or numeric value to display. */
   readonly value: string | number | undefined;
+  /** Render the cell muted to signal the field cannot be edited for this row. */
   readonly disabled?: boolean;
 };
 

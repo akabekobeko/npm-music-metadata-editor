@@ -8,12 +8,19 @@ import type { EditingState, PasteArgs, Selection, StartEditTarget } from "./type
 
 /** Args for {@link useSpreadsheetKeyboard}. */
 type Args = {
+  /** Active editor state; the listener no-ops while an editor has focus. */
   readonly editing: EditingState | null;
+  /** Current selection used to dispatch shortcuts (paste, type-to-edit). */
   readonly selection: Selection;
+  /** Track rows backing the grid; selections index into this array. */
   readonly rows: readonly TrackRow[];
+  /** Look up a column definition by id (sourced from `useSpreadsheetSelection`). */
   readonly findColumn: (id: ColumnId) => ColumnDefinition | undefined;
+  /** Open the inline editor for the given target. */
   readonly startEditAt: (target: StartEditTarget) => void;
+  /** Forward a clipboard paste request to the host. */
   readonly onPaste: (args: PasteArgs) => void;
+  /** Forward an undo request to the host. Bound to Cmd/Ctrl+Z. */
   readonly onUndo: () => void;
 };
 
@@ -102,8 +109,11 @@ export const useSpreadsheetKeyboard = ({
 };
 
 type DispatchPasteArgs = {
+  /** Selection that triggered the paste. */
   readonly selection: Selection;
+  /** Total number of rows in the grid; caps column-mode pastes. */
   readonly rowsLength: number;
+  /** Host callback receiving the resolved paste request. */
   readonly onPaste: (args: PasteArgs) => void;
 };
 

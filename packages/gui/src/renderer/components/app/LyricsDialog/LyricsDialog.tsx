@@ -24,10 +24,15 @@ import { type SyncedLineEntry, SynchronizedTab } from "./SynchronizedTab";
 
 /** Props for {@link LyricsDialog}. */
 export type LyricsDialogProps = {
+  /** Absolute path of the row being edited; used as the title's subtitle. */
   readonly filePath: string;
+  /** Lyrics block to seed the dialog with — `undefined` means "no lyrics yet". */
   readonly initialLyrics: LyricsInfo | undefined;
+  /** Commit the edited lyrics back to the edit store; `undefined` clears them. */
   readonly onApply: (lyrics: LyricsInfo | undefined) => void;
+  /** Close the dialog without applying. */
   readonly onClose: () => void;
+  /** Surface a transient status message (toast). */
   readonly onNotify: (message: string) => void;
 };
 

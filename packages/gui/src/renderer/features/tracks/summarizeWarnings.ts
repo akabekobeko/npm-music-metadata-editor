@@ -11,9 +11,13 @@ const SEVERITY_RANK = { info: 0, warn: 1, error: 2 } as const;
  * in the tooltip.
  */
 export type WarningsSummary = {
+  /** Total number of warnings on the row. */
   readonly count: number;
+  /** Highest severity present in the list, or `undefined` when empty. */
   readonly maxSeverity: Warning["severity"] | undefined;
+  /** Cell label (count as a string), or `undefined` when empty. */
   readonly label: string | undefined;
+  /** Per-entry message strings for tooltip rendering. */
   readonly messages: readonly string[];
 };
 

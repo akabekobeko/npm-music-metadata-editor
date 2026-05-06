@@ -8,6 +8,7 @@ import type { MenuItemTemplate, MenuState, MenuTemplate } from "./types.js";
 type Args = {
   /** Live menu state — the function rebuilds whenever the caller invokes it. */
   readonly state: MenuState;
+  /** Active UI locale; menu strings come from `t`. */
   readonly locale: Locale;
   /** Forward menu activations to the focused renderer's `mme:menu:action` channel. */
   readonly emit: (payload: MenuActionPayload) => void;

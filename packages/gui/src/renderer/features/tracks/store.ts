@@ -3,8 +3,11 @@ import type { TrackLoadError, TrackRow } from "./types.js";
 
 /** Tracks slice of the renderer state. */
 export type TracksState = {
+  /** Successfully-loaded rows keyed by absolute path. */
   readonly rows: readonly TrackRow[];
+  /** Per-file load failures retained until the path is reloaded or cleared. */
   readonly errors: readonly TrackLoadError[];
+  /** `true` while a `loadMany` IPC call is in flight. */
   readonly loading: boolean;
 };
 
@@ -14,7 +17,9 @@ export type TracksState = {
  * last-write-wins semantics keyed by file path.
  */
 type LoadDonePayload = {
+  /** Successfully-loaded rows from this round-trip. */
   readonly rows: readonly TrackRow[];
+  /** Per-file failures from this round-trip. */
   readonly errors: readonly TrackLoadError[];
 };
 

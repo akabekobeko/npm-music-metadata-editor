@@ -14,10 +14,15 @@ import type { IpcError, Track } from "../../../main/ipc/types.js";
  * a non-`undefined` `saveError`.
  */
 export type TrackRow = {
+  /** Absolute path used as the row's identity. */
   readonly filePath: string;
+  /** Latest in-memory track with edits applied. */
   readonly track: Track;
+  /** Snapshot returned by core at load time; powers `dirty` and revert. */
   readonly origin: Track;
+  /** `true` when `track` differs from `origin`. */
   readonly dirty: boolean;
+  /** Sticky save failure from the previous Save All run, when any. */
   readonly saveError?: IpcError;
 };
 
@@ -28,6 +33,8 @@ export type TrackRow = {
  * error placeholder instead of a single global toast.
  */
 export type TrackLoadError = {
+  /** Absolute path that failed to load. */
   readonly filePath: string;
+  /** Serialisable error payload from the IPC envelope. */
   readonly error: IpcError;
 };

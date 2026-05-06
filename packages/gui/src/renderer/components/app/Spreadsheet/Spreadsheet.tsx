@@ -18,8 +18,11 @@ import { useSpreadsheetSelection } from "./useSpreadsheetSelection.js";
 
 /** Props for {@link Spreadsheet}. */
 export type SpreadsheetProps = {
+  /** Visible columns in display order. */
   readonly columns: readonly ColumnDefinition[];
+  /** Track rows to render — array index doubles as the row's grid position. */
   readonly rows: readonly TrackRow[];
+  /** Per-format capability matrix used to gate read-only versus writable cells. */
   readonly support: FormatSupportMap;
   /**
    * Effective column widths in pixels, keyed by column id. Built from
@@ -27,10 +30,15 @@ export type SpreadsheetProps = {
    * `resolveColumnWidths`).
    */
   readonly columnWidths: Readonly<Record<ColumnId, number>>;
+  /** Open the picture-management dialog for the given row. */
   readonly onOpenPictures: (row: TrackRow) => void;
+  /** Open the lyrics editor dialog for the given row. */
   readonly onOpenLyrics: (row: TrackRow) => void;
+  /** Forward a single-cell edit to the host's edit store. */
   readonly onCommit: (args: CommitArgs) => void;
+  /** Apply a clipboard paste against the current selection. */
   readonly onPaste: (args: PasteArgs) => void;
+  /** Roll back the most recent edit. Bound to Cmd/Ctrl+Z. */
   readonly onUndo: () => void;
   /** Persist a new width for the dragged column. Called once per drag end. */
   readonly onColumnResize: (columnId: ColumnId, width: number) => void;

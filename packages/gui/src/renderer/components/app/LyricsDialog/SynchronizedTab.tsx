@@ -7,14 +7,19 @@ import type { SyncedLine } from "@/features/lyrics/types";
 
 /** One synchronized line plus a UI-only stable id used as the React key. */
 export type SyncedLineEntry = {
+  /** UI-only stable id used as the React key across reorders. */
   readonly id: string;
+  /** Synchronized line wrapped by this entry. */
   readonly line: SyncedLine;
 };
 
 /** Props for {@link SynchronizedTab}. */
 export type SynchronizedTabProps = {
+  /** Current entries in `timeMs` ascending order. */
   readonly entries: readonly SyncedLineEntry[];
+  /** Receive a new entry list — kept sorted by the parent. */
   readonly onChange: (entries: readonly SyncedLineEntry[]) => void;
+  /** Optional toolbar slot rendered next to `+ Line` (e.g. Import / Export buttons). */
   readonly extraButtons?: React.ReactNode;
 };
 
@@ -40,6 +45,7 @@ const sortEntries = (entries: readonly SyncedLineEntry[]): readonly SyncedLineEn
 
 /** Per-row local state — only the time input needs validation feedback. */
 type RowEditorState = {
+  /** Whether the time input failed to parse on its last blur. */
   readonly invalid: boolean;
 };
 

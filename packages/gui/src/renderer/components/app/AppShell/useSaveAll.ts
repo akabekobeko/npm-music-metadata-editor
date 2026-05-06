@@ -10,8 +10,11 @@ import { formatSaveSummary } from "./formatSaveSummary.js";
 
 /** Args for {@link useSaveAll}. */
 type Args = {
+  /** Current edit-store state — supplies the dirty rows to save. */
   readonly editState: EditState;
+  /** Edit reducer dispatch — drives `markSaveErrors` / `revert`. */
   readonly editDispatch: Dispatch<EditAction>;
+  /** Tracks reducer dispatch — used to refresh successful rows after save. */
   readonly tracksDispatch: Dispatch<TracksAction>;
   /** Notification sink for the post-save summary toast. */
   readonly notify: (message: string) => void;

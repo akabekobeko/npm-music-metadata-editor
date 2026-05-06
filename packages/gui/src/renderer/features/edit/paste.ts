@@ -7,9 +7,13 @@ import { validateTagValue } from "./validators.js";
 
 /** Counts and rows produced by {@link applyPaste}. */
 export type PasteOutcome = {
+  /** Cells that received the pasted value. */
   readonly applied: number;
+  /** Cells skipped because the target format cannot persist the field. */
   readonly skippedUnsupported: number;
+  /** Cells skipped because the value failed validation. */
   readonly skippedInvalid: number;
+  /** Replacement row array, with the paste applied. */
   readonly nextRows: readonly TrackRow[];
 };
 
