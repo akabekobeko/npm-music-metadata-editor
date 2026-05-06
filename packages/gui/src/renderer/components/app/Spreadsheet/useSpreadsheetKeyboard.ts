@@ -4,8 +4,7 @@ import type { ColumnDefinition, ColumnId } from "@/features/spreadsheet/types";
 import type { TrackRow } from "@/features/tracks/types";
 
 import { readCellAsString } from "./readCellAsString.js";
-import type { PasteArgs } from "./Spreadsheet";
-import type { EditingState, Selection, StartEditTarget } from "./useSpreadsheetSelection.js";
+import type { EditingState, PasteArgs, Selection, StartEditTarget } from "./types.js";
 
 /** Args for {@link useSpreadsheetKeyboard}. */
 type Args = {

@@ -6,7 +6,7 @@ import type { EditAction, EditState } from "@/features/edit/store";
 import type { FormatSupportMap } from "@/features/spreadsheet/types";
 import type { TrackRow } from "@/features/tracks/types";
 
-import type { CommitArgs, PasteArgs } from "../Spreadsheet/Spreadsheet";
+import type { CommitArgs, PasteArgs } from "../Spreadsheet/types.js";
 import { formatPasteSummary } from "./formatPasteSummary.js";
 
 /** Args for {@link useGridHandlers}. */

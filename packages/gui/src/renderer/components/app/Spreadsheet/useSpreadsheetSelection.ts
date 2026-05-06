@@ -7,27 +7,7 @@ import type { TrackRow } from "@/features/tracks/types";
 
 import type { TagData } from "../../../../main/ipc/types";
 import { readCellAsString } from "./readCellAsString.js";
-import type { CommitArgs } from "./Spreadsheet";
-
-/** What the user has highlighted on the grid. */
-export type Selection =
-  | { readonly kind: "none" }
-  | { readonly kind: "cell"; readonly rowIndex: number; readonly columnId: ColumnId }
-  | { readonly kind: "column"; readonly columnId: ColumnId };
-
-/** Active editor state — `null` when no cell is being edited. */
-export type EditingState = {
-  readonly rowIndex: number;
-  readonly columnId: ColumnId;
-  readonly initialValue: string;
-};
-
-/** Argument shape for {@link SpreadsheetSelection.startEditAt}. */
-export type StartEditTarget = {
-  readonly rowIndex: number;
-  readonly columnId: ColumnId;
-  readonly seed: string;
-};
+import type { CommitArgs, EditingState, Selection, StartEditTarget } from "./types.js";
 
 /** Args for {@link useSpreadsheetSelection}. */
 type Args = {

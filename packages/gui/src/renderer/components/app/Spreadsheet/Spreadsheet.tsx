@@ -1,7 +1,6 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useMemo, useRef } from "react";
 
-import type { PasteSelectionMode } from "@/features/edit/expandColumnPaste";
 import { isCellWritable } from "@/features/spreadsheet/isCellWritable";
 import { isColumnSelectable } from "@/features/spreadsheet/isColumnSelectable";
 import type { ColumnDefinition, ColumnId, FormatSupportMap } from "@/features/spreadsheet/types";
@@ -12,30 +11,10 @@ import type { TagData } from "../../../../main/ipc/types";
 import { EditableCell } from "./cells/EditableCell";
 import { renderCell } from "./renderCell";
 import { renderHeader } from "./renderHeader";
+import type { CommitArgs, PasteArgs } from "./types.js";
 import { useColumnResize } from "./useColumnResize.js";
 import { useSpreadsheetKeyboard } from "./useSpreadsheetKeyboard.js";
 import { useSpreadsheetSelection } from "./useSpreadsheetSelection.js";
-
-/** Arguments passed to {@link SpreadsheetProps.onCommit}. */
-export type CommitArgs = {
-  readonly row: TrackRow;
-  readonly field: keyof TagData;
-  readonly value: string | number | undefined;
-};
-
-/** Arguments passed to {@link SpreadsheetProps.onPaste}. */
-export type PasteArgs = {
-  readonly columnId: ColumnId;
-  readonly clipboardText: string;
-  readonly baseRowIndex: number;
-  readonly maxRows: number;
-  /**
-   * Selection that triggered the paste. The host uses this to enable the
-   * Numbers-style "broadcast a single value across the column" behaviour for
-   * `column` selections (see `expandColumnPaste`).
-   */
-  readonly mode: PasteSelectionMode;
-};
 
 /** Props for {@link Spreadsheet}. */
 export type SpreadsheetProps = {
