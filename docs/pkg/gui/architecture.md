@@ -8,7 +8,7 @@
 
 - **複数の音楽ファイルを 1 画面で読み・編集・保存** できる GUI を提供する。
 - core が公開する型 (`Track` / `TagData` / `PictureInfo` / `LyricsInfo` / `ChapterInfo`) をそのまま編集可能なテーブルに展開する。
-- CLI と同じ「最小依存・OS 標準路線」のサプライ チェーンを保つ (Renderer は React + Tailwind + shadcn/ui + base-ui のみ、Main は Electron + electron-log + core)。
+- CLI と同じ「最小依存・OS 標準路線」のサプライ チェーンを保つ (Renderer は React + Tailwind + shadcn/ui + base-ui のみ、Main は Electron + core のみ)。
 
 非ゴール (v1):
 
@@ -51,7 +51,6 @@ src/
     menu/                  # buildAppMenu (純関数) / installAppMenu / menuController
     dnd/                   # expandDroppedPaths (フォルダ再帰展開、深さ 3、symlink skip)
     fatal/                 # uncaughtException / unhandledRejection の Renderer 通知
-    logging/               # electron-log の初期化
   preload/
     preload.ts             # window.mme バインディング
   renderer/
@@ -153,7 +152,7 @@ sequenceDiagram
 
 - Main の `uncaughtException` / `unhandledRejection` は `setupFatalHandlers` が捕捉し、`mme:fatal` で Renderer に通知します。Renderer は `<FatalDialog>` を表示し `Reload` / `Quit` を選ばせます。
 - Renderer 側の `window.onerror` / `window.onunhandledrejection` も同様にモーダル表示し、`mme:fatal:report` で Main のログに記録します。
-- `electron-log` は `setupLogger` で初期化し、`<userData>/logs/main.log` (1 MB ローテーション) と stdout 双方に出力します。Renderer の `console.error` / `console.warn` は `useLogForwarder` で `mme:log:forward` 経由で Main に集約されます。
+- ログはファイル永続化を行わず、Main の `console.error` / `console.warn` (= Electron の stdout / stderr) にだけ流します。Renderer の `console.error` / `console.warn` は `useLogForwarder` で `mme:log:forward` 経由で Main に集約されます。Phase 7 plan には `electron-log` 導入が記載されていますが、依存ゼロでも `pnpm dev` 中の DevTools / ターミナルで原因究明できる規模のため v0.1.0 では導入を見送りました (将来のフェーズで永続化が必要になった時点で再評価)。
 
 ## 9. テスト戦略
 

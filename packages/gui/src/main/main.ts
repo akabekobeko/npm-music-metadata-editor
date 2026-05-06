@@ -6,7 +6,6 @@ import { initializeIpcEvents, releaseIpcEvents } from "./ipc/ipcHandler.js";
 import { IpcKeys } from "./ipc/ipcKeys.js";
 import type { MenuActionPayload, MenuStateSnapshot } from "./ipc/types.js";
 import { resolveLocale } from "./locales/resolveLocale.js";
-import { setupLogger } from "./logging/setupLogger.js";
 import { initializeMenuController, releaseMenuController } from "./menu/menuController.js";
 import { getSettings, initializeSettings, releaseSettings } from "./settings/settings.js";
 
@@ -103,7 +102,6 @@ const emitMenuAction = (payload: MenuActionPayload): void => {
 };
 
 app.whenReady().then(() => {
-  setupLogger();
   initializeSettings(app.getPath("userData"));
   initializeIpcEvents();
   mainWindow = createWindow();

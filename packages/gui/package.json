@@ -32,8 +32,7 @@
     "shadcn": "node scripts/shadcn.mjs"
   },
   "dependencies": {
-    "@akabeko/music-metadata-editor": "workspace:*",
-    "electron-log": "^5.4.3"
+    "@akabeko/music-metadata-editor": "workspace:*"
   },
   "devDependencies": {
     "@base-ui/react": "^1.4.1",
