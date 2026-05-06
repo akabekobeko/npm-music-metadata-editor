@@ -4,9 +4,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { expandColumnPaste } from "@/features/edit/expandColumnPaste";
 import { applyPaste, parseClipboardText } from "@/features/edit/paste";
 import { useEditStore } from "@/features/edit/store";
+import { saveDirtyRows } from "@/features/save/saveDirtyRows";
+import type { SaveProgress, SaveResult } from "@/features/save/types";
+import { resolveColumnWidths } from "@/features/settings/resolveColumnWidths";
+import { useSettings } from "@/features/settings/store";
+import { touchRecentFile } from "@/features/settings/touchRecentFile";
 import { buildColumns } from "@/features/spreadsheet/buildColumns";
-import { DEFAULT_VISIBLE_IDS } from "@/features/spreadsheet/constants";
-import type { FormatSupportMap } from "@/features/spreadsheet/types";
+import type { ColumnId, FormatSupportMap } from "@/features/spreadsheet/types";
 import { loadTracks } from "@/features/tracks/loadTracks";
 import { useTracksStore } from "@/features/tracks/store";
 import type { TrackRow } from "@/features/tracks/types";
@@ -16,6 +20,7 @@ import { EmptyState } from "./EmptyState";
 import { Header } from "./Header";
 import { LyricsDialog } from "./LyricsDialog/LyricsDialog";
 import { PicturesDialog } from "./PicturesDialog/PicturesDialog";
+import { SavingDialog } from "./SavingDialog";
 import { type CommitArgs, type PasteArgs, Spreadsheet } from "./Spreadsheet/Spreadsheet";
 import { StatusBar } from "./StatusBar";
 
@@ -30,13 +35,17 @@ const TRANSIENT_STATUS_MS = 5000;
 
 /**
  * Top-level shell composing the header, the spreadsheet (or empty state),
- * the status bar, and the load / edit stores.
+ * the status bar, and the load / edit / settings stores.
  *
- * Two stores cooperate: `tracksStore` owns the IPC-driven load lifecycle
- * (loading flag, per-file errors), while `editStore` owns the live row array
- * plus undo history. Whenever the loaded rows change, `editStore.load`
- * mirrors them in — which also clears history because path identities may
- * have shifted.
+ * Settings flow (Phase 6): `useSettings` hands back the persisted snapshot
+ * and a `setSettings` patch helper. The shell projects `columns.visibleIds`
+ * and `columns.widths` into the spreadsheet, listens for column toggles /
+ * resizes, and pushes `recentFiles` updates after every successful open.
+ *
+ * Save flow (Phase 6): `Save All` collects every `dirty` row and runs them
+ * through `saveDirtyRows` while the {@link SavingDialog} masks the rest of
+ * the UI. After the loop terminates we re-load the affected paths so the
+ * `Track` snapshots and `warnings` columns refresh in place.
  *
  * @returns The composed application UI.
  */
@@ -44,7 +53,13 @@ export function AppShell() {
   const { state: tracksState, dispatch: tracksDispatch } = useTracksStore();
   const { state: editState, dispatch: editDispatch } = useEditStore();
   const support = useFormatSupport();
-  const columns = useMemo(() => buildColumns(DEFAULT_VISIBLE_IDS, support), [support]);
+  const [settings, setSettings] = useSettings();
+  const visibleIds = settings.columns.visibleIds as readonly ColumnId[];
+  const columns = useMemo(() => buildColumns(visibleIds, support), [visibleIds, support]);
+  const columnWidths = useMemo(
+    () => resolveColumnWidths(columns, settings.columns.widths),
+    [columns, settings.columns.widths],
+  );
 
   useEffect(() => {
     editDispatch({ type: "load", rows: tracksState.rows });
@@ -59,7 +74,15 @@ export function AppShell() {
     tracksDispatch({ type: "load:start" });
     const result = await loadTracks(dialog.value);
     tracksDispatch({ type: "load:done", payload: { rows: result.rows, errors: result.errors } });
-  }, [tracksDispatch]);
+
+    if (result.rows.length > 0) {
+      const next = touchRecentFile(
+        settings.recentFiles,
+        result.rows.map((row) => row.filePath),
+      );
+      setSettings({ recentFiles: next });
+    }
+  }, [tracksDispatch, settings.recentFiles, setSettings]);
 
   useOpenFilesShortcut(handleOpenFiles);
 
@@ -177,16 +200,102 @@ export function AppShell() {
     [editState.rows, editDispatch, support, showTransientStatus],
   );
 
+  const handleToggleColumn = useCallback(
+    (id: ColumnId, visible: boolean): void => {
+      const current = settings.columns.visibleIds;
+      const next = visible
+        ? current.includes(id)
+          ? current
+          : [...current, id]
+        : current.filter((value) => value !== id);
+      setSettings({ columns: { visibleIds: next } });
+    },
+    [settings.columns.visibleIds, setSettings],
+  );
+
+  const handleColumnResize = useCallback(
+    (id: ColumnId, width: number): void => {
+      setSettings({ columns: { widths: { [id]: width } } });
+    },
+    [setSettings],
+  );
+
+  const handleDiscardChanges = useCallback((): void => {
+    const dirtyPaths = editState.rows.filter((row) => row.dirty).map((row) => row.filePath);
+    for (const filePath of dirtyPaths) {
+      editDispatch({ type: "revert", filePath });
+    }
+  }, [editState.rows, editDispatch]);
+
+  const cancelRef = useRef(false);
+  const [saving, setSaving] = useState(false);
+  const [saveProgress, setSaveProgress] = useState<SaveProgress | null>(null);
+  const [errorCount, setErrorCount] = useState(0);
+
+  const handleSaveAll = useCallback(async (): Promise<void> => {
+    const dirtyRows = editState.rows.filter((row) => row.dirty);
+    if (dirtyRows.length === 0) {
+      return;
+    }
+
+    cancelRef.current = false;
+    setErrorCount(0);
+    setSaveProgress(null);
+    setSaving(true);
+
+    let runningErrorCount = 0;
+    const summary = await saveDirtyRows({
+      rows: dirtyRows,
+      isCancelled: () => cancelRef.current,
+      onProgress: (progress) => {
+        setSaveProgress(progress);
+      },
+    });
+
+    runningErrorCount = summary.results.filter((r) => r.error !== undefined).length;
+    setErrorCount(runningErrorCount);
+
+    const errorMap = new Map(summary.results.map((r) => [r.filePath, r.error]));
+    editDispatch({ type: "markSaveErrors", errors: errorMap });
+
+    const succeededPaths = summary.results
+      .filter((r) => r.error === undefined)
+      .map((r) => r.filePath);
+
+    if (succeededPaths.length > 0) {
+      const reload = await loadTracks(succeededPaths);
+      tracksDispatch({
+        type: "load:done",
+        payload: { rows: reload.rows, errors: reload.errors },
+      });
+    }
+
+    setSaving(false);
+    showTransientStatus(formatSaveSummary(summary.results, summary.cancelled));
+  }, [editState.rows, editDispatch, tracksDispatch, showTransientStatus]);
+
+  const handleCancelSave = useCallback((): void => {
+    cancelRef.current = true;
+  }, []);
+
   const dirtyCount = editState.rows.filter((row) => row.dirty).length;
   const warningCount = editState.rows.reduce((sum, row) => sum + row.track.warnings.length, 0);
+
+  useSaveAllShortcut(handleSaveAll, saving);
 
   return (
     <TooltipProvider>
       <div className="flex h-screen flex-col">
         <Header
           fileCount={editState.rows.length}
+          dirtyCount={dirtyCount}
           loading={tracksState.loading}
+          saving={saving}
+          visibleIds={visibleIds}
           onOpenFiles={handleOpenFiles}
+          onToggleColumn={handleToggleColumn}
+          onSaveAll={handleSaveAll}
+          onDiscardChanges={handleDiscardChanges}
         />
         <main className="flex-1 overflow-hidden">
           {editState.rows.length === 0 ? (
@@ -196,11 +305,13 @@ export function AppShell() {
               columns={columns}
               rows={editState.rows}
               support={support}
+              columnWidths={columnWidths}
               onOpenPictures={handleOpenPictures}
               onOpenLyrics={handleOpenLyrics}
               onCommit={handleCommit}
               onPaste={handlePaste}
               onUndo={handleUndo}
+              onColumnResize={handleColumnResize}
             />
           )}
         </main>
@@ -229,6 +340,12 @@ export function AppShell() {
           onNotify={showTransientStatus}
         />
       ) : null}
+      <SavingDialog
+        open={saving}
+        progress={saveProgress}
+        errorCount={errorCount}
+        onCancel={handleCancelSave}
+      />
     </TooltipProvider>
   );
 }
@@ -284,6 +401,33 @@ const useOpenFilesShortcut = (onOpen: () => void): void => {
 };
 
 /**
+ * Wire `Cmd/Ctrl+S` to the Save All handler at the document level.
+ *
+ * Suppressed while a save is already in flight so the user does not
+ * accidentally queue a second pass over the same dirty rows.
+ *
+ * @param onSave - Save All callback.
+ * @param disabled - Whether the shortcut should currently be a no-op.
+ */
+const useSaveAllShortcut = (onSave: () => void, disabled: boolean): void => {
+  useEffect(() => {
+    if (disabled) {
+      return;
+    }
+
+    const handler = (event: KeyboardEvent): void => {
+      const usingMeta = event.metaKey || event.ctrlKey;
+      if (usingMeta && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        onSave();
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onSave, disabled]);
+};
+
+/**
  * Build the transient status sentence shown after a paste.
  *
  * @param outcome - Counters produced by `applyPaste`.
@@ -295,3 +439,19 @@ const formatPasteSummary = (outcome: {
   readonly skippedInvalid: number;
 }): string =>
   `Pasted ${outcome.applied} values, skipped ${outcome.skippedUnsupported} unsupported, ${outcome.skippedInvalid} invalid`;
+
+/**
+ * Build the transient status sentence shown after a Save All run terminates.
+ *
+ * @param results - Per-row outcomes from `saveDirtyRows`.
+ * @param cancelled - Whether the loop bailed before reaching every row.
+ * @returns A single-sentence summary, e.g. "Saved 4 of 5 (1 error)".
+ */
+const formatSaveSummary = (results: readonly SaveResult[], cancelled: boolean): string => {
+  const total = results.length;
+  const errors = results.filter((r) => r.error !== undefined).length;
+  const ok = total - errors;
+  const errorPart = errors === 0 ? "" : ` (${errors} ${errors === 1 ? "error" : "errors"})`;
+  const cancelledPart = cancelled ? " — cancelled" : "";
+  return `Saved ${ok} of ${total}${errorPart}${cancelledPart}`;
+};

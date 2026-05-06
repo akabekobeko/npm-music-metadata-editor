@@ -2,6 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { app, BrowserWindow } from "electron";
 import { initializeIpcEvents, releaseIpcEvents } from "./ipc/ipcHandler.js";
+import { initializeSettings, releaseSettings } from "./settings/settings.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -31,6 +32,7 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
+  initializeSettings(app.getPath("userData"));
   initializeIpcEvents();
   createWindow();
 
@@ -43,6 +45,7 @@ app.whenReady().then(() => {
 
 app.on("will-quit", () => {
   releaseIpcEvents();
+  releaseSettings();
 });
 
 app.on("window-all-closed", () => {

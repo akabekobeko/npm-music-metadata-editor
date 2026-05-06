@@ -130,3 +130,19 @@ it("history is bounded to 50 entries (oldest is dropped)", () => {
   expect(state.history).toHaveLength(50);
   expect(state.rows[0]?.track.tag.title).toBe("60");
 });
+
+it("markSaveErrors attaches errors per filePath without altering history", () => {
+  const loaded = editReducer(initialEditState, {
+    type: "load",
+    rows: [buildRow("/a.mp3", "A"), buildRow("/b.mp3", "B")],
+  });
+  const errors = new Map<string, { name: string; message: string } | undefined>([
+    ["/a.mp3", { name: "MmeError", message: "boom" }],
+    ["/b.mp3", undefined],
+  ]);
+  const next = editReducer(loaded, { type: "markSaveErrors", errors });
+
+  expect(next.rows[0]?.saveError?.message).toBe("boom");
+  expect(next.rows[1]?.saveError).toBeUndefined();
+  expect(next.history).toEqual([]);
+});

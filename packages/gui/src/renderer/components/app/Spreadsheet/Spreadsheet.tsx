@@ -1,5 +1,12 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type PointerEvent as ReactPointerEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { PasteSelectionMode } from "@/features/edit/expandColumnPaste";
 import { isCellWritable } from "@/features/spreadsheet/isCellWritable";
 import type { ColumnDefinition, ColumnId, FormatSupportMap } from "@/features/spreadsheet/types";
@@ -50,17 +57,27 @@ export type SpreadsheetProps = {
   readonly columns: readonly ColumnDefinition[];
   readonly rows: readonly TrackRow[];
   readonly support: FormatSupportMap;
+  /**
+   * Effective column widths in pixels, keyed by column id. Built from
+   * `AppSettings.columns.widths` plus registry fallbacks (see
+   * `resolveColumnWidths`).
+   */
+  readonly columnWidths: Readonly<Record<ColumnId, number>>;
   readonly onOpenPictures: (row: TrackRow) => void;
   readonly onOpenLyrics: (row: TrackRow) => void;
   readonly onCommit: (args: CommitArgs) => void;
   readonly onPaste: (args: PasteArgs) => void;
   readonly onUndo: () => void;
+  /** Persist a new width for the dragged column. Called once per drag end. */
+  readonly onColumnResize: (columnId: ColumnId, width: number) => void;
 };
 
 /** Estimated row height (px) used by the virtualizer to size the spacer. */
 const ROW_HEIGHT = 32;
 /** How many rows past the viewport to keep mounted, smoothing scroll. */
 const VIRTUAL_OVERSCAN = 8;
+/** Lower bound enforced while dragging a column resize handle. */
+const MIN_RESIZE_WIDTH = 48;
 
 /**
  * Virtualized grid with cell selection, inline editing, undo, and column
@@ -76,15 +93,22 @@ export function Spreadsheet({
   columns,
   rows,
   support,
+  columnWidths,
   onOpenPictures,
   onOpenLyrics,
   onCommit,
   onPaste,
   onUndo,
+  onColumnResize,
 }: SpreadsheetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [selection, setSelection] = useState<Selection>({ kind: "none" });
   const [editing, setEditing] = useState<EditingState | null>(null);
+  const { liveWidths, beginResize } = useColumnResize({
+    baseWidths: columnWidths,
+    onColumnResize,
+  });
+  const widthOf = (id: ColumnId): number => liveWidths[id] ?? columnWidths[id] ?? 0;
 
   const virtualizer = useVirtualizer({
     count: rows.length,
@@ -232,7 +256,7 @@ export function Spreadsheet({
       <table className="w-full table-fixed border-collapse text-sm">
         <colgroup>
           {columns.map((column) => (
-            <col key={column.id} style={{ width: column.width }} />
+            <col key={column.id} style={{ width: widthOf(column.id) }} />
           ))}
         </colgroup>
         <thead className="sticky top-0 z-20 bg-background">
@@ -242,7 +266,7 @@ export function Spreadsheet({
                 key={column.id}
                 onClick={() => handleColumnHeaderClick(column.id)}
                 className={cn(
-                  "border-r px-2 py-1.5 text-left cursor-pointer select-none",
+                  "relative border-r px-2 py-1.5 text-left cursor-pointer select-none",
                   column.sticky === "left" && "sticky left-0 z-30 bg-background",
                   selection.kind === "column" &&
                     selection.columnId === column.id &&
@@ -250,6 +274,15 @@ export function Spreadsheet({
                 )}
               >
                 {node}
+                {/* biome-ignore lint/a11y/noStaticElementInteractions: column resize is a pointer-only affordance; keyboard column sizing is deferred to Phase 7 */}
+                {/* biome-ignore lint/a11y/useKeyWithClickEvents: ditto — onClick is only used to swallow header-click bubbling */}
+                <span
+                  data-testid={`resize-handle-${column.id}`}
+                  title={`Resize ${column.title} column`}
+                  className="absolute right-0 top-0 z-40 h-full w-1.5 cursor-col-resize select-none hover:bg-accent"
+                  onClick={(event) => event.stopPropagation()}
+                  onPointerDown={(event) => beginResize(event, column.id)}
+                />
               </th>
             ))}
           </tr>
@@ -292,7 +325,7 @@ export function Spreadsheet({
                         column.sticky === "left" && "sticky left-0 z-10 bg-background",
                         isSelected && "bg-accent/40",
                       )}
-                      style={{ width: column.width }}
+                      style={{ width: widthOf(column.id) }}
                     >
                       {isEditingCell && column.editable === "tag" && column.inputKind ? (
                         <EditableCell
@@ -344,6 +377,78 @@ type DispatchPasteArgs = {
   readonly selection: Selection;
   readonly rowsLength: number;
   readonly onPaste: (args: PasteArgs) => void;
+};
+
+type UseColumnResizeArgs = {
+  /** Persisted widths from settings, indexed by column id. */
+  readonly baseWidths: Readonly<Record<ColumnId, number>>;
+  /** Persistence callback fired once per drag end. */
+  readonly onColumnResize: (columnId: ColumnId, width: number) => void;
+};
+
+/**
+ * Drive the column-resize interaction.
+ *
+ * Owns two pieces of state:
+ *   1. `liveWidths` — what the grid renders during a drag (one column's
+ *      width is "in flight" until pointerup commits it).
+ *   2. The transient pointer-listener bound to `window` while the user is
+ *      actively dragging.
+ *
+ * Persistence is debounced one step further upstream — `onColumnResize`
+ * arrives in the host, which feeds `setSettings({ columns: { widths } })`,
+ * and the Main process collapses the bursts into a single disk write.
+ *
+ * @returns `liveWidths` for render and a `beginResize(event, columnId)`
+ *   handler to attach to each header's resize gripper.
+ */
+const useColumnResize = ({
+  baseWidths,
+  onColumnResize,
+}: UseColumnResizeArgs): {
+  readonly liveWidths: Readonly<Record<ColumnId, number>>;
+  readonly beginResize: (event: ReactPointerEvent<HTMLElement>, columnId: ColumnId) => void;
+} => {
+  const [override, setOverride] = useState<{
+    readonly columnId: ColumnId;
+    readonly width: number;
+  } | null>(null);
+
+  const liveWidths = useMemo(() => {
+    if (override === null) {
+      return baseWidths;
+    }
+
+    return { ...baseWidths, [override.columnId]: override.width };
+  }, [baseWidths, override]);
+
+  const beginResize = useCallback(
+    (event: ReactPointerEvent<HTMLElement>, columnId: ColumnId): void => {
+      event.preventDefault();
+      event.stopPropagation();
+      const startX = event.clientX;
+      const startWidth = baseWidths[columnId] ?? 100;
+      let lastWidth = startWidth;
+      const handleMove = (moveEvent: globalThis.PointerEvent): void => {
+        const delta = moveEvent.clientX - startX;
+        lastWidth = Math.max(MIN_RESIZE_WIDTH, startWidth + delta);
+        setOverride({ columnId, width: lastWidth });
+      };
+      const handleUp = (): void => {
+        window.removeEventListener("pointermove", handleMove);
+        window.removeEventListener("pointerup", handleUp);
+        setOverride(null);
+        if (lastWidth !== startWidth) {
+          onColumnResize(columnId, Math.round(lastWidth));
+        }
+      };
+      window.addEventListener("pointermove", handleMove);
+      window.addEventListener("pointerup", handleUp);
+    },
+    [baseWidths, onColumnResize],
+  );
+
+  return { liveWidths, beginResize };
 };
 
 /**

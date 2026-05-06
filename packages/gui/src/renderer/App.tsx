@@ -1,16 +1,22 @@
 import { AppShell } from "./components/app/AppShell";
+import { SettingsProvider } from "./features/settings/store";
 
 /**
  * Renderer entry component.
  *
- * Phase 3 reduces `App` to a thin wrapper over the application shell so the
- * shell itself can own state and effects without dragging React-tree noise
- * along with it.
+ * Wraps the application shell with the settings context so any descendant
+ * (Header, Spreadsheet, dialogs) can call `useSettings()` without further
+ * plumbing. Effects that need the persisted snapshot (column widths, recent
+ * files) live inside the shell.
  *
  * @returns The rendered application.
  */
 function App() {
-  return <AppShell />;
+  return (
+    <SettingsProvider>
+      <AppShell />
+    </SettingsProvider>
+  );
 }
 
 export default App;
