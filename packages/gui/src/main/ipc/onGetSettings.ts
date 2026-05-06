@@ -1,21 +1,19 @@
+import { getSettings } from "../settings/settings.js";
 import type { IpcResult, SettingsSnapshot } from "./types.js";
 
 /**
- * Phase 2 stub for `mme:settings:get`.
+ * Channel handler for `mme:settings:get`.
  *
- * Renderer code can call the channel today and branch on the `NotImplemented`
- * error; Phase 6 will replace the stub with a real `electron-store`-backed
- * implementation.
+ * Reads from the in-memory cache hydrated by `initializeSettings` at startup.
+ * The cache fronts the on-disk JSON so this handler never performs blocking
+ * I/O — Renderer can call it freely (e.g. from a column-picker `useEffect`).
  *
  * @param _ev - Electron event object (unused).
- * @returns A `NotImplemented` failure.
+ * @returns The current settings snapshot.
  */
 export const onGetSettings = async (
   _ev: Electron.IpcMainInvokeEvent,
 ): Promise<IpcResult<SettingsSnapshot>> => ({
-  ok: false,
-  error: {
-    name: "NotImplemented",
-    message: "mme:settings:get is not implemented yet (Phase 6).",
-  },
+  ok: true,
+  value: getSettings(),
 });

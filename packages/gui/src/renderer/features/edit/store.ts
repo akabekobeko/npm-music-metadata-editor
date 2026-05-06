@@ -1,5 +1,5 @@
 import { type Dispatch, useReducer } from "react";
-import type { LyricsInfo, PictureInfo, TagData } from "../../../main/ipc/types.js";
+import type { IpcError, LyricsInfo, PictureInfo, TagData } from "../../../main/ipc/types.js";
 import type { TrackRow } from "../tracks/types.js";
 import { revertRow } from "./revertRow.js";
 import { setLyrics } from "./setLyrics.js";
@@ -47,6 +47,10 @@ export type EditAction =
     }
   | { readonly type: "revert"; readonly filePath: string }
   | { readonly type: "applyChange"; readonly nextRows: readonly TrackRow[] }
+  | {
+      readonly type: "markSaveErrors";
+      readonly errors: ReadonlyMap<string, IpcError | undefined>;
+    }
   | { readonly type: "undo" };
 
 /** Empty initial state — no rows, empty history. */
@@ -84,6 +88,21 @@ const transitionRows = (state: EditState, nextRows: readonly TrackRow[]): EditSt
   rows: nextRows,
   history: pushHistory(state.history, state.rows),
 });
+
+/**
+ * Strip a previously-set `saveError` flag from a row.
+ *
+ * @param row - Row to strip.
+ * @returns A row reference without the `saveError` field.
+ */
+const withoutSaveError = (row: TrackRow): TrackRow => {
+  if (row.saveError === undefined) {
+    return row;
+  }
+
+  const { saveError: _saveError, ...rest } = row;
+  return rest;
+};
 
 /**
  * Reducer for the edit slice.
@@ -135,6 +154,18 @@ export const editReducer = (state: EditState, action: EditAction): EditState => 
 
   if (action.type === "applyChange") {
     return transitionRows(state, action.nextRows);
+  }
+
+  if (action.type === "markSaveErrors") {
+    const nextRows = state.rows.map((row) => {
+      if (!action.errors.has(row.filePath)) {
+        return row;
+      }
+
+      const next = action.errors.get(row.filePath);
+      return next === undefined ? withoutSaveError(row) : { ...row, saveError: next };
+    });
+    return { ...state, rows: nextRows };
   }
 
   if (action.type === "undo") {

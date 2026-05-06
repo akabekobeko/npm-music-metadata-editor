@@ -1,22 +1,28 @@
+import { applySettingsPatch } from "../settings/settings.js";
 import type { IpcResult, SetSettingsRequest, SettingsSnapshot } from "./types.js";
+import { toIpcError } from "./utils/toIpcError.js";
 
 /**
- * Phase 2 stub for `mme:settings:set`.
+ * Channel handler for `mme:settings:set`.
  *
- * Mirror of `onGetSettings` so Renderer code paths can be exercised before the
- * real persistence layer is wired up.
+ * Applies a deeply-partial patch to the cache and returns the merged snapshot.
+ * The disk flush is debounced (see `applySettingsPatch`) so a burst of patches
+ * — typical of a column resize drag — coalesces into a single write.
  *
  * @param _ev - Electron event object (unused).
- * @param _request - Reserved for the Phase 6 implementation.
- * @returns A `NotImplemented` failure.
+ * @param request - Patch to deep-merge onto the current settings.
+ * @returns The merged snapshot, or a serialisable error.
  */
 export const onSetSettings = async (
   _ev: Electron.IpcMainInvokeEvent,
-  _request: SetSettingsRequest,
-): Promise<IpcResult<SettingsSnapshot>> => ({
-  ok: false,
-  error: {
-    name: "NotImplemented",
-    message: "mme:settings:set is not implemented yet (Phase 6).",
-  },
-});
+  request: SetSettingsRequest,
+): Promise<IpcResult<SettingsSnapshot>> => {
+  try {
+    const next = applySettingsPatch(request.patch);
+    return { ok: true, value: next };
+  } catch (error) {
+    const ipcError = toIpcError(error);
+    console.error("[mme:settings:set]", ipcError);
+    return { ok: false, error: ipcError };
+  }
+};

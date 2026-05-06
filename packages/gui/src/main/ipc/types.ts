@@ -8,6 +8,49 @@ import type {
   Warning,
 } from "@akabeko/music-metadata-editor";
 
+/**
+ * Persisted user preferences. Lives in `<userData>/settings.json`; only Main
+ * touches the file directly. Defined here (the shared IPC types module)
+ * because both Main and Renderer reference the shape on either end of the
+ * `mme:settings:get` / `mme:settings:set` channels.
+ *
+ * `version` is the schema generation; bumping it means the next release ships
+ * a `migrate(v1 → vN)` step. v1 keeps the surface intentionally narrow so
+ * that migration hooks exist before they are needed.
+ */
+export type AppSettings = {
+  readonly version: 1;
+  readonly columns: {
+    /** Visible column ids in display order. `fileName` is always present. */
+    readonly visibleIds: readonly string[];
+    /** Column widths in pixels keyed by column id. Missing keys fall back to the registry default. */
+    readonly widths: Readonly<Record<string, number>>;
+  };
+  readonly window: {
+    readonly width: number;
+    readonly height: number;
+    readonly maximized: boolean;
+  };
+  /** Most-recently-opened file paths. Newest first, capped at 10. */
+  readonly recentFiles: readonly string[];
+  /** Reserved for Phase 7 i18n; only the type is fixed in Phase 6. */
+  readonly locale?: "en" | "ja";
+};
+
+/**
+ * Deeply-partial counterpart of `T`.
+ *
+ * Used for `mme:settings:set` patches so callers can update a single nested
+ * key without echoing the rest of the tree back. Arrays are replaced
+ * wholesale — the merge contract is documented on `mergeSettings`.
+ */
+export type DeepPartial<T> =
+  T extends ReadonlyArray<infer U>
+    ? ReadonlyArray<U>
+    : T extends object
+      ? { readonly [K in keyof T]?: DeepPartial<T[K]> }
+      : T;
+
 // Re-export the slice of the core type surface that Renderer needs.
 //
 // Renderer and Preload import these from `../main/ipc/types.js` (type-only)
@@ -172,28 +215,36 @@ export type FormatSupportEntry = {
  * Persisted settings shape exchanged over `mme:settings:get` /
  * `mme:settings:set`.
  *
- * Phase 2 keeps the type intentionally open (`Record<string, unknown>`) so the
- * channels can be declared and stubbed without committing to a key set; Phase 6
- * narrows it to the real schema.
+ * Phase 6 narrows the type to the real {@link AppSettings} schema. The alias
+ * is kept for callers (Renderer) that still reference the older name, and as
+ * a stable IPC-only surface so further fields can land without dragging
+ * Renderer imports through the Main package's internal layout.
  */
-export type SettingsSnapshot = Readonly<Record<string, unknown>>;
+export type SettingsSnapshot = AppSettings;
 
-/** Request payload for `mme:settings:set`. */
+/**
+ * Request payload for `mme:settings:set`.
+ *
+ * Patches are deeply-partial so callers can update one nested key without
+ * round-tripping the rest of the tree. Arrays inside the patch replace
+ * wholesale — see `mergeSettings`.
+ */
 export type SetSettingsRequest = {
-  readonly patch: SettingsSnapshot;
+  readonly patch: DeepPartial<AppSettings>;
 };
 
 /**
  * Payload of the Main → Renderer save-progress notification.
  *
- * Phase 2 only fixes the contract; Main does not emit progress yet — Phase 6
- * wires up the real save pipeline.
+ * Emitted on `mme:progress:save` once when the Main handler is about to call
+ * core's `saveTrack` (`phase: "writing"`) and once after it returns (`phase:
+ * "done"`). The Renderer aggregates these per-file events with its own
+ * `current/total` counters from the `saveDirtyRows` loop to drive the modal
+ * progress bar.
  */
 export type ProgressSavePayload = {
   readonly filePath: string;
-  /** Completion ratio in `[0, 1]`. */
-  readonly progress: number;
-  readonly stage: "start" | "writing" | "done" | "error";
+  readonly phase: "start" | "writing" | "done";
 };
 
 /**

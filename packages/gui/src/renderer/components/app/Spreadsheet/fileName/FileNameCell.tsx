@@ -12,19 +12,29 @@ export type FileNameCellProps = {
  * tooltip so users can disambiguate same-name tracks across folders.
  *
  * Dirty rows are flagged with a leading bullet (matches the Mp3tag /
- * VS Code unsaved-tab convention) so users can scan the column for pending
- * edits without opening every cell.
+ * VS Code unsaved-tab convention). Rows with a sticky `saveError` from the
+ * previous Save All run get a red `!` marker plus the error message in the
+ * tooltip — this is intentionally distinct from the dirty bullet so users can
+ * triage failed-vs-pending rows at a glance.
  *
  * @param props - Cell props.
  * @returns The cell content.
  */
 export function FileNameCell({ row }: FileNameCellProps) {
+  const tooltipText =
+    row.saveError === undefined
+      ? row.filePath
+      : `${row.filePath}\nSave failed: ${row.saveError.message}`;
   return (
     <Tooltip>
       <TooltipTrigger
         render={
           <span className="block truncate text-left font-medium">
-            {row.dirty ? (
+            {row.saveError !== undefined ? (
+              <span role="img" aria-label="save failed" className="mr-1 font-bold text-destructive">
+                !
+              </span>
+            ) : row.dirty ? (
               <span role="img" aria-label="unsaved changes">
                 {"• "}
               </span>
@@ -33,7 +43,7 @@ export function FileNameCell({ row }: FileNameCellProps) {
           </span>
         }
       />
-      <TooltipContent>{row.filePath}</TooltipContent>
+      <TooltipContent className="whitespace-pre-line">{tooltipText}</TooltipContent>
     </Tooltip>
   );
 }

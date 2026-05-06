@@ -47,17 +47,22 @@ const renderSpreadsheet = ({ visibleIds, rows, support, handlers = {} }: Scenari
   const onPaste: PasteFn = handlers.onPaste ?? vi.fn();
   const onUndo: UndoFn = handlers.onUndo ?? vi.fn();
   const columns = buildColumns(visibleIds, support);
+  const columnWidths = Object.fromEntries(
+    columns.map((column) => [column.id, column.width]),
+  ) as Record<ColumnId, number>;
   const result = render(
     <TooltipProvider>
       <Spreadsheet
         columns={columns}
         rows={rows}
         support={support}
+        columnWidths={columnWidths}
         onOpenPictures={() => {}}
         onOpenLyrics={() => {}}
         onCommit={onCommit}
         onPaste={onPaste}
         onUndo={onUndo}
+        onColumnResize={() => {}}
       />
     </TooltipProvider>,
   );
