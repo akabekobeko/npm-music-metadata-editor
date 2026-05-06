@@ -12,8 +12,8 @@ export type NumberCellProps = {
  * Renders a numeric value, right-aligned to ease scanning columns of integers
  * (year / track number / BPM).
  *
- * Phase 4 will replace this with an inline `<Input type="number" />` editor;
- * Phase 3 keeps it display-only.
+ * Read-only view — inline editing is handled by `EditableCell` (with
+ * `inputKind: "number"`) when the cell enters edit mode.
  *
  * @param props - Cell props.
  * @returns The cell content.

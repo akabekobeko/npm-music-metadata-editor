@@ -63,7 +63,7 @@ export function SpreadsheetHeader({
             )}
           >
             {node}
-            {/* biome-ignore lint/a11y/noStaticElementInteractions: column resize is a pointer-only affordance; keyboard column sizing is deferred to Phase 7 */}
+            {/* biome-ignore lint/a11y/noStaticElementInteractions: column resize is intentionally pointer-only — keyboard column sizing is not in scope */}
             {/* biome-ignore lint/a11y/useKeyWithClickEvents: ditto — onClick is only used to swallow header-click bubbling */}
             <span
               data-testid={`resize-handle-${column.id}`}

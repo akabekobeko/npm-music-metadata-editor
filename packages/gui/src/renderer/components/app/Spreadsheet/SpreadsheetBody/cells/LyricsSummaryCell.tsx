@@ -17,8 +17,8 @@ export type LyricsSummaryCellProps = {
 /**
  * Cell summarizing the track's lyrics as `none` / `text` / `synced`.
  *
- * Double-click delegates to `onOpen`. Phase 3 surfaces a placeholder modal
- * notice; Phase 5 wires the real lyrics editor.
+ * Double-click delegates to `onOpen`, which the host wires to the lyrics
+ * editor dialog (`LyricsDialog`).
  *
  * @param props - Cell props.
  * @returns The cell content.

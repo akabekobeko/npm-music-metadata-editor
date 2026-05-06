@@ -18,7 +18,6 @@ import { useDialogState } from "./useDialogState.js";
 import { useFatalHandler } from "./useFatalHandler.js";
 import { useFileOpen } from "./useFileOpen.js";
 import { useFormatSupport } from "./useFormatSupport.js";
-import { useGlobalShortcuts } from "./useGlobalShortcuts.js";
 import type { GridHandlers } from "./useGridHandlers.js";
 import { useGridHandlers } from "./useGridHandlers.js";
 import { useLogForwarder } from "./useLogForwarder.js";
@@ -123,8 +122,6 @@ export const useAppShell = (): AppShellModel => {
     recentFiles: settings.recentFiles,
     setSettings,
   });
-
-  useGlobalShortcuts({ onOpenFiles, onSaveAll: save.saveAll, saveDisabled: save.saving });
 
   const onCloseAll = useCallback(() => {
     tracksDispatch({ type: "clear" });

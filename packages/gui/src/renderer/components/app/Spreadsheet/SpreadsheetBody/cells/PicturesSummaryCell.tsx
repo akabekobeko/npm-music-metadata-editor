@@ -18,8 +18,8 @@ export type PicturesSummaryCellProps = {
  * Cell summarizing the track's embedded pictures.
  *
  * Shows the picture count with a "(cover)" hint when a Cover (front) is
- * present, and dispatches `onOpen` on double click. Phase 5 wires `onOpen` to
- * the picture editor dialog; Phase 3 calls a placeholder handler.
+ * present, and dispatches `onOpen` on double click. The host wires `onOpen`
+ * to the picture editor dialog (`PicturesDialog`).
  *
  * @param props - Cell props.
  * @returns The cell content.

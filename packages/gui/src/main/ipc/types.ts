@@ -252,17 +252,6 @@ export type FormatSupportEntry = {
 };
 
 /**
- * Persisted settings shape exchanged over `mme:settings:get` /
- * `mme:settings:set`.
- *
- * Phase 6 narrows the type to the real {@link AppSettings} schema. The alias
- * is kept for callers (Renderer) that still reference the older name, and as
- * a stable IPC-only surface so further fields can land without dragging
- * Renderer imports through the Main package's internal layout.
- */
-export type SettingsSnapshot = AppSettings;
-
-/**
  * Request payload for `mme:settings:set`.
  *
  * Patches are deeply-partial so callers can update one nested key without
@@ -480,9 +469,9 @@ export type MmeBridge = {
   /** Persisted-settings channels. */
   readonly settings: {
     /** Read the current settings snapshot. */
-    readonly get: () => Promise<IpcResult<SettingsSnapshot>>;
+    readonly get: () => Promise<IpcResult<AppSettings>>;
     /** Apply a deeply-partial patch and return the merged snapshot. */
-    readonly set: (request: SetSettingsRequest) => Promise<IpcResult<SettingsSnapshot>>;
+    readonly set: (request: SetSettingsRequest) => Promise<IpcResult<AppSettings>>;
   };
   /** Long-running progress notifications. */
   readonly progress: {

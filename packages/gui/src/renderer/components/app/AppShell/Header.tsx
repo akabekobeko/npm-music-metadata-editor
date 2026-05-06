@@ -31,9 +31,8 @@ export type HeaderProps = {
  * Top-level toolbar with the File → Open entry point, the columns picker, the
  * Save / Discard controls, and the file counter.
  *
- * Phase 6 grows this from a single Open button into the full save-flow header:
  * Save All / Discard Changes are gated on `dirtyCount > 0`, the Columns
- * picker drives `AppSettings.columns.visibleIds`, and the loading / saving
+ * picker drives `AppSettings.columns.visibleIds`, and the `loading` / `saving`
  * flags collapse the buttons during long-running ops.
  *
  * @param props - Component props.
