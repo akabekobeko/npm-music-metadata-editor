@@ -2,7 +2,9 @@ import { cn } from "@/libs/utils";
 
 /** Props for {@link NumberCell}. */
 export type NumberCellProps = {
+  /** Numeric value or its stringified form to display. */
   readonly value: string | number | undefined;
+  /** Render the cell muted to signal the field cannot be edited for this row. */
   readonly disabled?: boolean;
 };
 
@@ -10,8 +12,8 @@ export type NumberCellProps = {
  * Renders a numeric value, right-aligned to ease scanning columns of integers
  * (year / track number / BPM).
  *
- * Phase 4 will replace this with an inline `<Input type="number" />` editor;
- * Phase 3 keeps it display-only.
+ * Read-only view — inline editing is handled by `EditableCell` (with
+ * `inputKind: "number"`) when the cell enters edit mode.
  *
  * @param props - Cell props.
  * @returns The cell content.

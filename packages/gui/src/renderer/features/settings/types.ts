@@ -1,4 +1,4 @@
-import type { AppSettings, DeepPartial } from "../../../main/ipc/types.js";
+import type { AppSettings, DeepPartial } from "@mme/ipc";
 
 export type { AppSettings, DeepPartial };
 
@@ -10,7 +10,9 @@ export type { AppSettings, DeepPartial };
  * built-in defaults synchronously while the IPC round-trip is in flight.
  */
 export type SettingsState = {
+  /** Latest settings snapshot — falls back to defaults until `loaded` flips. */
   readonly settings: AppSettings;
+  /** `true` once the initial `mme:settings:get` round-trip has resolved. */
   readonly loaded: boolean;
 };
 

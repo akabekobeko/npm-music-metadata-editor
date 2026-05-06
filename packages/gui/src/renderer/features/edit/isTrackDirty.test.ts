@@ -1,5 +1,5 @@
+import type { Track } from "@mme/ipc";
 import { expect, it } from "vitest";
-import type { Track } from "../../../main/ipc/types.js";
 import { isTrackDirty } from "./isTrackDirty";
 
 const baseTrack = (): Track => ({

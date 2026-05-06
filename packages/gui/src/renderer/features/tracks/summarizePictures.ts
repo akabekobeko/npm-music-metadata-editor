@@ -1,4 +1,4 @@
-import type { PictureInfo } from "../../../main/ipc/types.js";
+import type { PictureInfo } from "@mme/ipc";
 
 /**
  * Numeric `kind` value for the "Cover (front)" picture role.
@@ -17,8 +17,11 @@ const PICTURE_KIND_COVER_FRONT = 3;
  * an em-dash without forcing the consumer to special-case `0`.
  */
 export type PicturesSummary = {
+  /** Total number of embedded pictures. */
   readonly count: number;
+  /** `true` when at least one picture has the Cover (front) role. */
   readonly hasCoverFront: boolean;
+  /** Cell label, or `undefined` when there are no pictures. */
   readonly label: string | undefined;
 };
 

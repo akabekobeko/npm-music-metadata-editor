@@ -1,5 +1,6 @@
 /** Props for {@link DurationCell}. */
 export type DurationCellProps = {
+  /** Pre-formatted duration string from the column registry. */
   readonly value: string | number | undefined;
 };
 

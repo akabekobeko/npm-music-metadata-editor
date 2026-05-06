@@ -1,5 +1,5 @@
+import type { FatalPayload } from "@mme/ipc";
 import { useEffect, useState } from "react";
-import type { FatalPayload } from "../../../../main/ipc/types.js";
 
 /**
  * Wire the Main → Renderer `mme:fatal` channel and the renderer's own

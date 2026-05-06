@@ -5,9 +5,13 @@ import { basename } from "@/libs/basename";
 
 /** Props for {@link LrcExportButton}. */
 export type LrcExportButtonProps = {
+  /** Suggested file name pre-filled into the save dialog. */
   readonly defaultName: string;
+  /** Synchronized lines serialised into the LRC payload. */
   readonly lines: readonly SyncedLine[];
+  /** Surface a user-facing error message (toast). */
   readonly onError: (message: string) => void;
+  /** Surface a user-facing success message (toast). */
   readonly onSuccess: (message: string) => void;
 };
 

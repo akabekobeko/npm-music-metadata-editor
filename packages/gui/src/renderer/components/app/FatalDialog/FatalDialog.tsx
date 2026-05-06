@@ -1,3 +1,4 @@
+import type { FatalPayload } from "@mme/ipc";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,12 +9,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useLocale } from "@/features/i18n/useLocale";
-import type { FatalPayload } from "../../../../main/ipc/types.js";
 
 /** Props for {@link FatalDialog}. */
 export type FatalDialogProps = {
+  /** Latest fatal payload, or `null` to keep the modal hidden. */
   readonly fatal: FatalPayload | null;
+  /** Reload the renderer and dismiss the modal. */
   readonly onReload: () => void;
+  /** Quit the application from the modal. */
   readonly onQuit: () => void;
 };
 

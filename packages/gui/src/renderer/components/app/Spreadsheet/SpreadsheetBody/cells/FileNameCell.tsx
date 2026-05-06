@@ -4,6 +4,7 @@ import { basename } from "@/libs/basename";
 
 /** Props for {@link FileNameCell}. */
 export type FileNameCellProps = {
+  /** Row whose file path is rendered in the cell. */
   readonly row: TrackRow;
 };
 

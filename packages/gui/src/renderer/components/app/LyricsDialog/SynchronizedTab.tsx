@@ -1,46 +1,19 @@
-import { useState } from "react";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatTimeInput, parseTimeInput } from "@/features/lyrics/parseTimeInput";
-import type { SyncedLine } from "@/features/lyrics/types";
+import { formatTimeInput } from "@/features/lyrics/parseTimeInput";
 
-/** One synchronized line plus a UI-only stable id used as the React key. */
-export type SyncedLineEntry = {
-  readonly id: string;
-  readonly line: SyncedLine;
-};
+import { type SyncedLineEntry, useSynchronizedTab } from "./useSynchronizedTab.js";
+
+export type { SyncedLineEntry } from "./useSynchronizedTab.js";
 
 /** Props for {@link SynchronizedTab}. */
 export type SynchronizedTabProps = {
+  /** Current entries in `timeMs` ascending order. */
   readonly entries: readonly SyncedLineEntry[];
+  /** Receive a new entry list — kept sorted by the parent. */
   readonly onChange: (entries: readonly SyncedLineEntry[]) => void;
+  /** Optional toolbar slot rendered next to `+ Line` (e.g. Import / Export buttons). */
   readonly extraButtons?: React.ReactNode;
-};
-
-/**
- * Mint a fresh stable id for a new synchronized-line row.
- *
- * Uses `crypto.randomUUID` so React picks up reorderings via key identity,
- * not array position — `noArrayIndexKey` is incompatible with the row-level
- * delete + re-sort flow.
- *
- * @returns A v4 UUID.
- */
-const mintEntryId = (): string => globalThis.crypto.randomUUID();
-
-/**
- * Sort entries by their line's `timeMs` ascending, keeping ids attached.
- *
- * @param entries - Unsorted entries.
- * @returns A new array with entries sorted by `timeMs`.
- */
-const sortEntries = (entries: readonly SyncedLineEntry[]): readonly SyncedLineEntry[] =>
-  [...entries].sort((a, b) => a.line.timeMs - b.line.timeMs);
-
-/** Per-row local state — only the time input needs validation feedback. */
-type RowEditorState = {
-  readonly invalid: boolean;
 };
 
 /**
@@ -57,65 +30,15 @@ type RowEditorState = {
  * @returns The table markup.
  */
 export function SynchronizedTab({ entries, onChange, extraButtons }: SynchronizedTabProps) {
-  const [rowState, setRowState] = useState<readonly RowEditorState[]>(() =>
-    entries.map(() => ({ invalid: false })),
-  );
-  const [timeDrafts, setTimeDrafts] = useState<readonly string[]>(() =>
-    entries.map((entry) => formatTimeInput(entry.line.timeMs)),
-  );
-
-  const syncDraftLength = (next: readonly SyncedLineEntry[]): void => {
-    setTimeDrafts(next.map((entry) => formatTimeInput(entry.line.timeMs)));
-    setRowState(next.map(() => ({ invalid: false })));
-  };
-
-  const updateLine = (entryId: string, patch: Partial<SyncedLine>): void => {
-    const updated = entries.map((entry) =>
-      entry.id === entryId ? { ...entry, line: { ...entry.line, ...patch } } : entry,
-    );
-    const sorted = sortEntries(updated);
-    onChange(sorted);
-    syncDraftLength(sorted);
-  };
-
-  const handleTimeBlur = (target: {
-    readonly entryId: string;
-    readonly index: number;
-    readonly value: string;
-  }): void => {
-    const { entryId, index, value } = target;
-    const ms = parseTimeInput(value);
-    if (ms === null) {
-      setRowState((prev) => prev.map((row, i) => (i === index ? { invalid: true } : row)));
-      return;
-    }
-
-    setRowState((prev) => prev.map((row, i) => (i === index ? { invalid: false } : row)));
-    updateLine(entryId, { timeMs: ms });
-  };
-
-  const handleTextChange = (entryId: string, value: string): void => {
-    const next = entries.map((entry) =>
-      entry.id === entryId ? { ...entry, line: { ...entry.line, text: value } } : entry,
-    );
-    onChange(next);
-  };
-
-  const handleAddLine = (): void => {
-    const lastTime = entries[entries.length - 1]?.line.timeMs ?? 0;
-    const next: readonly SyncedLineEntry[] = [
-      ...entries,
-      { id: mintEntryId(), line: { timeMs: lastTime, text: "" } },
-    ];
-    onChange(next);
-    syncDraftLength(next);
-  };
-
-  const handleRemoveLine = (entryId: string): void => {
-    const next = entries.filter((entry) => entry.id !== entryId);
-    onChange(next);
-    syncDraftLength(next);
-  };
+  const {
+    rowState,
+    timeDrafts,
+    setTimeDraftAt,
+    handleTimeBlur,
+    handleTextChange,
+    handleAddLine,
+    handleRemoveLine,
+  } = useSynchronizedTab({ entries, onChange });
 
   return (
     <div className="flex flex-col gap-2">
@@ -141,11 +64,7 @@ export function SynchronizedTab({ entries, onChange, extraButtons }: Synchronize
                   <td className="px-2 py-1">
                     <Input
                       value={timeDrafts[index] ?? formatTimeInput(entry.line.timeMs)}
-                      onChange={(event) =>
-                        setTimeDrafts((prev) =>
-                          prev.map((value, i) => (i === index ? event.target.value : value)),
-                        )
-                      }
+                      onChange={(event) => setTimeDraftAt(index, event.target.value)}
                       onBlur={(event) =>
                         handleTimeBlur({ entryId: entry.id, index, value: event.target.value })
                       }

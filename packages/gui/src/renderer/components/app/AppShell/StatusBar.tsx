@@ -1,7 +1,10 @@
 /** Props for {@link StatusBar}. */
 export type StatusBarProps = {
+  /** Total number of loaded rows. */
   readonly fileCount: number;
+  /** Number of rows with unsaved edits. */
   readonly dirtyCount: number;
+  /** Number of rows reporting at least one warning after load. */
   readonly warningCount: number;
   /**
    * Transient summary appended to the right of the bar (e.g. paste outcome).
@@ -14,7 +17,7 @@ export type StatusBarProps = {
  * Bottom status bar showing aggregate counters and transient action summaries.
  *
  * Counters refresh every render; transient text fades out after the parent
- * clears it (Phase 4 plan: 5 seconds after a paste).
+ * clears it (auto-cleared by `useTransientStatus` after `TRANSIENT_STATUS_MS`).
  *
  * @returns The bar.
  */

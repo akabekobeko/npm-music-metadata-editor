@@ -1,3 +1,4 @@
+import type { FatalPayload } from "@mme/ipc";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDragAndDrop } from "@/features/dnd/useDragAndDrop";
 import { useEditStore } from "@/features/edit/store";
@@ -10,7 +11,6 @@ import { useTheme } from "@/features/theme/useTheme";
 import { loadTracks } from "@/features/tracks/loadTracks";
 import { useTracksStore } from "@/features/tracks/store";
 import type { TrackRow } from "@/features/tracks/types";
-import type { FatalPayload } from "../../../../main/ipc/types.js";
 import type { ColumnSettings } from "./useColumnSettings.js";
 import { useColumnSettings } from "./useColumnSettings.js";
 import type { DialogState } from "./useDialogState.js";
@@ -18,7 +18,6 @@ import { useDialogState } from "./useDialogState.js";
 import { useFatalHandler } from "./useFatalHandler.js";
 import { useFileOpen } from "./useFileOpen.js";
 import { useFormatSupport } from "./useFormatSupport.js";
-import { useGlobalShortcuts } from "./useGlobalShortcuts.js";
 import type { GridHandlers } from "./useGridHandlers.js";
 import { useGridHandlers } from "./useGridHandlers.js";
 import { useLogForwarder } from "./useLogForwarder.js";
@@ -53,10 +52,15 @@ export type AppShellModel = {
   readonly onReloadFromFatal: () => void;
   /** Quit the application in response to a fatal. */
   readonly onQuitFromFatal: () => void;
+  /** Column visibility / width view model from `useColumnSettings`. */
   readonly columns: ColumnSettings;
+  /** Pictures / Lyrics modal state from `useDialogState`. */
   readonly dialogs: DialogState;
+  /** Save All / Discard Changes controls from `useSaveAll`. */
   readonly save: SaveAllControls;
+  /** Grid commit / paste / undo callbacks from `useGridHandlers`. */
   readonly grid: GridHandlers;
+  /** Transient status bar text from `useTransientStatus`. */
   readonly status: TransientStatus;
   /** Open Files handler (header button + Cmd/Ctrl+O). */
   readonly onOpenFiles: () => void;
@@ -118,8 +122,6 @@ export const useAppShell = (): AppShellModel => {
     recentFiles: settings.recentFiles,
     setSettings,
   });
-
-  useGlobalShortcuts({ onOpenFiles, onSaveAll: save.saveAll, saveDisabled: save.saving });
 
   const onCloseAll = useCallback(() => {
     tracksDispatch({ type: "clear" });

@@ -4,16 +4,18 @@ import type { ColumnDefinition } from "@/features/spreadsheet/types";
 import type { TrackRow } from "@/features/tracks/types";
 
 import { DurationCell } from "./cells/DurationCell";
+import { FileNameCell } from "./cells/FileNameCell";
 import { LyricsSummaryCell } from "./cells/LyricsSummaryCell";
 import { NumberCell } from "./cells/NumberCell";
 import { PicturesSummaryCell } from "./cells/PicturesSummaryCell";
 import { TextCell } from "./cells/TextCell";
 import { WarningsCell } from "./cells/WarningsCell";
-import { FileNameCell } from "./fileName/FileNameCell";
 
 /** Handlers for cells that delegate user intent back to the page (modal opens). */
 export type CellHandlers = {
+  /** Open the picture-management dialog for the given row. */
   readonly onOpenPictures: (row: TrackRow) => void;
+  /** Open the lyrics editor dialog for the given row. */
   readonly onOpenLyrics: (row: TrackRow) => void;
 };
 

@@ -4,8 +4,11 @@ import { cn } from "@/libs/utils";
 
 /** Props for {@link PictureList}. */
 export type PictureListProps = {
+  /** Picture drafts shown in the list, in display order. */
   readonly drafts: readonly PictureDraft[];
+  /** Id of the currently-highlighted entry, or `null` for none. */
   readonly selectedId: string | null;
+  /** Select a different entry in the list. */
   readonly onSelect: (id: string) => void;
 };
 

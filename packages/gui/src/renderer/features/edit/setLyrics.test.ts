@@ -1,5 +1,5 @@
+import type { LyricsInfo, Track } from "@mme/ipc";
 import { expect, it } from "vitest";
-import type { LyricsInfo, Track } from "../../../main/ipc/types.js";
 import type { TrackRow } from "../tracks/types.js";
 import { setLyrics } from "./setLyrics.js";
 

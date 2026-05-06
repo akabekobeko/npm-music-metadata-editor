@@ -1,4 +1,4 @@
-import type { LyricsInfo } from "../../../main/ipc/types.js";
+import type { LyricsInfo } from "@mme/ipc";
 import type { LyricsDraft } from "./types.js";
 
 /**

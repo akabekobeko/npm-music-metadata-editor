@@ -1,12 +1,13 @@
-import { useRef } from "react";
-
 import { Button } from "@/components/ui/button";
-import { parseLrc } from "@/features/lyrics/parseLrc";
 import type { SyncedLine } from "@/features/lyrics/types";
+
+import { useLrcImportButton } from "./useLrcImportButton.js";
 
 /** Props for {@link LrcImportButton}. */
 export type LrcImportButtonProps = {
+  /** Receive the synchronized lines parsed from the chosen file. */
   readonly onImport: (lines: readonly SyncedLine[]) => void;
+  /** Surface a user-facing error message (toast). */
   readonly onError: (message: string) => void;
 };
 
@@ -22,27 +23,7 @@ export type LrcImportButtonProps = {
  * @returns The button markup plus the hidden input.
  */
 export function LrcImportButton({ onImport, onError }: LrcImportButtonProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
-  const handleClick = (): void => {
-    inputRef.current?.click();
-  };
-
-  const handleChange = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (file === undefined) {
-      return;
-    }
-
-    try {
-      const text = await file.text();
-      const parsed = parseLrc(text);
-      onImport(parsed.lines);
-    } catch (error) {
-      onError(error instanceof Error ? error.message : String(error));
-    }
-  };
+  const { inputRef, handleClick, handleChange } = useLrcImportButton({ onImport, onError });
 
   return (
     <>

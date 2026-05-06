@@ -46,8 +46,11 @@ const COMMON_TAG_FIELDS: ReadonlyArray<keyof TagData> = [
  * given container.
  */
 type FormatCapability = {
+  /** Whether the format can carry embedded pictures. */
   readonly pictures: boolean;
+  /** Whether the format can carry chapter markers. */
   readonly chapters: boolean;
+  /** Whether the format can carry lyrics. */
   readonly lyrics: boolean;
   /** When set, replaces {@link COMMON_TAG_FIELDS} for this format. */
   readonly tagFields?: ReadonlyArray<keyof TagData>;

@@ -9,19 +9,19 @@ import type { ColumnDefinition, ColumnId, FormatSupportMap } from "./types.js";
  * unusable without it. Duplicate ids are de-duplicated while preserving the
  * caller's order.
  *
- * The format support matrix is accepted for API stability with Phase 4 (which
- * will use it to compute per-column "writable count" hints in headers); Phase
- * 3 only consults it inside `isCellWritable` to disable individual cells, so
- * the column shape itself does not depend on `support` yet.
+ * The format support matrix is accepted for signature stability — column
+ * shape itself never depends on `support`. Per-column "writable count" hints
+ * are computed in `renderHeader.tsx` using the same matrix, and per-cell
+ * write gating goes through `isCellWritable`.
  *
  * @param visibleIds - Column ids the user wants to display, in display order.
- * @param _support - Format support matrix from `mme:formatSupport:list`. Phase
- *   3 reserves the parameter; the column shape does not depend on it yet.
+ * @param _support - Format support matrix from `mme:formatSupport:list`.
+ *   Currently unused here; reserved so callers don't have to change shape if
+ *   the column registry ever needs to react to format support.
  * @returns Column definitions in render order.
  */
 export const buildColumns = (
   visibleIds: readonly ColumnId[],
-  // Phase 3 keeps the parameter for API stability — see TSDoc.
   _support: FormatSupportMap,
 ): readonly ColumnDefinition[] => {
   const seen = new Set<ColumnId>();

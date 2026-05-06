@@ -1,5 +1,5 @@
+import type { PictureInfo } from "@mme/ipc";
 import { expect, it } from "vitest";
-import type { PictureInfo } from "../../../main/ipc/types.js";
 import { summarizePictures } from "./summarizePictures";
 
 const fakePicture = (kind: number): PictureInfo => ({

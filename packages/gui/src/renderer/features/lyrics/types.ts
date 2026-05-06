@@ -5,7 +5,9 @@
  * the structure here keeps this module independent from `main/ipc/types`.
  */
 export type SyncedLine = {
+  /** Offset of the line within the track, in milliseconds. */
   readonly timeMs: number;
+  /** Lyric text shown at this offset. */
   readonly text: string;
 };
 
@@ -35,6 +37,8 @@ export type LyricsDraft = {
  * lets a future iteration surface them in the UI without changing the parser.
  */
 export type ParsedLrc = {
+  /** Synchronized lines in `timeMs` ascending order. */
   readonly lines: readonly SyncedLine[];
+  /** Metadata tags keyed by the lower-cased tag name. */
   readonly meta: Readonly<Record<string, string>>;
 };

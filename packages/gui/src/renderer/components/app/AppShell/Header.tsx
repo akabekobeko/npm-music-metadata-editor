@@ -7,14 +7,23 @@ import { ColumnsMenu } from "./ColumnsMenu";
 
 /** Props for {@link Header}. */
 export type HeaderProps = {
+  /** Total number of loaded rows; drives the trailing counter. */
   readonly fileCount: number;
+  /** Number of rows with unsaved edits; gates Save All / Discard. */
   readonly dirtyCount: number;
+  /** Whether a load operation is in progress; collapses the toolbar. */
   readonly loading: boolean;
+  /** Whether a save operation is in progress; disables actions during the run. */
   readonly saving: boolean;
+  /** Visible column ids in display order; powers the columns picker checkmarks. */
   readonly visibleIds: readonly ColumnId[];
+  /** Open the native file picker. */
   readonly onOpenFiles: () => void;
+  /** Toggle a column's visibility. */
   readonly onToggleColumn: (id: ColumnId, visible: boolean) => void;
+  /** Trigger a Save All run. */
   readonly onSaveAll: () => void;
+  /** Discard every unsaved edit. */
   readonly onDiscardChanges: () => void;
 };
 
@@ -22,9 +31,8 @@ export type HeaderProps = {
  * Top-level toolbar with the File → Open entry point, the columns picker, the
  * Save / Discard controls, and the file counter.
  *
- * Phase 6 grows this from a single Open button into the full save-flow header:
  * Save All / Discard Changes are gated on `dirtyCount > 0`, the Columns
- * picker drives `AppSettings.columns.visibleIds`, and the loading / saving
+ * picker drives `AppSettings.columns.visibleIds`, and the `loading` / `saving`
  * flags collapse the buttons during long-running ops.
  *
  * @param props - Component props.

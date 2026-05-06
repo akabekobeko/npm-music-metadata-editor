@@ -1,5 +1,5 @@
 import { getSettings } from "../settings/settings.js";
-import type { IpcResult, SettingsSnapshot } from "./types.js";
+import type { AppSettings, IpcResult } from "./types.js";
 
 /**
  * Channel handler for `mme:settings:get`.
@@ -13,7 +13,7 @@ import type { IpcResult, SettingsSnapshot } from "./types.js";
  */
 export const onGetSettings = async (
   _ev: Electron.IpcMainInvokeEvent,
-): Promise<IpcResult<SettingsSnapshot>> => ({
+): Promise<IpcResult<AppSettings>> => ({
   ok: true,
   value: getSettings(),
 });

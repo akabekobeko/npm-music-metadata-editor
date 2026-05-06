@@ -1,7 +1,7 @@
-import { resolveLocale } from "../locales/resolveLocale.js";
+import { resolveLocale } from "../../shared/locales/resolveLocale.js";
 import { applyMenuLocale } from "../menu/menuController.js";
 import { applySettingsPatch } from "../settings/settings.js";
-import type { IpcResult, SetSettingsRequest, SettingsSnapshot } from "./types.js";
+import type { AppSettings, IpcResult, SetSettingsRequest } from "./types.js";
 import { toIpcError } from "./utils/toIpcError.js";
 
 /**
@@ -22,7 +22,7 @@ import { toIpcError } from "./utils/toIpcError.js";
 export const onSetSettings = async (
   _ev: Electron.IpcMainInvokeEvent,
   request: SetSettingsRequest,
-): Promise<IpcResult<SettingsSnapshot>> => {
+): Promise<IpcResult<AppSettings>> => {
   try {
     const next = applySettingsPatch(request.patch);
     if (request.patch.locale !== undefined) {

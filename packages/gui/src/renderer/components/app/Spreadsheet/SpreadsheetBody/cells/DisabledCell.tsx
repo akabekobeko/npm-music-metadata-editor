@@ -1,5 +1,6 @@
 /** Props for {@link DisabledCell}. */
 export type DisabledCellProps = {
+  /** Raw value to display; rendered as `"—"` when `undefined` or empty. */
   readonly value: string | number | undefined;
 };
 

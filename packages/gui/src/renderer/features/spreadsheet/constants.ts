@@ -333,11 +333,12 @@ export const COLUMN_REGISTRY: Readonly<Record<ColumnId, ColumnDefinition>> = {
 };
 
 /**
- * Visible column ids in the default spreadsheet layout.
+ * Fallback visible column ids used when no user preference exists yet.
  *
- * Phase 6 will replace this with a JSON-persisted user setting; until then the
- * default doubles as the "out of the box" column set referenced by the
- * `buildColumns` snapshot test.
+ * The persisted choice in `AppSettings.columns.visibleIds` (see
+ * `useColumnSettings`) overrides this at runtime; the default also doubles
+ * as the "out of the box" column set referenced by the `buildColumns`
+ * snapshot test.
  */
 export const DEFAULT_VISIBLE_IDS: readonly ColumnId[] = [
   "fileName",
@@ -358,7 +359,7 @@ export const DEFAULT_VISIBLE_IDS: readonly ColumnId[] = [
 /**
  * Every known column id, preserving the registry's declaration order.
  *
- * Used by the "show all columns" snapshot test and (Phase 6) by the column
- * picker UI as the catalog of switchable columns.
+ * Used by the "show all columns" snapshot test and by the column picker UI
+ * (`ColumnsMenu`) as the catalog of switchable columns.
  */
 export const ALL_COLUMN_IDS: readonly ColumnId[] = Object.keys(COLUMN_REGISTRY) as ColumnId[];

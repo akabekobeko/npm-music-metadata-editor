@@ -1,4 +1,4 @@
-import type { LyricsInfo, PictureInfo, TagData, Track } from "../../../main/ipc/types.js";
+import type { LyricsInfo, PictureInfo, TagData, Track } from "@mme/ipc";
 
 /**
  * Compare every key present in either tag object.

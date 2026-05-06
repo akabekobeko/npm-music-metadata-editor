@@ -1,5 +1,5 @@
+import type { PictureInfo, Track } from "@mme/ipc";
 import { expect, it } from "vitest";
-import type { PictureInfo, Track } from "../../../main/ipc/types.js";
 import type { TrackRow } from "../tracks/types.js";
 import { setPictures } from "./setPictures.js";
 

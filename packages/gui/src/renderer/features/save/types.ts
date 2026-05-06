@@ -1,4 +1,4 @@
-import type { IpcError } from "../../../main/ipc/types.js";
+import type { IpcError } from "@mme/ipc";
 
 /**
  * Per-file outcome reported by `saveDirtyRows`.
@@ -9,7 +9,9 @@ import type { IpcError } from "../../../main/ipc/types.js";
  * here).
  */
 export type SaveResult = {
+  /** Absolute path of the row that was attempted. */
   readonly filePath: string;
+  /** Failure payload, or `undefined` when the save succeeded. */
   readonly error?: IpcError;
 };
 
@@ -22,7 +24,9 @@ export type SaveResult = {
  * of the cancel are absent.
  */
 export type SaveSummary = {
+  /** Per-row outcomes for every row the loop attempted. */
   readonly results: readonly SaveResult[];
+  /** Whether the loop bailed before reaching every row. */
   readonly cancelled: boolean;
 };
 
@@ -33,8 +37,12 @@ export type SaveSummary = {
  * the dirty batch at the moment the loop started.
  */
 export type SaveProgress = {
+  /** 1-based index of the row currently being processed. */
   readonly current: number;
+  /** Total number of rows queued for the run. */
   readonly total: number;
+  /** Absolute path of the row currently being processed. */
   readonly filePath: string;
+  /** Lifecycle phase of this row's save. */
   readonly phase: "start" | "writing" | "done";
 };

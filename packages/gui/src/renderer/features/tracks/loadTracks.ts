@@ -4,7 +4,9 @@ import type { TrackLoadError, TrackRow } from "./types.js";
  * Outcome of a `loadTracks` call: per-file rows separated from per-file errors.
  */
 export type LoadTracksResult = {
+  /** Rows that loaded successfully. */
   readonly rows: readonly TrackRow[];
+  /** Per-file load failures. */
   readonly errors: readonly TrackLoadError[];
 };
 

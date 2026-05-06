@@ -1,12 +1,15 @@
+import type { MenuStateSnapshot } from "@mme/ipc";
 import { useEffect } from "react";
 import type { ColumnDefinition } from "@/features/spreadsheet/types";
 import type { ResolvedTheme } from "@/features/theme/types";
-import type { MenuStateSnapshot } from "../../../../main/ipc/types.js";
 
 /** Args for {@link useMenuStatePush}. */
 type Args = {
+  /** Whether the workspace has unsaved edits — gates Save / Discard items. */
   readonly hasDirty: boolean;
+  /** Persisted recent-files list, newest first. */
   readonly recentFiles: readonly string[];
+  /** Resolved color theme — drives the toggle item's check state. */
   readonly theme: ResolvedTheme;
   /** Visible-column id set, used to mark each known column with its checkbox state. */
   readonly visibleColumnIds: readonly string[];

@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,12 +7,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useLocale } from "@/features/i18n/useLocale";
-import type { AppVersions } from "../../../../main/ipc/types.js";
+
+import { useAboutDialog } from "./useAboutDialog.js";
 
 /** Props for {@link AboutDialog}. */
 export type AboutDialogProps = {
+  /** Whether the modal is currently mounted. */
   readonly open: boolean;
+  /** Close handler — flips `open` back to `false`. */
   readonly onClose: () => void;
 };
 
@@ -28,24 +29,7 @@ export type AboutDialogProps = {
  * @returns The modal node.
  */
 export function AboutDialog({ open, onClose }: AboutDialogProps) {
-  const { t } = useLocale();
-  const [versions, setVersions] = useState<AppVersions | null>(null);
-
-  useEffect(() => {
-    if (!open || versions !== null) {
-      return;
-    }
-
-    let cancelled = false;
-    void window.mme.app.getVersions().then((result) => {
-      if (!cancelled) {
-        setVersions(result);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [open, versions]);
+  const { t, versions } = useAboutDialog({ open });
 
   return (
     <Dialog open={open} onOpenChange={(next) => (!next ? onClose() : undefined)}>

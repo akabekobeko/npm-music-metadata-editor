@@ -1,5 +1,5 @@
+import type { AudioFormat, FormatSupportEntry, TagData, Track } from "@mme/ipc";
 import { expect, it } from "vitest";
-import type { AudioFormat, FormatSupportEntry, TagData, Track } from "../../../main/ipc/types.js";
 import type { TrackRow } from "../tracks/types.js";
 import { isCellWritable } from "./isCellWritable";
 import type { FormatSupportMap } from "./types.js";

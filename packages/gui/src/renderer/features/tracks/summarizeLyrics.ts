@@ -1,4 +1,4 @@
-import type { LyricsInfo } from "../../../main/ipc/types.js";
+import type { LyricsInfo } from "@mme/ipc";
 
 /** Discriminator for the lyrics cell display. */
 export type LyricsKind = "none" | "text" | "synced";
@@ -11,7 +11,9 @@ export type LyricsKind = "none" | "text" | "synced";
  * an em-dash without re-checking the kind.
  */
 export type LyricsSummary = {
+  /** Discriminator picking the richer of synced / text / none. */
   readonly kind: LyricsKind;
+  /** Cell label, or `undefined` when there are no lyrics. */
   readonly label: string | undefined;
 };
 

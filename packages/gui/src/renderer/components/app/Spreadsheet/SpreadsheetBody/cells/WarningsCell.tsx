@@ -7,6 +7,7 @@ import { cn } from "@/libs/utils";
 
 /** Props for {@link WarningsCell}. */
 export type WarningsCellProps = {
+  /** Row whose warnings are summarised. */
   readonly row: TrackRow;
 };
 

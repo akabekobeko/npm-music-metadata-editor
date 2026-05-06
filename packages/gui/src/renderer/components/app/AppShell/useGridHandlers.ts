@@ -6,13 +6,16 @@ import type { EditAction, EditState } from "@/features/edit/store";
 import type { FormatSupportMap } from "@/features/spreadsheet/types";
 import type { TrackRow } from "@/features/tracks/types";
 
-import type { CommitArgs, PasteArgs } from "../Spreadsheet/Spreadsheet";
+import type { CommitArgs, PasteArgs } from "../Spreadsheet/types.js";
 import { formatPasteSummary } from "./formatPasteSummary.js";
 
 /** Args for {@link useGridHandlers}. */
 type Args = {
+  /** Current edit-store state — supplies the rows the paste handler splices into. */
   readonly editState: EditState;
+  /** Edit reducer dispatch — drives commit / undo / applyChange. */
   readonly editDispatch: Dispatch<EditAction>;
+  /** Format support matrix used to gate per-cell paste eligibility. */
   readonly support: FormatSupportMap;
   /** Notification sink for the post-paste summary toast. */
   readonly notify: (message: string) => void;
@@ -20,8 +23,11 @@ type Args = {
 
 /** Public surface returned by {@link useGridHandlers}. */
 export type GridHandlers = {
+  /** Commit a single-cell edit. */
   readonly onCommit: (args: CommitArgs) => void;
+  /** Roll back the most recent edit. */
   readonly onUndo: () => void;
+  /** Apply a clipboard paste against the current selection. */
   readonly onPaste: (args: PasteArgs) => void;
 };
 

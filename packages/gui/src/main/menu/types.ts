@@ -1,5 +1,5 @@
+import type { Locale } from "../../shared/locales/types.js";
 import type { MenuAction } from "../ipc/types.js";
-import type { Locale } from "../locales/types.js";
 
 /**
  * Inputs that drive {@link buildAppMenu}.
@@ -47,11 +47,17 @@ export type MenuColumn = {
  * callers import it directly from that module.
  */
 export type MenuItemTemplate = {
+  /** Display label; omitted for separators. */
   readonly label?: string;
+  /** Keyboard shortcut string passed straight to Electron (e.g. `"CmdOrCtrl+S"`). */
   readonly accelerator?: string;
+  /** Disable the item without hiding it. */
   readonly enabled?: boolean;
+  /** Hide the item entirely. */
   readonly visible?: boolean;
+  /** Item kind — `"separator"` produces a divider, others are interactive. */
   readonly type?: "normal" | "separator" | "submenu" | "checkbox" | "radio";
+  /** Built-in Electron role; bypasses the `action` mapping when set. */
   readonly role?:
     | "appMenu"
     | "fileMenu"
@@ -93,6 +99,7 @@ export type MenuItemTemplate = {
   readonly externalUrl?: string;
   /** Set on `Toggle Dark Mode` so Electron renders the radio/checkmark. */
   readonly checked?: boolean;
+  /** Nested submenu — promotes the item to a parent node. */
   readonly submenu?: readonly MenuItemTemplate[];
 };
 

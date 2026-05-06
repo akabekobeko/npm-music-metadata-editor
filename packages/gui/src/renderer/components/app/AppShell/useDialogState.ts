@@ -1,9 +1,8 @@
+import type { LyricsInfo, PictureInfo } from "@mme/ipc";
 import { type Dispatch, useCallback, useState } from "react";
-
 import type { EditAction } from "@/features/edit/store";
 import type { FormatSupportMap } from "@/features/spreadsheet/types";
 import type { TrackRow } from "@/features/tracks/types";
-import type { LyricsInfo, PictureInfo } from "../../../../main/ipc/types";
 
 /** Discriminator for the modal currently mounted on top of the spreadsheet. */
 export type ActiveDialog =
