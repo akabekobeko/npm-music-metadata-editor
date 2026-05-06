@@ -4,7 +4,7 @@ import type { ColumnDefinition, ColumnId, FormatSupportMap } from "@/features/sp
 import type { TrackRow } from "@/features/tracks/types";
 import { cn } from "@/libs/utils";
 
-import type { Selection } from "./types.js";
+import type { Selection } from "../types.js";
 import { useSpreadsheetHeader } from "./useSpreadsheetHeader.js";
 
 /** Props for {@link SpreadsheetHeader}. */

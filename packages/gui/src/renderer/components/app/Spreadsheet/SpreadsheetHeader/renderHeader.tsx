@@ -4,7 +4,7 @@ import { isCellWritable } from "@/features/spreadsheet/isCellWritable";
 import type { ColumnDefinition, FormatSupportMap } from "@/features/spreadsheet/types";
 import type { TrackRow } from "@/features/tracks/types";
 
-import { FileNameHeaderCell } from "./fileName/FileNameHeaderCell";
+import { FileNameHeaderCell } from "./FileNameHeaderCell";
 
 type Args = {
   /** Column definition currently being rendered. */

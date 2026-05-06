@@ -2,7 +2,7 @@ import type { ColumnDefinition, ColumnId, FormatSupportMap } from "@/features/sp
 import type { TrackRow } from "@/features/tracks/types";
 
 import { SpreadsheetBody } from "./SpreadsheetBody/SpreadsheetBody";
-import { SpreadsheetHeader } from "./SpreadsheetHeader";
+import { SpreadsheetHeader } from "./SpreadsheetHeader/SpreadsheetHeader";
 import type { CommitArgs, PasteArgs } from "./types.js";
 import { useSpreadsheet } from "./useSpreadsheet.js";
 

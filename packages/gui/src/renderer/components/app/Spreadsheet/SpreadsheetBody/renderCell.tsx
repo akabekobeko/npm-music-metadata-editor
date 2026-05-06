@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 import type { ColumnDefinition } from "@/features/spreadsheet/types";
 import type { TrackRow } from "@/features/tracks/types";
 
-import { FileNameCell } from "../fileName/FileNameCell";
 import { DurationCell } from "./cells/DurationCell";
+import { FileNameCell } from "./cells/FileNameCell";
 import { LyricsSummaryCell } from "./cells/LyricsSummaryCell";
 import { NumberCell } from "./cells/NumberCell";
 import { PicturesSummaryCell } from "./cells/PicturesSummaryCell";
