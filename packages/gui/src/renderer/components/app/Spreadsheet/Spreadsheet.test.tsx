@@ -143,6 +143,33 @@ it("keeps disabled cells out of edit mode on double-click", () => {
   expect(onCommit).not.toHaveBeenCalled();
 });
 
+it("ignores header clicks on cell-only columns and skips paste afterwards", async () => {
+  const onPaste = vi.fn();
+  vi.stubGlobal("navigator", {
+    ...globalThis.navigator,
+    clipboard: { readText: () => Promise.resolve("Alpha\nBeta") },
+  });
+
+  renderSpreadsheet({
+    visibleIds: ["fileName", "lyrics"],
+    rows: [
+      buildRow({ filePath: "/a.mp3", audioFormat: "mp3" }),
+      buildRow({ filePath: "/b.mp3", audioFormat: "mp3" }),
+    ],
+    support: supportMap([{ ...supportEntry("mp3", []), supportsLyrics: true }]),
+    handlers: { onPaste },
+  });
+
+  const header = screen.getByText("Lyrics", { selector: "span.font-medium" });
+  const headerCell = header.closest("th") as HTMLTableCellElement;
+  expect(headerCell.title).toMatch(/cell only/i);
+  expect(headerCell.className).toContain("cursor-default");
+  fireEvent.click(header);
+  fireEvent.keyDown(document, { key: "v", ctrlKey: true });
+  await Promise.resolve();
+  expect(onPaste).not.toHaveBeenCalled();
+});
+
 it("requests a paste with the selected column id when Cmd+V fires", async () => {
   const onPaste = vi.fn();
   vi.stubGlobal("navigator", {

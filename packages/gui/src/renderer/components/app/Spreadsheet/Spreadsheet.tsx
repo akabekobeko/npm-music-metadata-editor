@@ -9,6 +9,7 @@ import {
 } from "react";
 import type { PasteSelectionMode } from "@/features/edit/expandColumnPaste";
 import { isCellWritable } from "@/features/spreadsheet/isCellWritable";
+import { isColumnSelectable } from "@/features/spreadsheet/isColumnSelectable";
 import type { ColumnDefinition, ColumnId, FormatSupportMap } from "@/features/spreadsheet/types";
 import type { TrackRow } from "@/features/tracks/types";
 import { cn } from "@/libs/utils";
@@ -182,10 +183,18 @@ export function Spreadsheet({
     [rows, findColumn, startEditAt],
   );
 
-  const handleColumnHeaderClick = useCallback((columnId: ColumnId): void => {
-    setSelection({ kind: "column", columnId });
-    setEditing(null);
-  }, []);
+  const handleColumnHeaderClick = useCallback(
+    (columnId: ColumnId): void => {
+      const column = findColumn(columnId);
+      if (!column || !isColumnSelectable(column)) {
+        return;
+      }
+
+      setSelection({ kind: "column", columnId });
+      setEditing(null);
+    },
+    [findColumn],
+  );
 
   useEffect(() => {
     const handler = (event: globalThis.KeyboardEvent): void => {
@@ -261,30 +270,39 @@ export function Spreadsheet({
         </colgroup>
         <thead className="sticky top-0 z-20 bg-background">
           <tr className="border-b">
-            {headerEntries.map(({ column, node }) => (
-              <th
-                key={column.id}
-                onClick={() => handleColumnHeaderClick(column.id)}
-                className={cn(
-                  "relative border-r px-2 py-1.5 text-left cursor-pointer select-none",
-                  column.sticky === "left" && "sticky left-0 z-30 bg-background",
-                  selection.kind === "column" &&
-                    selection.columnId === column.id &&
-                    "bg-accent text-accent-foreground",
-                )}
-              >
-                {node}
-                {/* biome-ignore lint/a11y/noStaticElementInteractions: column resize is a pointer-only affordance; keyboard column sizing is deferred to Phase 7 */}
-                {/* biome-ignore lint/a11y/useKeyWithClickEvents: ditto — onClick is only used to swallow header-click bubbling */}
-                <span
-                  data-testid={`resize-handle-${column.id}`}
-                  title={`Resize ${column.title} column`}
-                  className="absolute right-0 top-0 z-40 h-full w-1.5 cursor-col-resize select-none hover:bg-accent"
-                  onClick={(event) => event.stopPropagation()}
-                  onPointerDown={(event) => beginResize(event, column.id)}
-                />
-              </th>
-            ))}
+            {headerEntries.map(({ column, node }) => {
+              const selectable = isColumnSelectable(column);
+              return (
+                <th
+                  key={column.id}
+                  onClick={() => handleColumnHeaderClick(column.id)}
+                  title={
+                    selectable
+                      ? undefined
+                      : `${column.title} is editable per cell only — column-wide paste is disabled.`
+                  }
+                  className={cn(
+                    "relative border-r px-2 py-1.5 text-left select-none",
+                    selectable ? "cursor-pointer" : "cursor-default",
+                    column.sticky === "left" && "sticky left-0 z-30 bg-background",
+                    selection.kind === "column" &&
+                      selection.columnId === column.id &&
+                      "bg-accent text-accent-foreground",
+                  )}
+                >
+                  {node}
+                  {/* biome-ignore lint/a11y/noStaticElementInteractions: column resize is a pointer-only affordance; keyboard column sizing is deferred to Phase 7 */}
+                  {/* biome-ignore lint/a11y/useKeyWithClickEvents: ditto — onClick is only used to swallow header-click bubbling */}
+                  <span
+                    data-testid={`resize-handle-${column.id}`}
+                    title={`Resize ${column.title} column`}
+                    className="absolute right-0 top-0 z-40 h-full w-1.5 cursor-col-resize select-none hover:bg-accent"
+                    onClick={(event) => event.stopPropagation()}
+                    onPointerDown={(event) => beginResize(event, column.id)}
+                  />
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody style={{ height: virtualizer.getTotalSize() }} className="relative block">

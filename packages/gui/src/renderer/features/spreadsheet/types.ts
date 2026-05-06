@@ -34,6 +34,17 @@ export type ColumnId = SimpleColumnId | TagColumnId;
 export type ColumnEditability = "never" | "tag" | "modal";
 
 /**
+ * Whether a column reacts to header clicks with column-wide selection.
+ *
+ * - `"column"`    — default. Header click selects the whole column, enabling
+ *   the Phase 4 "1 value pasted = broadcast to every row" workflow.
+ * - `"cell-only"` — header click is a no-op. Use for columns whose values may
+ *   contain newlines (`lyrics`) or whose payload is opaque to text paste
+ *   (`pictures`); editing happens through dedicated modals or per-cell focus.
+ */
+export type ColumnSelectability = "column" | "cell-only";
+
+/**
  * Input flavour of an editable cell.
  *
  * Used by the cell editor (Phase 4) to pick between `<Input />`, `<Input
@@ -76,6 +87,13 @@ export type ColumnDefinition = {
   readonly editable: ColumnEditability;
   /** When `"left"`, the column is pinned to the left edge of the viewport. */
   readonly sticky?: "left";
+  /**
+   * Whether the header allows column-wide selection. Defaults to `"column"`
+   * (the Phase 4 behaviour); set to `"cell-only"` for columns that should
+   * never broadcast a single pasted value across every row (`lyrics`,
+   * `pictures`).
+   */
+  readonly selectable?: ColumnSelectability;
   readonly readValue: (row: TrackRow) => string | number | undefined;
   readonly inputKind?: InputKind;
   readonly options?: readonly SelectOption[];
