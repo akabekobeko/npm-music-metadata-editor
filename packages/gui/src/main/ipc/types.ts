@@ -33,8 +33,10 @@ export type AppSettings = {
   };
   /** Most-recently-opened file paths. Newest first, capped at 10. */
   readonly recentFiles: readonly string[];
-  /** Reserved for Phase 7 i18n; only the type is fixed in Phase 6. */
+  /** UI language. Unset means "follow `app.getLocale()` and fall back to en". */
   readonly locale?: "en" | "ja";
+  /** Color theme. Unset (or `"system"`) means "follow `prefers-color-scheme`". */
+  readonly theme?: "light" | "dark" | "system";
 };
 
 /**
@@ -257,6 +259,115 @@ export type ProgressSaveSubscriber = (
 ) => () => void;
 
 /**
+ * Snapshot of menu-relevant state pushed by the Renderer through
+ * `mme:menu:setState`.
+ *
+ * The Main process re-installs the application menu every time this
+ * channel is invoked. Static slots (`isMac`, `isDev`, `websiteUrl`) are
+ * filled in by Main itself, so the Renderer only sends the parts that
+ * change at runtime.
+ */
+export type MenuStateSnapshot = {
+  readonly hasDirty: boolean;
+  readonly recentFiles: readonly string[];
+  readonly theme: "light" | "dark";
+  readonly columns: ReadonlyArray<{
+    readonly id: string;
+    readonly label: string;
+    readonly visible: boolean;
+  }>;
+};
+
+/**
+ * Identifier of a native menu item routed through `mme:menu:action`.
+ *
+ * Main owns the Electron `Menu`; per-action work (Open Files, Save All, …)
+ * runs in the Renderer because that is where the application state lives.
+ * Adding a new menu item means extending this union plus the matching
+ * Renderer dispatch.
+ */
+export type MenuAction =
+  | "openFiles"
+  | "openRecent"
+  | "saveSelected"
+  | "saveAll"
+  | "discardChanges"
+  | "closeAll"
+  | "selectAll"
+  | "toggleColumn"
+  | "toggleTheme"
+  | "showAbout";
+
+/**
+ * Payload of `mme:menu:action`.
+ *
+ * `data` is action-specific (currently used by `openRecent` to carry the file
+ * path and by `toggleColumn` to carry the column id), so it stays loosely
+ * typed at the IPC boundary; consumers narrow it on the action discriminant.
+ */
+export type MenuActionPayload = {
+  readonly action: MenuAction;
+  readonly data?: unknown;
+};
+
+/**
+ * Subscribe to menu-action events from Main.
+ *
+ * @returns Unsubscribe function.
+ */
+export type MenuActionSubscriber = (listener: (payload: MenuActionPayload) => void) => () => void;
+
+/**
+ * Payload of `mme:fatal`.
+ *
+ * Surfaced when Main's `uncaughtException` / `unhandledRejection` fire, or
+ * when the Renderer reports its own `window.onerror`. The Renderer modal
+ * expects the same shape from both directions.
+ */
+export type FatalPayload = {
+  readonly source: "main" | "renderer";
+  readonly message: string;
+  readonly stack?: string;
+};
+
+/**
+ * Subscribe to `mme:fatal` notifications.
+ *
+ * @returns Unsubscribe function.
+ */
+export type FatalSubscriber = (listener: (payload: FatalPayload) => void) => () => void;
+
+/**
+ * Severity of a `mme:log:forward` entry. Mirrors the subset of `console`
+ * methods Renderer is allowed to forward.
+ */
+export type LogLevel = "info" | "warn" | "error";
+
+/** Request payload for `mme:log:forward`. */
+export type LogForwardRequest = {
+  readonly level: LogLevel;
+  readonly message: string;
+  /** Optional auxiliary detail (Error stack, JSON snippet, …). */
+  readonly detail?: string;
+};
+
+/**
+ * Successful payload of `mme:dialog:expandPaths`.
+ *
+ * Returns the absolute audio file paths that survived recursion + filtering.
+ * Folder inputs walk up to {@link MAX_DROP_DEPTH} levels deep; file inputs
+ * are returned unchanged when their extension matches.
+ */
+export type ExpandPathsOk = {
+  readonly filePaths: readonly string[];
+};
+
+/** Request payload for `mme:dialog:expandPaths`. */
+export type ExpandPathsRequest = {
+  readonly paths: readonly string[];
+};
+
+/**
  * The shape of `window.mme`, exposed via `contextBridge.exposeInMainWorld`.
  *
  * Renderer and Preload both reference this type; only Main implements the
@@ -297,5 +408,26 @@ export type MmeBridge = {
   };
   readonly progress: {
     readonly onSave: ProgressSaveSubscriber;
+  };
+  readonly dnd: {
+    readonly expandPaths: (request: ExpandPathsRequest) => Promise<IpcResult<ExpandPathsOk>>;
+    /**
+     * Resolve the absolute filesystem path of a `File` produced by HTML drag
+     * & drop. Wraps Electron's `webUtils.getPathForFile`, which is the only
+     * supported way to get a path from a Renderer-constructed `File` since
+     * `File.path` was removed.
+     */
+    readonly pathFor: (file: File) => string;
+  };
+  readonly menu: {
+    readonly onAction: MenuActionSubscriber;
+    readonly setState: (snapshot: MenuStateSnapshot) => void;
+  };
+  readonly fatal: {
+    readonly onError: FatalSubscriber;
+    readonly report: (payload: FatalPayload) => void;
+  };
+  readonly log: {
+    readonly forward: (request: LogForwardRequest) => void;
   };
 };

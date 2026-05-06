@@ -1,7 +1,7 @@
 {
   "name": "@akabeko/music-metadata-editor-gui",
   "description": "Electron desktop application for @akabeko/music-metadata-editor.",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": "akabeko (http://akabeko.me/)",
   "license": "MIT",
   "private": true,
@@ -32,7 +32,8 @@
     "shadcn": "node scripts/shadcn.mjs"
   },
   "dependencies": {
-    "@akabeko/music-metadata-editor": "workspace:*"
+    "@akabeko/music-metadata-editor": "workspace:*",
+    "electron-log": "^5.4.3"
   },
   "devDependencies": {
     "@base-ui/react": "^1.4.1",

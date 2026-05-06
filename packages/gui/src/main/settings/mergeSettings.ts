@@ -39,6 +39,11 @@ export const mergeSettings = (
     : current.locale !== undefined
       ? { locale: current.locale }
       : {}),
+  ...(patch.theme !== undefined
+    ? { theme: patch.theme }
+    : current.theme !== undefined
+      ? { theme: current.theme }
+      : {}),
 });
 
 type ColumnsPatch = DeepPartial<AppSettings["columns"]> | undefined;

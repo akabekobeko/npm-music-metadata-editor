@@ -1,6 +1,11 @@
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge, ipcRenderer, webUtils } from "electron";
 import { IpcKeys } from "../main/ipc/ipcKeys.js";
-import type { MmeBridge, ProgressSavePayload } from "../main/ipc/types.js";
+import type {
+  FatalPayload,
+  MenuActionPayload,
+  MmeBridge,
+  ProgressSavePayload,
+} from "../main/ipc/types.js";
 
 /**
  * Build the `window.mme` bridge.
@@ -46,6 +51,31 @@ const buildBridge = (): MmeBridge => ({
       ipcRenderer.on(IpcKeys.ProgressSave, wrapped);
       return () => ipcRenderer.off(IpcKeys.ProgressSave, wrapped);
     },
+  },
+  dnd: {
+    expandPaths: (request) => ipcRenderer.invoke(IpcKeys.ExpandPaths, request),
+    pathFor: (file) => webUtils.getPathForFile(file),
+  },
+  menu: {
+    onAction: (listener) => {
+      const wrapped = (_event: unknown, payload: MenuActionPayload): void => listener(payload);
+      ipcRenderer.on(IpcKeys.MenuAction, wrapped);
+      return () => ipcRenderer.off(IpcKeys.MenuAction, wrapped);
+    },
+    setState: (snapshot) => ipcRenderer.send(IpcKeys.MenuSetState, snapshot),
+  },
+  fatal: {
+    onError: (listener) => {
+      const wrapped = (_event: unknown, payload: FatalPayload): void => listener(payload);
+      ipcRenderer.on(IpcKeys.Fatal, wrapped);
+      return () => ipcRenderer.off(IpcKeys.Fatal, wrapped);
+    },
+    report: (payload) => {
+      ipcRenderer.send(IpcKeys.FatalReport, payload);
+    },
+  },
+  log: {
+    forward: (request) => ipcRenderer.send(IpcKeys.LogForward, request),
   },
 });
 
