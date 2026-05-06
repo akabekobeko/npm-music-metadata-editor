@@ -28,7 +28,7 @@ flowchart LR
   renderer <-->|window.mme = MmeBridge| preload["Preload (sandbox bridge)"]
   preload <-->|ipcRenderer / ipcMain| main["Main (Node.js)"]
   main -->|loadTrack / saveTrack| core["@akabeko/music-metadata-editor"]
-  main -->|app.getPath('userData')| disk[("settings.json / logs/main.log")]
+  main -->|userData write| disk[("settings.json / logs/main.log")]
 ```
 
 | プロセス | エントリー | 役割 |
