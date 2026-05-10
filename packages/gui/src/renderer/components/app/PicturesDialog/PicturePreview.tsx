@@ -1,3 +1,4 @@
+import { useLocale } from "@/features/i18n/useLocale";
 import { usePicturePreview } from "./usePicturePreview.js";
 
 /** Props for {@link PicturePreview}. */
@@ -19,12 +20,13 @@ export type PicturePreviewProps = {
  * @returns The preview markup.
  */
 export function PicturePreview({ bytes, mimeType }: PicturePreviewProps) {
+  const { t } = useLocale();
   const { src, errored, handleError } = usePicturePreview({ bytes, mimeType });
 
   if (errored) {
     return (
       <div className="flex h-48 items-center justify-center rounded-md border bg-muted/50 text-xs text-muted-foreground">
-        Cannot display as an image
+        {t("pictures.preview.cannot")}
       </div>
     );
   }
@@ -36,7 +38,7 @@ export function PicturePreview({ bytes, mimeType }: PicturePreviewProps) {
   return (
     <img
       src={src}
-      alt="Embedded artwork"
+      alt={t("pictures.preview.alt")}
       onError={handleError}
       className="max-h-64 w-full rounded-md border bg-muted/50 object-contain"
     />

@@ -1,38 +1,15 @@
 import type { PictureInfo } from "@mme/ipc";
 
 /**
- * Picture-kind options surfaced in the Pictures dialog `<Select>`.
+ * Picture-kind values surfaced in the Pictures dialog `<Select>`.
  *
  * Numeric values mirror core's `PictureKind` enum (the same numbers ID3v2
- * uses for `APIC` picture type). Keeping the labels here decouples the
- * Renderer-side UI from the source-of-truth enum: when a new kind ships in
- * core we add an entry here without breaking the dialog.
+ * uses for `APIC` picture type). The user-facing label is resolved through
+ * the `pictures.kind.<value>` translation key — keeping the list here lets a
+ * future enum entry land with a single edit on each side.
  */
-export const PICTURE_KIND_OPTIONS: readonly {
-  readonly value: PictureInfo["kind"];
-  readonly label: string;
-}[] = [
-  { value: 0, label: "Other" },
-  { value: 1, label: "32x32 file icon" },
-  { value: 2, label: "Other file icon" },
-  { value: 3, label: "Cover (front)" },
-  { value: 4, label: "Cover (back)" },
-  { value: 5, label: "Leaflet page" },
-  { value: 6, label: "Media" },
-  { value: 7, label: "Lead artist" },
-  { value: 8, label: "Artist" },
-  { value: 9, label: "Conductor" },
-  { value: 10, label: "Band" },
-  { value: 11, label: "Composer" },
-  { value: 12, label: "Lyricist" },
-  { value: 13, label: "Recording location" },
-  { value: 14, label: "During recording" },
-  { value: 15, label: "During performance" },
-  { value: 16, label: "Movie / video screen capture" },
-  { value: 17, label: "A bright coloured fish" },
-  { value: 18, label: "Illustration" },
-  { value: 19, label: "Band / artist logotype" },
-  { value: 20, label: "Publisher / studio logotype" },
+export const PICTURE_KIND_VALUES: ReadonlyArray<PictureInfo["kind"]> = [
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
 ];
 
 /** MIME-type quick-select shortcuts shown above the free-text input. */

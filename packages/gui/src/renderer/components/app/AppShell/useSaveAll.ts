@@ -1,6 +1,7 @@
 import { type Dispatch, useCallback, useRef, useState } from "react";
 
 import type { EditAction, EditState } from "@/features/edit/store";
+import { useLocale } from "@/features/i18n/useLocale";
 import { saveDirtyRows } from "@/features/save/saveDirtyRows";
 import type { SaveProgress } from "@/features/save/types";
 import { loadTracks } from "@/features/tracks/loadTracks";
@@ -57,6 +58,7 @@ export const useSaveAll = ({
   tracksDispatch,
   notify,
 }: Args): SaveAllControls => {
+  const { t } = useLocale();
   const cancelRef = useRef(false);
   const [saving, setSaving] = useState(false);
   const [progress, setProgress] = useState<SaveProgress | null>(null);
@@ -98,8 +100,8 @@ export const useSaveAll = ({
     }
 
     setSaving(false);
-    notify(formatSaveSummary(summary.results, summary.cancelled));
-  }, [editState.rows, editDispatch, tracksDispatch, notify]);
+    notify(formatSaveSummary({ t, results: summary.results, cancelled: summary.cancelled }));
+  }, [editState.rows, editDispatch, tracksDispatch, notify, t]);
 
   const cancelSave = useCallback((): void => {
     cancelRef.current = true;

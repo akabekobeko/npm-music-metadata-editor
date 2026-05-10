@@ -1,4 +1,4 @@
-import { PICTURE_KIND_OPTIONS } from "@/features/pictures/constants";
+import { useLocale } from "@/features/i18n/useLocale";
 import type { PictureDraft } from "@/features/pictures/types";
 import { cn } from "@/libs/utils";
 
@@ -32,15 +32,6 @@ const formatSize = (byteLength: number): string => {
 };
 
 /**
- * Look up the label for a `PictureDraft.kind` value.
- *
- * @param kind - Numeric kind value from the draft.
- * @returns The user-facing label or the numeric value as a fallback.
- */
-const labelForKind = (kind: PictureDraft["kind"]): string =>
-  PICTURE_KIND_OPTIONS.find((option) => option.value === kind)?.label ?? String(kind);
-
-/**
  * Left-pane list of pictures inside the Pictures dialog.
  *
  * Each entry is a button so keyboard users can move through the list with
@@ -50,10 +41,12 @@ const labelForKind = (kind: PictureDraft["kind"]): string =>
  * @returns The list markup.
  */
 export function PictureList({ drafts, selectedId, onSelect }: PictureListProps) {
+  const { t } = useLocale();
+
   if (drafts.length === 0) {
     return (
       <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-        No pictures
+        {t("pictures.none")}
       </div>
     );
   }
@@ -72,7 +65,7 @@ export function PictureList({ drafts, selectedId, onSelect }: PictureListProps) 
                 : "border-transparent hover:bg-muted",
             )}
           >
-            <span className="font-medium">{labelForKind(draft.kind)}</span>
+            <span className="font-medium">{t(`pictures.kind.${draft.kind}`)}</span>
             <span className="text-muted-foreground">
               {draft.mimeType} · {formatSize(draft.data.byteLength)}
             </span>

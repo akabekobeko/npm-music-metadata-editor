@@ -1,3 +1,5 @@
+import type { TranslateFn } from "@/features/i18n/useLocale";
+
 type PasteOutcome = {
   /** Cells that received the pasted value. */
   readonly applied: number;
@@ -10,8 +12,13 @@ type PasteOutcome = {
 /**
  * Build the transient status sentence shown after a paste.
  *
+ * @param t - Locale-bound translation helper from `useLocale`.
  * @param outcome - Counters produced by `applyPaste`.
  * @returns A single-sentence summary of the paste action.
  */
-export const formatPasteSummary = (outcome: PasteOutcome): string =>
-  `Pasted ${outcome.applied} values, skipped ${outcome.skippedUnsupported} unsupported, ${outcome.skippedInvalid} invalid`;
+export const formatPasteSummary = (t: TranslateFn, outcome: PasteOutcome): string =>
+  t("paste.summary", {
+    applied: outcome.applied,
+    skippedUnsupported: outcome.skippedUnsupported,
+    skippedInvalid: outcome.skippedInvalid,
+  });

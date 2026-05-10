@@ -1,6 +1,7 @@
 import type { LyricsInfo, PictureInfo } from "@mme/ipc";
 import { type Dispatch, useCallback, useState } from "react";
 import type { EditAction } from "@/features/edit/store";
+import { useLocale } from "@/features/i18n/useLocale";
 import type { FormatSupportMap } from "@/features/spreadsheet/types";
 import type { TrackRow } from "@/features/tracks/types";
 
@@ -58,32 +59,33 @@ export type DialogState = {
  * @returns The dialog state plus its handlers.
  */
 export const useDialogState = ({ rows, editDispatch, support, notify }: Args): DialogState => {
+  const { t } = useLocale();
   const [active, setActive] = useState<ActiveDialog>(null);
 
   const openPictures = useCallback(
     (row: TrackRow): void => {
       const entry = support.get(row.track.audioFormat);
       if (entry !== undefined && !entry.supportsPictures) {
-        notify(`${row.track.audioFormat.toUpperCase()} does not support pictures.`);
+        notify(t("format.unsupported.pictures", { format: row.track.audioFormat.toUpperCase() }));
         return;
       }
 
       setActive({ kind: "pictures", filePath: row.filePath });
     },
-    [support, notify],
+    [support, notify, t],
   );
 
   const openLyrics = useCallback(
     (row: TrackRow): void => {
       const entry = support.get(row.track.audioFormat);
       if (entry !== undefined && !entry.supportsLyrics) {
-        notify(`${row.track.audioFormat.toUpperCase()} does not support lyrics.`);
+        notify(t("format.unsupported.lyrics", { format: row.track.audioFormat.toUpperCase() }));
         return;
       }
 
       setActive({ kind: "lyrics", filePath: row.filePath });
     },
-    [support, notify],
+    [support, notify, t],
   );
 
   const close = useCallback((): void => {

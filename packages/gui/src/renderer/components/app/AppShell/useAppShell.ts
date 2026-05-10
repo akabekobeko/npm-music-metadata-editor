@@ -6,11 +6,12 @@ import { useSettings } from "@/features/settings/store";
 import { touchRecentFile } from "@/features/settings/touchRecentFile";
 import { COLUMN_REGISTRY } from "@/features/spreadsheet/constants";
 import type { ColumnDefinition, FormatSupportMap } from "@/features/spreadsheet/types";
-import type { ResolvedTheme } from "@/features/theme/types";
+import type { ResolvedTheme, ThemePreference } from "@/features/theme/types";
 import { useTheme } from "@/features/theme/useTheme";
 import { loadTracks } from "@/features/tracks/loadTracks";
 import { useTracksStore } from "@/features/tracks/store";
 import type { TrackRow } from "@/features/tracks/types";
+import type { LocalePreference } from "../../../../shared/locales/types.js";
 import type { ColumnSettings } from "./useColumnSettings.js";
 import { useColumnSettings } from "./useColumnSettings.js";
 import type { DialogState } from "./useDialogState.js";
@@ -62,8 +63,22 @@ export type AppShellModel = {
   readonly grid: GridHandlers;
   /** Transient status bar text from `useTransientStatus`. */
   readonly status: TransientStatus;
+  /** Locale / theme preferences plus their setters for the header menus. */
+  readonly preferences: PreferenceControls;
   /** Open Files handler (header button + Cmd/Ctrl+O). */
   readonly onOpenFiles: () => void;
+};
+
+/** Locale / theme controls surfaced to the header. */
+export type PreferenceControls = {
+  /** Persisted locale preference (`AppSettings.locale`). */
+  readonly locale: LocalePreference | undefined;
+  /** Persisted theme preference (`AppSettings.theme`). */
+  readonly theme: ThemePreference | undefined;
+  /** Commit a new locale preference; round-trips through `setSettings`. */
+  readonly setLocale: (value: LocalePreference) => void;
+  /** Commit a new theme preference; round-trips through `setSettings`. */
+  readonly setTheme: (value: ThemePreference) => void;
 };
 
 /**
@@ -181,6 +196,21 @@ export const useAppShell = (): AppShellModel => {
   const dirtyCount = editState.rows.filter((row) => row.dirty).length;
   const warningCount = editState.rows.reduce((sum, row) => sum + row.track.warnings.length, 0);
 
+  const setLocale = useCallback(
+    (value: LocalePreference) => setSettings({ locale: value }),
+    [setSettings],
+  );
+  const setTheme = useCallback(
+    (value: ThemePreference) => setSettings({ theme: value }),
+    [setSettings],
+  );
+  const preferences: PreferenceControls = {
+    locale: settings.locale,
+    theme: settings.theme,
+    setLocale,
+    setTheme,
+  };
+
   useMenuStatePush({
     hasDirty: dirtyCount > 0,
     recentFiles: settings.recentFiles,
@@ -212,6 +242,7 @@ export const useAppShell = (): AppShellModel => {
     save,
     grid,
     status,
+    preferences,
     onOpenFiles,
   };
 };

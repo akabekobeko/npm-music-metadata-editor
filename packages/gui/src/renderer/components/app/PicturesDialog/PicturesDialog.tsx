@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useLocale } from "@/features/i18n/useLocale";
 import { basename } from "@/libs/basename";
 import { PictureForm } from "./PictureForm";
 import { PictureList } from "./PictureList";
@@ -69,12 +70,13 @@ export function PicturesDialog({
     handleDrop,
     pictureAccept,
   } = usePicturesDialog({ filePath, initialPictures, onApply, onNotify });
+  const { t } = useLocale();
 
   return (
     <Dialog open onOpenChange={(open) => (open ? undefined : onClose())}>
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Pictures</DialogTitle>
+          <DialogTitle>{t("pictures.title")}</DialogTitle>
           <DialogDescription>{basename(filePath)}</DialogDescription>
         </DialogHeader>
         <section
@@ -82,12 +84,12 @@ export function PicturesDialog({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          aria-label="Picture drop zone"
+          aria-label={t("pictures.dropZone")}
           className="relative grid grid-cols-[180px_1fr] gap-3"
         >
           {dragActive ? (
             <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-md border-2 border-dashed border-ring bg-accent/40 text-sm">
-              Drop image files to add
+              {t("pictures.dropOverlay")}
             </div>
           ) : null}
           <div className="h-72 rounded-md border bg-muted/30 p-1.5">
@@ -96,7 +98,7 @@ export function PicturesDialog({
           <div className="flex flex-col gap-3">
             {selected === null ? (
               <div className="flex h-72 items-center justify-center rounded-md border bg-muted/30 text-sm text-muted-foreground">
-                Add a picture to get started.
+                {t("pictures.empty")}
               </div>
             ) : (
               <>
@@ -113,7 +115,7 @@ export function PicturesDialog({
         </section>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={handleAddClick}>
-            Add…
+            {t("pictures.add")}
           </Button>
           <Button
             variant="outline"
@@ -121,7 +123,7 @@ export function PicturesDialog({
             onClick={handleReplaceClick}
             disabled={selected === null}
           >
-            Replace…
+            {t("pictures.replace")}
           </Button>
           <Button
             variant="outline"
@@ -129,7 +131,7 @@ export function PicturesDialog({
             onClick={handleExportClick}
             disabled={selected === null}
           >
-            Export…
+            {t("pictures.export")}
           </Button>
           <Button
             variant="destructive"
@@ -137,7 +139,7 @@ export function PicturesDialog({
             onClick={handleRemoveClick}
             disabled={selected === null}
           >
-            Remove
+            {t("pictures.remove")}
           </Button>
         </div>
         <input
@@ -157,10 +159,10 @@ export function PicturesDialog({
         />
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button onClick={handleApplyClick} disabled={!dirty}>
-            {dirty ? "Apply changes" : "Apply"}
+            {dirty ? t("pictures.applyChanges") : t("common.apply")}
           </Button>
         </DialogFooter>
       </DialogContent>

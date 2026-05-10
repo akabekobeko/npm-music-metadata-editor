@@ -1,8 +1,11 @@
 import { useMemo } from "react";
 import { useSettings } from "@/features/settings/store";
 import { resolveLocale } from "../../../shared/locales/resolveLocale.js";
-import { t as rawT } from "../../../shared/locales/t.js";
+import { type BoundTranslate, tFor } from "../../../shared/locales/t.js";
 import type { Locale } from "../../../shared/locales/types.js";
+
+/** Locale-bound translation helper re-exported for callers outside React. */
+export type TranslateFn = BoundTranslate;
 
 /**
  * Active locale plus a bound `t` helper.
@@ -17,7 +20,7 @@ import type { Locale } from "../../../shared/locales/types.js";
  *
  * @returns `{ locale, t }`.
  */
-export const useLocale = (): { readonly locale: Locale; readonly t: (key: string) => string } => {
+export const useLocale = (): { readonly locale: Locale; readonly t: TranslateFn } => {
   const [settings] = useSettings();
   const locale = useMemo(
     () =>
@@ -28,11 +31,6 @@ export const useLocale = (): { readonly locale: Locale; readonly t: (key: string
     [settings.locale],
   );
 
-  const t = useMemo(
-    () =>
-      (key: string): string =>
-        rawT(key, locale),
-    [locale],
-  );
+  const t = useMemo(() => tFor(locale), [locale]);
   return { locale, t };
 };

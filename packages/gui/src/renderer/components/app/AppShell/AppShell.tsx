@@ -25,7 +25,7 @@ import { useAppShell } from "./useAppShell.js";
  */
 export function AppShell() {
   const model = useAppShell();
-  const { rows, columns, save, grid, dialogs, status } = model;
+  const { rows, columns, save, grid, dialogs, status, preferences } = model;
   const fileCount = rows.length;
 
   return (
@@ -37,8 +37,13 @@ export function AppShell() {
           loading={model.loading}
           saving={save.saving}
           visibleIds={columns.visibleIds}
+          localePreference={preferences.locale}
+          themePreference={preferences.theme}
+          resolvedTheme={model.theme}
           onOpenFiles={model.onOpenFiles}
           onToggleColumn={columns.toggleColumn}
+          onLocaleChange={preferences.setLocale}
+          onThemeChange={preferences.setTheme}
           onSaveAll={save.saveAll}
           onDiscardChanges={save.discardChanges}
         />

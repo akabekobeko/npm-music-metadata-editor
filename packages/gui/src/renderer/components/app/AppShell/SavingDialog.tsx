@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useLocale } from "@/features/i18n/useLocale";
 import type { SaveProgress } from "@/features/save/types";
 import { basename } from "@/libs/basename";
 
@@ -33,6 +34,7 @@ export type SavingDialogProps = {
  * @returns The dialog node.
  */
 export function SavingDialog({ open, progress, errorCount, onCancel }: SavingDialogProps) {
+  const { t } = useLocale();
   const total = progress?.total ?? 0;
   const current = progress?.current ?? 0;
   const ratio = total === 0 ? 0 : Math.min(1, current / total);
@@ -42,14 +44,14 @@ export function SavingDialog({ open, progress, errorCount, onCancel }: SavingDia
     <Dialog open={open}>
       <DialogContent showCloseButton={false}>
         <DialogHeader>
-          <DialogTitle>
-            Saving {current} of {total}…
-          </DialogTitle>
-          <DialogDescription>{fileName === "" ? "Preparing to save…" : fileName}</DialogDescription>
+          <DialogTitle>{t("saving.title", { current, total })}</DialogTitle>
+          <DialogDescription>
+            {fileName === "" ? t("saving.preparing") : fileName}
+          </DialogDescription>
         </DialogHeader>
         <div
           role="progressbar"
-          aria-label="Save progress"
+          aria-label={t("saving.progressLabel")}
           aria-valuemin={0}
           aria-valuemax={total}
           aria-valuenow={current}
@@ -60,10 +62,10 @@ export function SavingDialog({ open, progress, errorCount, onCancel }: SavingDia
             style={{ width: `${Math.round(ratio * 100)}%` }}
           />
         </div>
-        <p className="text-sm text-muted-foreground">Errors so far: {errorCount}</p>
+        <p className="text-sm text-muted-foreground">{t("saving.errors", { count: errorCount })}</p>
         <DialogFooter>
           <Button variant="outline" onClick={onCancel}>
-            Cancel
+            {t("common.cancel")}
           </Button>
         </DialogFooter>
       </DialogContent>
