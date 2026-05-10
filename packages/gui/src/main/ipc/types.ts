@@ -39,8 +39,11 @@ export type AppSettings = {
   };
   /** Most-recently-opened file paths. Newest first, capped at 10. */
   readonly recentFiles: readonly string[];
-  /** UI language. Unset means "follow `app.getLocale()` and fall back to en". */
-  readonly locale?: "en" | "ja";
+  /**
+   * UI language preference. Unset (or `"system"`) means "follow
+   * `app.getLocale()` and fall back to en".
+   */
+  readonly locale?: "en" | "ja" | "system";
   /** Color theme. Unset (or `"system"`) means "follow `prefers-color-scheme`". */
   readonly theme?: "light" | "dark" | "system";
 };

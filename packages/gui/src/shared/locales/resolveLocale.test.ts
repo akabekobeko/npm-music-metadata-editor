@@ -23,3 +23,9 @@ it("ignores an unsupported preference and falls back to system / English", () =>
   expect(resolveLocale({ preference: "fr" as unknown as "en", systemLocale: "ja-JP" })).toBe("ja");
   expect(resolveLocale({ preference: "fr" as unknown as "en", systemLocale: "fr-FR" })).toBe("en");
 });
+
+it('treats the explicit "system" preference like an unset preference', () => {
+  expect(resolveLocale({ preference: "system", systemLocale: "ja-JP" })).toBe("ja");
+  expect(resolveLocale({ preference: "system", systemLocale: "fr-FR" })).toBe("en");
+  expect(resolveLocale({ preference: "system", systemLocale: undefined })).toBe("en");
+});

@@ -8,6 +8,16 @@
 export type Locale = "en" | "ja";
 
 /**
+ * User-selectable locale preference persisted in `AppSettings.locale`.
+ *
+ * `"system"` (the default when unset) tracks the system locale via
+ * {@link import("./resolveLocale.js").resolveLocale}. The resolved value used
+ * for translations is always a {@link Locale} — `"system"` never reaches the
+ * dictionary lookup itself.
+ */
+export type LocalePreference = Locale | "system";
+
+/**
  * Single dictionary mapping translation keys to display strings.
  *
  * The shape is "string → string" so the lookup helper (`t`) stays trivial.

@@ -1,12 +1,13 @@
 import { FALLBACK_LOCALE, SUPPORTED_LOCALES } from "./constants.js";
-import type { Locale } from "./types.js";
+import type { Locale, LocalePreference } from "./types.js";
 
 /**
  * Pick a {@link Locale} for the running process from a "preference + system"
  * pair.
  *
  * Resolution order, mirroring the Phase 7 plan:
- *   1. The user's explicit `AppSettings.locale`, when set and supported.
+ *   1. The user's explicit `AppSettings.locale`, when it names a supported
+ *      {@link Locale}. `"system"` and `undefined` skip this rule.
  *   2. The system locale reported by Electron (`app.getLocale()`), normalised
  *      to its language tag (`ja-JP` → `ja`) before matching.
  *   3. {@link FALLBACK_LOCALE} (English) as the floor.
@@ -18,14 +19,21 @@ import type { Locale } from "./types.js";
  * @returns The resolved locale.
  */
 type Args = {
-  /** `AppSettings.locale`, or `undefined` when the user has not chosen one. */
-  readonly preference: Locale | undefined;
+  /**
+   * `AppSettings.locale`. `undefined` and `"system"` both fall through to the
+   * system locale; only an explicit {@link Locale} short-circuits resolution.
+   */
+  readonly preference: LocalePreference | undefined;
   /** System locale (e.g. Electron's `app.getLocale()`). */
   readonly systemLocale: string | undefined;
 };
 
 export const resolveLocale = ({ preference, systemLocale }: Args): Locale => {
-  if (preference !== undefined && SUPPORTED_LOCALES.includes(preference)) {
+  if (
+    preference !== undefined &&
+    preference !== "system" &&
+    SUPPORTED_LOCALES.includes(preference)
+  ) {
     return preference;
   }
 

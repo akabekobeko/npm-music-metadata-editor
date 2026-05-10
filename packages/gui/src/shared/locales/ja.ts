@@ -9,6 +9,14 @@ import type { Dictionary } from "./types.js";
  */
 export const ja: Dictionary = {
   "app.name": "Music Metadata Editor",
+  "header.language": "言語",
+  "header.language.system": "システム",
+  "header.language.en": "English",
+  "header.language.ja": "日本語",
+  "header.theme": "テーマ",
+  "header.theme.system": "システム",
+  "header.theme.light": "ライト",
+  "header.theme.dark": "ダーク",
   "menu.app.about": "Music Metadata Editor について",
   "menu.app.preferences": "環境設定…",
   "menu.app.quit": "終了",

@@ -10,6 +10,14 @@ import type { Dictionary } from "./types.js";
  */
 export const en: Dictionary = {
   "app.name": "Music Metadata Editor",
+  "header.language": "Language",
+  "header.language.system": "System",
+  "header.language.en": "English",
+  "header.language.ja": "日本語",
+  "header.theme": "Theme",
+  "header.theme.system": "System",
+  "header.theme.light": "Light",
+  "header.theme.dark": "Dark",
   "menu.app.about": "About Music Metadata Editor",
   "menu.app.preferences": "Preferences…",
   "menu.app.quit": "Quit",
