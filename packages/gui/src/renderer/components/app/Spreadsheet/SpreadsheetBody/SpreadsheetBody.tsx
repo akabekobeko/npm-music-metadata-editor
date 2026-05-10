@@ -90,8 +90,14 @@ export function SpreadsheetBody({
                 // biome-ignore lint/a11y/useKeyWithClickEvents: container handles all keyboard
                 <td
                   key={column.id}
-                  onClick={() => onCellClick(virtualRow.index, column.id)}
-                  onDoubleClick={() => onCellDoubleClick(virtualRow.index, column.id)}
+                  onClick={
+                    isEditingCell ? undefined : () => onCellClick(virtualRow.index, column.id)
+                  }
+                  onDoubleClick={
+                    isEditingCell
+                      ? undefined
+                      : () => onCellDoubleClick(virtualRow.index, column.id)
+                  }
                   className={cn(
                     "flex shrink-0 items-center border-r px-2",
                     column.sticky === "left" && "sticky left-0 z-10 bg-background",

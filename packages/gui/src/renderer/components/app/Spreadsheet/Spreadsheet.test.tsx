@@ -129,6 +129,24 @@ it("opens an inline editor on double-click and commits on Enter", () => {
   expect(onCommit).toHaveBeenCalledWith(expect.objectContaining({ field: "title", value: "New" }));
 });
 
+it("keeps the inline editor open when clicking inside the editing cell", () => {
+  const onCommit = vi.fn();
+  renderSpreadsheet({
+    visibleIds: ["fileName", "tag.title"],
+    rows: [buildRow({ filePath: "/a.mp3", audioFormat: "mp3", title: "Old" })],
+    support: supportMap([supportEntry("mp3", ["title"])]),
+    handlers: { onCommit },
+  });
+
+  fireEvent.doubleClick(screen.getByText("Old"));
+  const input = screen.getByDisplayValue("Old") as HTMLInputElement;
+  fireEvent.change(input, { target: { value: "Edited" } });
+  fireEvent.click(input);
+
+  expect(screen.getByDisplayValue("Edited")).toBe(input);
+  expect(onCommit).not.toHaveBeenCalled();
+});
+
 it("keeps disabled cells out of edit mode on double-click", () => {
   const onCommit = vi.fn();
   renderSpreadsheet({
