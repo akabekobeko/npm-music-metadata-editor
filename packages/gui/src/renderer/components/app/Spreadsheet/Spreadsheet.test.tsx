@@ -74,13 +74,22 @@ type RowSeed = {
   readonly filePath: string;
   readonly audioFormat: AudioFormat;
   readonly title?: string;
+  readonly language?: string;
 };
 
-const buildRow = ({ filePath, audioFormat, title }: RowSeed): TrackRow => {
+const buildRow = ({ filePath, audioFormat, title, language }: RowSeed): TrackRow => {
+  const tag: TagData = {};
+  if (title !== undefined) {
+    tag.title = title;
+  }
+  if (language !== undefined) {
+    tag.language = language;
+  }
+
   const track: Track = {
     audioFormat,
     durationMs: 1000,
-    tag: title === undefined ? {} : { title },
+    tag,
     pictures: [],
     chapters: [],
     additionalFields: {},
@@ -145,6 +154,43 @@ it("keeps the inline editor open when clicking inside the editing cell", () => {
 
   expect(screen.getByDisplayValue("Edited")).toBe(input);
   expect(onCommit).not.toHaveBeenCalled();
+});
+
+it("commits the edited value when the input loses focus", () => {
+  const onCommit = vi.fn();
+  renderSpreadsheet({
+    visibleIds: ["fileName", "tag.title"],
+    rows: [buildRow({ filePath: "/a.mp3", audioFormat: "mp3", title: "Old" })],
+    support: supportMap([supportEntry("mp3", ["title"])]),
+    handlers: { onCommit },
+  });
+
+  fireEvent.doubleClick(screen.getByText("Old"));
+  const input = screen.getByDisplayValue("Old") as HTMLInputElement;
+  fireEvent.change(input, { target: { value: "Text" } });
+  fireEvent.blur(input);
+
+  expect(onCommit).toHaveBeenCalledWith(
+    expect.objectContaining({ field: "title", value: "Text" }),
+  );
+});
+
+it("discards the edit on blur when the value fails validation", () => {
+  const onCommit = vi.fn();
+  renderSpreadsheet({
+    visibleIds: ["fileName", "tag.language"],
+    rows: [buildRow({ filePath: "/a.mp3", audioFormat: "mp3", language: "eng" })],
+    support: supportMap([supportEntry("mp3", ["language"])]),
+    handlers: { onCommit },
+  });
+
+  fireEvent.doubleClick(screen.getByText("eng"));
+  const input = screen.getByDisplayValue("eng") as HTMLInputElement;
+  fireEvent.change(input, { target: { value: "ZZZZZ" } });
+  fireEvent.blur(input);
+
+  expect(onCommit).not.toHaveBeenCalled();
+  expect(screen.queryByDisplayValue("ZZZZZ")).toBeNull();
 });
 
 it("keeps disabled cells out of edit mode on double-click", () => {

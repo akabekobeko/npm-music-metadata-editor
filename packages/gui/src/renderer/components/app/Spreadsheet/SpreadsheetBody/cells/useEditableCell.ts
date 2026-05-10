@@ -34,6 +34,8 @@ export type EditableCellState = {
   readonly handleKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
   /** `onChange` handler — stores the live text and clears stale errors. */
   readonly handleChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  /** `onBlur` handler — commits when valid, discards otherwise. */
+  readonly handleBlur: () => void;
 };
 
 /**
@@ -42,9 +44,10 @@ export type EditableCellState = {
  *
  * Validates locally on `Enter` so the parent never receives an invalid
  * value: failures keep the editor open and surface a tooltip-style message
- * via the input's `title` attribute. `Esc` cancels without dispatching, and
- * blur is treated as cancel by the component (matching Excel-style "click
- * elsewhere → discard" expectations).
+ * via the input's `title` attribute. `Esc` cancels without dispatching.
+ * Blur commits when the current value is valid (matching Excel / Numbers
+ * "click elsewhere → confirm" expectations) and discards silently on
+ * validation failure so focus is free to leave the cell.
  *
  * @param args - Component props passed straight through.
  * @returns The view-model the component renders against.
@@ -91,5 +94,15 @@ export const useEditableCell = ({
     }
   };
 
-  return { inputRef, value, errorMessage, handleKeyDown, handleChange };
+  const handleBlur = (): void => {
+    const result = validateTagValue(field, value);
+    if (result.ok) {
+      onCommit(result.value);
+      return;
+    }
+
+    onCancel();
+  };
+
+  return { inputRef, value, errorMessage, handleKeyDown, handleChange, handleBlur };
 };

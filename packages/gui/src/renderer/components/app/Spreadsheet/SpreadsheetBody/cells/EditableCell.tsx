@@ -24,8 +24,9 @@ export type EditableCellProps = {
  * The editor validates locally on `Enter` so the parent never receives an
  * invalid value: failures keep the editor open and surface a tooltip-style
  * message via the input's `title` attribute. `Esc` cancels without
- * dispatching, and blur is treated as cancel to match Excel-style "click
- * elsewhere → discard" expectations.
+ * dispatching. Blur commits when the current value is valid — matching
+ * Excel / Numbers "click elsewhere → confirm" expectations — and discards
+ * silently on validation failure so focus is free to leave the cell.
  *
  * @returns The editor markup.
  */
@@ -36,12 +37,13 @@ export function EditableCell({
   onCommit,
   onCancel,
 }: EditableCellProps) {
-  const { inputRef, value, errorMessage, handleKeyDown, handleChange } = useEditableCell({
-    field,
-    initialValue,
-    onCommit,
-    onCancel,
-  });
+  const { inputRef, value, errorMessage, handleKeyDown, handleChange, handleBlur } =
+    useEditableCell({
+      field,
+      initialValue,
+      onCommit,
+      onCancel,
+    });
 
   return (
     <input
@@ -50,7 +52,7 @@ export function EditableCell({
       value={value}
       onChange={handleChange}
       onKeyDown={handleKeyDown}
-      onBlur={onCancel}
+      onBlur={handleBlur}
       title={errorMessage ?? undefined}
       aria-invalid={errorMessage !== null}
       className={cn(
