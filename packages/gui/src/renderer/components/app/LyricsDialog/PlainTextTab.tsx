@@ -1,4 +1,5 @@
 import { Textarea } from "@/components/ui/textarea";
+import { useLocale } from "@/features/i18n/useLocale";
 
 /** Props for {@link PlainTextTab}. */
 export type PlainTextTabProps = {
@@ -18,11 +19,12 @@ export type PlainTextTabProps = {
  * @returns The textarea markup.
  */
 export function PlainTextTab({ value, onChange }: PlainTextTabProps) {
+  const { t } = useLocale();
   return (
     <Textarea
       value={value}
       onChange={(event) => onChange(event.target.value)}
-      placeholder="Paste plain-text lyrics here…"
+      placeholder={t("lyrics.plainPlaceholder")}
       className="min-h-72 font-mono text-sm"
     />
   );

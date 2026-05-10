@@ -6,8 +6,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useLocale } from "@/features/i18n/useLocale";
 import {
-  PICTURE_KIND_OPTIONS,
+  PICTURE_KIND_VALUES,
   PICTURE_MIME_OPTIONS,
   PICTURE_SIZE_WARNING_BYTES,
 } from "@/features/pictures/constants";
@@ -60,11 +61,12 @@ export function PictureForm({
   onChangeMimeType,
   onChangeDescription,
 }: PictureFormProps) {
+  const { t } = useLocale();
   const oversize = draft.data.byteLength >= PICTURE_SIZE_WARNING_BYTES;
   return (
     <div className="flex flex-col gap-3 text-sm">
       <div className="flex flex-col gap-1">
-        <span className="text-xs text-muted-foreground">Kind</span>
+        <span className="text-xs text-muted-foreground">{t("pictures.kind")}</span>
         <Select
           value={String(draft.kind)}
           onValueChange={(next) => {
@@ -73,20 +75,20 @@ export function PictureForm({
             }
           }}
         >
-          <SelectTrigger className="w-full" aria-label="Picture kind">
+          <SelectTrigger className="w-full" aria-label={t("pictures.kind")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {PICTURE_KIND_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={String(option.value)}>
-                {option.label}
+            {PICTURE_KIND_VALUES.map((value) => (
+              <SelectItem key={value} value={String(value)}>
+                {t(`pictures.kind.${value}`)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
       <div className="flex flex-col gap-1">
-        <span className="text-xs text-muted-foreground">MIME type</span>
+        <span className="text-xs text-muted-foreground">{t("pictures.mimeType")}</span>
         <div className="flex gap-2">
           <Select
             value={draft.mimeType}
@@ -96,8 +98,8 @@ export function PictureForm({
               }
             }}
           >
-            <SelectTrigger className="w-40" aria-label="MIME type preset">
-              <SelectValue placeholder="Pick" />
+            <SelectTrigger className="w-40" aria-label={t("pictures.mimePreset")}>
+              <SelectValue placeholder={t("pictures.mimePresetPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
               {PICTURE_MIME_OPTIONS.map((mime) => (
@@ -110,26 +112,24 @@ export function PictureForm({
           <Input
             value={draft.mimeType}
             onChange={(event) => onChangeMimeType(event.target.value)}
-            placeholder="image/jpeg"
-            aria-label="MIME type"
+            placeholder={t("pictures.mimePlaceholder")}
+            aria-label={t("pictures.mimeType")}
           />
         </div>
       </div>
       <div className="flex flex-col gap-1">
-        <span className="text-xs text-muted-foreground">Description</span>
+        <span className="text-xs text-muted-foreground">{t("pictures.description")}</span>
         <Input
           value={draft.description}
           onChange={(event) => onChangeDescription(event.target.value)}
           placeholder=""
-          aria-label="Picture description"
+          aria-label={t("pictures.description")}
         />
       </div>
       <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
-        <span>Size: {formatSize(draft.data.byteLength)}</span>
+        <span>{t("pictures.size", { size: formatSize(draft.data.byteLength) })}</span>
         {oversize ? (
-          <span className="text-destructive">
-            Embedding pictures over 5 MiB inflates tag size — consider resizing.
-          </span>
+          <span className="text-destructive">{t("pictures.oversizeWarning")}</span>
         ) : null}
       </div>
     </div>

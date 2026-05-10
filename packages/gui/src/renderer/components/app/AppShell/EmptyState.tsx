@@ -1,6 +1,7 @@
 import { FolderOpen } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/features/i18n/useLocale";
 
 /** Props for {@link EmptyState}. */
 export type EmptyStateProps = {
@@ -17,18 +18,17 @@ export type EmptyStateProps = {
  * @returns The empty-state surface.
  */
 export function EmptyState({ onOpenFiles }: EmptyStateProps) {
+  const { t } = useLocale();
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4 p-8 text-center">
       <FolderOpen className="size-10 text-muted-foreground" />
       <div className="space-y-1">
-        <p className="text-base font-medium">No audio files opened</p>
-        <p className="text-sm text-muted-foreground">
-          Choose audio files to inspect or edit their metadata.
-        </p>
+        <p className="text-base font-medium">{t("empty.title")}</p>
+        <p className="text-sm text-muted-foreground">{t("empty.description")}</p>
       </div>
       <Button onClick={onOpenFiles}>
         <FolderOpen />
-        Open Audio Files…
+        {t("header.openFiles")}
       </Button>
     </div>
   );

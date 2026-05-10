@@ -1,3 +1,5 @@
+import { useLocale } from "@/features/i18n/useLocale";
+
 /** Props for {@link StatusBar}. */
 export type StatusBarProps = {
   /** Total number of loaded rows. */
@@ -22,14 +24,17 @@ export type StatusBarProps = {
  * @returns The bar.
  */
 export function StatusBar({ fileCount, dirtyCount, warningCount, transient }: StatusBarProps) {
+  const { t } = useLocale();
+  const fileCountKey = fileCount === 1 ? "header.fileCount.singular" : "header.fileCount.plural";
+  const warningKey = warningCount === 1 ? "status.warning.singular" : "status.warning.plural";
   return (
     <footer
       role="status"
       className="flex h-7 shrink-0 items-center gap-3 border-t bg-background px-3 text-xs text-muted-foreground tabular-nums"
     >
-      <span>{`${fileCount} ${fileCount === 1 ? "file" : "files"}`}</span>
-      <span>{`${dirtyCount} edited`}</span>
-      <span>{`${warningCount} ${warningCount === 1 ? "warning" : "warnings"}`}</span>
+      <span>{t(fileCountKey, { count: fileCount })}</span>
+      <span>{t("status.edited", { count: dirtyCount })}</span>
+      <span>{t(warningKey, { count: warningCount })}</span>
       {transient !== null ? <span className="ml-auto text-foreground">{transient}</span> : null}
     </footer>
   );

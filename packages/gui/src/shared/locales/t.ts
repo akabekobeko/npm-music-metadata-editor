@@ -11,13 +11,25 @@ import type { Locale } from "./types.js";
  */
 const warnedKeys = new Set<string>();
 
+/** Map of placeholder name to substitution value (numbers are coerced to string). */
+export type TranslationParams = Readonly<Record<string, string | number>>;
+
+/**
+ * Locale-bound translation helper produced by {@link tFor}.
+ *
+ * Always shaped as `(key, params?)` so callers do not need to repeat the
+ * locale on every call.
+ */
+export type BoundTranslate = (key: string, params?: TranslationParams) => string;
+
 /**
  * Look up a translation, falling back to {@link FALLBACK_LOCALE} and finally
  * to the key itself when no dictionary covers it.
  *
- * The function emits one `console.warn` per missing key (deduplicated via
- * {@link warnedKeys}) so unit tests can assert "exactly one warning per
- * unknown key" without triggering a flood from React re-renders.
+ * Curried so callers can either bind a locale once via {@link tFor} (the
+ * Renderer / Main React + menu paths) or call this short form when a one-off
+ * lookup is fine. The biome `useMaxParams` rule (max=2) forces the bound form
+ * to carry the optional `params` slot — see {@link tFor}.
  *
  * @param key - Dot-separated translation key (e.g. `"menu.file.openFiles"`).
  * @param locale - Target locale; pass `FALLBACK_LOCALE` when the user has
@@ -25,7 +37,25 @@ const warnedKeys = new Set<string>();
  * @returns The translated string, the fallback-locale string, or the key
  *   itself when neither resolves.
  */
-export const t = (key: string, locale: Locale): string => {
+export const t = (key: string, locale: Locale): string => lookup(key, locale);
+
+/**
+ * Bind {@link t} to a locale and expose `{name}` placeholder interpolation.
+ *
+ * Use this when the consumer needs both interpolation and a stable locale —
+ * which is everything React (`useLocale`) and the format-summary helpers do.
+ *
+ * @param locale - Locale all subsequent lookups should target.
+ * @returns A `(key, params?) => string` helper.
+ */
+export const tFor =
+  (locale: Locale): BoundTranslate =>
+  (key, params) => {
+    const template = lookup(key, locale);
+    return params === undefined ? template : interpolate(template, params);
+  };
+
+const lookup = (key: string, locale: Locale): string => {
   const primary = dictionaries[locale][key];
   if (primary !== undefined) {
     return primary;
@@ -43,6 +73,12 @@ export const t = (key: string, locale: Locale): string => {
 
   return key;
 };
+
+const interpolate = (template: string, params: TranslationParams): string =>
+  template.replace(/\{(\w+)\}/g, (match, name: string) => {
+    const value = params[name];
+    return value === undefined ? match : String(value);
+  });
 
 /**
  * Clear the "already warned" set used by {@link t}.

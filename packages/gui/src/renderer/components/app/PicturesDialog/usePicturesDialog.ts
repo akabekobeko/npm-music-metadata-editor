@@ -1,5 +1,6 @@
 import type { PictureInfo } from "@mme/ipc";
 import { type ChangeEvent, type DragEvent, useCallback, useMemo, useRef, useState } from "react";
+import { useLocale } from "@/features/i18n/useLocale";
 import { PICTURE_FILE_EXTENSIONS, PICTURE_SIZE_WARNING_BYTES } from "@/features/pictures/constants";
 import { draftsToPictureInfos, pictureInfosToDrafts } from "@/features/pictures/draftConversions";
 import { extensionForMime } from "@/features/pictures/extensionForMime";
@@ -156,6 +157,7 @@ export const usePicturesDialog = ({
   onApply,
   onNotify,
 }: Args): PicturesDialogState => {
+  const { t } = useLocale();
   const initialDrafts = useMemo(() => pictureInfosToDrafts(initialPictures), [initialPictures]);
   const [drafts, setDrafts] = useState<readonly PictureDraft[]>(initialDrafts);
   const [selectedId, setSelectedId] = useState<string | null>(initialDrafts[0]?.id ?? null);
@@ -187,10 +189,10 @@ export const usePicturesDialog = ({
 
       const oversize = next.find((draft) => draft.data.byteLength >= PICTURE_SIZE_WARNING_BYTES);
       if (oversize !== undefined) {
-        onNotify("Added picture exceeds 5 MiB — embedding will inflate tag size.");
+        onNotify(t("pictures.notify.oversizeAdded"));
       }
     },
-    [onNotify],
+    [onNotify, t],
   );
 
   const handleAddClick = useCallback((): void => {
@@ -227,10 +229,10 @@ export const usePicturesDialog = ({
         data: replacement.data,
       });
       if (replacement.data.byteLength >= PICTURE_SIZE_WARNING_BYTES) {
-        onNotify("Replacement picture exceeds 5 MiB — embedding will inflate tag size.");
+        onNotify(t("pictures.notify.oversizeReplaced"));
       }
     },
-    [selected, updateDraft, onNotify],
+    [selected, updateDraft, onNotify, t],
   );
 
   const handleExportClick = useCallback(async (): Promise<void> => {
@@ -245,7 +247,7 @@ export const usePicturesDialog = ({
       filters: [{ name: "Image", extensions: [ext] }],
     });
     if (!dialog.ok) {
-      onNotify(`Save dialog failed: ${dialog.error.message}`);
+      onNotify(t("pictures.notify.saveDialogFailed", { message: dialog.error.message }));
       return;
     }
 
@@ -258,12 +260,12 @@ export const usePicturesDialog = ({
       bytes: selected.data,
     });
     if (!write.ok) {
-      onNotify(`Export failed: ${write.error.message}`);
+      onNotify(t("pictures.notify.exportFailed", { message: write.error.message }));
       return;
     }
 
-    onNotify(`Exported picture to ${basename(dialog.value.filePath)}`);
-  }, [filePath, selected, onNotify]);
+    onNotify(t("pictures.notify.exportedTo", { fileName: basename(dialog.value.filePath) }));
+  }, [filePath, selected, onNotify, t]);
 
   const handleRemoveClick = useCallback((): void => {
     if (selected === null) {

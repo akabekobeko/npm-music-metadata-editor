@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/features/i18n/useLocale";
 import { formatLrc } from "@/features/lyrics/formatLrc";
 import type { SyncedLine } from "@/features/lyrics/types";
 import { basename } from "@/libs/basename";
@@ -26,9 +27,10 @@ export type LrcExportButtonProps = {
  * @returns The button markup.
  */
 export function LrcExportButton({ defaultName, lines, onError, onSuccess }: LrcExportButtonProps) {
+  const { t } = useLocale();
   const handleClick = async (): Promise<void> => {
     if (lines.length === 0) {
-      onError("Nothing to export — add at least one synchronized line.");
+      onError(t("lyrics.exportEmpty"));
       return;
     }
 
@@ -37,7 +39,7 @@ export function LrcExportButton({ defaultName, lines, onError, onSuccess }: LrcE
       filters: [{ name: "LRC", extensions: ["lrc"] }],
     });
     if (!dialog.ok) {
-      onError(`Save dialog failed: ${dialog.error.message}`);
+      onError(t("lyrics.saveDialogFailed", { message: dialog.error.message }));
       return;
     }
 
@@ -52,16 +54,16 @@ export function LrcExportButton({ defaultName, lines, onError, onSuccess }: LrcE
       bytes,
     });
     if (!write.ok) {
-      onError(`Export failed: ${write.error.message}`);
+      onError(t("lyrics.exportFailed", { message: write.error.message }));
       return;
     }
 
-    onSuccess(`Exported lyrics to ${basename(dialog.value.filePath)}`);
+    onSuccess(t("lyrics.exportedTo", { fileName: basename(dialog.value.filePath) }));
   };
 
   return (
     <Button type="button" variant="outline" size="sm" onClick={handleClick}>
-      Export LRC…
+      {t("lyrics.export")}
     </Button>
   );
 }

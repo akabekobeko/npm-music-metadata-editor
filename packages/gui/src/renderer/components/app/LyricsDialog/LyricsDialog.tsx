@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLocale } from "@/features/i18n/useLocale";
 import { basename } from "@/libs/basename";
 import { LrcExportButton } from "./LrcExportButton";
 import { LrcImportButton } from "./LrcImportButton";
@@ -57,38 +58,39 @@ export function LyricsDialog({
     handleSyncImport,
     baseFileName,
   } = useLyricsDialog({ filePath, initialLyrics, onApply, onNotify });
+  const { t } = useLocale();
 
   return (
     <Dialog open onOpenChange={(open) => (open ? undefined : onClose())}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Lyrics</DialogTitle>
+          <DialogTitle>{t("lyrics.title")}</DialogTitle>
           <DialogDescription>{basename(filePath)}</DialogDescription>
         </DialogHeader>
         <div className="flex gap-3">
           <div className="flex flex-1 flex-col gap-1 text-sm">
-            <span className="text-xs text-muted-foreground">Language (ISO-639)</span>
+            <span className="text-xs text-muted-foreground">{t("lyrics.language")}</span>
             <Input
               value={draft.language}
               onChange={(event) => updateDraft({ language: event.target.value })}
-              placeholder="eng"
-              aria-label="Lyrics language"
+              placeholder={t("lyrics.languagePlaceholder")}
+              aria-label={t("lyrics.languageAria")}
             />
           </div>
           <div className="flex flex-1 flex-col gap-1 text-sm">
-            <span className="text-xs text-muted-foreground">Description</span>
+            <span className="text-xs text-muted-foreground">{t("lyrics.description")}</span>
             <Input
               value={draft.description}
               onChange={(event) => updateDraft({ description: event.target.value })}
               placeholder=""
-              aria-label="Lyrics description"
+              aria-label={t("lyrics.descriptionAria")}
             />
           </div>
         </div>
         <Tabs defaultValue="plain" className="gap-3">
           <TabsList>
-            <TabsTrigger value="plain">Plain text</TabsTrigger>
-            <TabsTrigger value="synced">Synchronized</TabsTrigger>
+            <TabsTrigger value="plain">{t("lyrics.tab.plain")}</TabsTrigger>
+            <TabsTrigger value="synced">{t("lyrics.tab.synced")}</TabsTrigger>
           </TabsList>
           <TabsContent value="plain">
             <PlainTextTab
@@ -104,7 +106,7 @@ export function LyricsDialog({
                 <>
                   <LrcImportButton
                     onImport={handleSyncImport}
-                    onError={(message) => onNotify(`Import failed: ${message}`)}
+                    onError={(message) => onNotify(t("lyrics.importFailed", { message }))}
                   />
                   <LrcExportButton
                     defaultName={`${baseFileName}.lrc`}
@@ -119,9 +121,9 @@ export function LyricsDialog({
         </Tabs>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </Button>
-          <Button onClick={handleApply}>Apply</Button>
+          <Button onClick={handleApply}>{t("common.apply")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

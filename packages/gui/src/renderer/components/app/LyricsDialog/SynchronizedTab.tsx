@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useLocale } from "@/features/i18n/useLocale";
 import { formatTimeInput } from "@/features/lyrics/parseTimeInput";
 
 import { type SyncedLineEntry, useSynchronizedTab } from "./useSynchronizedTab.js";
@@ -39,6 +40,7 @@ export function SynchronizedTab({ entries, onChange, extraButtons }: Synchronize
     handleAddLine,
     handleRemoveLine,
   } = useSynchronizedTab({ entries, onChange });
+  const { t } = useLocale();
 
   return (
     <div className="flex flex-col gap-2">
@@ -46,8 +48,8 @@ export function SynchronizedTab({ entries, onChange, extraButtons }: Synchronize
         <table className="w-full table-fixed text-sm">
           <thead className="bg-muted/40 text-xs text-muted-foreground">
             <tr>
-              <th className="w-32 px-2 py-1 text-left font-medium">Time</th>
-              <th className="px-2 py-1 text-left font-medium">Text</th>
+              <th className="w-32 px-2 py-1 text-left font-medium">{t("lyrics.synced.time")}</th>
+              <th className="px-2 py-1 text-left font-medium">{t("lyrics.synced.text")}</th>
               <th className="w-12" />
             </tr>
           </thead>
@@ -55,7 +57,7 @@ export function SynchronizedTab({ entries, onChange, extraButtons }: Synchronize
             {entries.length === 0 ? (
               <tr>
                 <td colSpan={3} className="px-2 py-3 text-center text-xs text-muted-foreground">
-                  No synchronized lines.
+                  {t("lyrics.synced.none")}
                 </td>
               </tr>
             ) : (
@@ -70,15 +72,15 @@ export function SynchronizedTab({ entries, onChange, extraButtons }: Synchronize
                       }
                       aria-invalid={rowState[index]?.invalid ?? false}
                       placeholder="00:00.000"
-                      aria-label="Line time"
+                      aria-label={t("lyrics.synced.lineTimeAria")}
                     />
                   </td>
                   <td className="px-2 py-1">
                     <Input
                       value={entry.line.text}
                       onChange={(event) => handleTextChange(entry.id, event.target.value)}
-                      placeholder="Lyric line"
-                      aria-label="Line text"
+                      placeholder={t("lyrics.synced.linePlaceholder")}
+                      aria-label={t("lyrics.synced.lineTextAria")}
                     />
                   </td>
                   <td className="px-2 py-1 text-right">
@@ -87,7 +89,7 @@ export function SynchronizedTab({ entries, onChange, extraButtons }: Synchronize
                       variant="ghost"
                       size="sm"
                       onClick={() => handleRemoveLine(entry.id)}
-                      aria-label="Remove line"
+                      aria-label={t("lyrics.synced.removeLine")}
                     >
                       ✕
                     </Button>
@@ -100,7 +102,7 @@ export function SynchronizedTab({ entries, onChange, extraButtons }: Synchronize
       </div>
       <div className="flex flex-wrap gap-2">
         <Button type="button" variant="outline" size="sm" onClick={handleAddLine}>
-          + Line
+          {t("lyrics.synced.addLine")}
         </Button>
         {extraButtons}
       </div>

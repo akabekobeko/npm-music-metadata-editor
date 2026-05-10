@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/features/i18n/useLocale";
 import type { SyncedLine } from "@/features/lyrics/types";
 
 import { useLrcImportButton } from "./useLrcImportButton.js";
@@ -24,11 +25,12 @@ export type LrcImportButtonProps = {
  */
 export function LrcImportButton({ onImport, onError }: LrcImportButtonProps) {
   const { inputRef, handleClick, handleChange } = useLrcImportButton({ onImport, onError });
+  const { t } = useLocale();
 
   return (
     <>
       <Button type="button" variant="outline" size="sm" onClick={handleClick}>
-        Import LRC…
+        {t("lyrics.import")}
       </Button>
       <input ref={inputRef} type="file" accept=".lrc,text/plain" hidden onChange={handleChange} />
     </>

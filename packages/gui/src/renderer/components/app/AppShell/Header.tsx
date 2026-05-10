@@ -1,6 +1,7 @@
 import { FolderOpen, RotateCcw, Save } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/features/i18n/useLocale";
 import type { ColumnId } from "@/features/spreadsheet/types";
 import type { ResolvedTheme, ThemePreference } from "@/features/theme/types";
 import type { LocalePreference } from "../../../../shared/locales/types.js";
@@ -68,13 +69,15 @@ export function Header({
   onSaveAll,
   onDiscardChanges,
 }: HeaderProps) {
+  const { t } = useLocale();
   const hasDirty = dirtyCount > 0;
+  const fileCountKey = fileCount === 1 ? "header.fileCount.singular" : "header.fileCount.plural";
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b bg-background px-3">
       <h1 className="font-heading text-base font-semibold">Music Metadata Editor</h1>
       <Button variant="outline" size="sm" onClick={onOpenFiles} disabled={loading || saving}>
         <FolderOpen />
-        Open Audio Files…
+        {t("header.openFiles")}
       </Button>
       <ColumnsMenu visibleIds={visibleIds} onToggle={onToggleColumn} />
       <Button
@@ -84,7 +87,7 @@ export function Header({
         disabled={!hasDirty || saving || loading}
       >
         <Save />
-        Save All{hasDirty ? ` (${dirtyCount})` : ""}
+        {hasDirty ? t("header.saveAllWithCount", { count: dirtyCount }) : t("header.saveAll")}
       </Button>
       <Button
         variant="outline"
@@ -93,11 +96,11 @@ export function Header({
         disabled={!hasDirty || saving || loading}
       >
         <RotateCcw />
-        Discard Changes
+        {t("header.discardChanges")}
       </Button>
       <div className="ml-auto flex items-center gap-3">
         <div className="text-sm text-muted-foreground tabular-nums">
-          {loading ? "Loading…" : `${fileCount} ${fileCount === 1 ? "file" : "files"}`}
+          {loading ? t("header.loading") : t(fileCountKey, { count: fileCount })}
         </div>
         <LanguageMenu value={localePreference} onChange={onLocaleChange} />
         <ThemeMenu value={themePreference} resolved={resolvedTheme} onChange={onThemeChange} />

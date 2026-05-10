@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { dictionaries } from "./dictionaries.js";
-import { resetMissingKeyLog, t } from "./t.js";
+import { resetMissingKeyLog, t, tFor } from "./t.js";
 
 beforeEach(() => {
   resetMissingKeyLog();
@@ -24,6 +24,17 @@ it("returns the key itself when no dictionary defines it", () => {
   const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
   expect(t("does.not.exist", "en")).toBe("does.not.exist");
   expect(warn).toHaveBeenCalledTimes(1);
+});
+
+it("substitutes {name} placeholders from params via tFor", () => {
+  expect(tFor("en")("header.fileCount.singular", { count: 1 })).toBe("1 file");
+  expect(tFor("ja")("header.fileCount.plural", { count: 7 })).toBe("7 件");
+});
+
+it("leaves placeholders without a matching param untouched", () => {
+  // `{count}` survives when the caller forgot to pass it — easier to spot
+  // in the UI than a silent empty substring.
+  expect(tFor("en")("header.fileCount.singular")).toBe("{count} file");
 });
 
 it("only warns once per missing key", () => {

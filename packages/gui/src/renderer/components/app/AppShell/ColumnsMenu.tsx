@@ -7,6 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useLocale } from "@/features/i18n/useLocale";
 import { ALL_COLUMN_IDS, COLUMN_REGISTRY } from "@/features/spreadsheet/constants";
 import type { ColumnId } from "@/features/spreadsheet/types";
 
@@ -30,6 +31,7 @@ export type ColumnsMenuProps = {
  * @returns The dropdown trigger plus its checkbox menu.
  */
 export function ColumnsMenu({ visibleIds, onToggle }: ColumnsMenuProps) {
+  const { t } = useLocale();
   const visible = new Set(visibleIds);
   return (
     <DropdownMenu>
@@ -37,7 +39,7 @@ export function ColumnsMenu({ visibleIds, onToggle }: ColumnsMenuProps) {
         render={
           <Button variant="outline" size="sm">
             <Columns3 />
-            Columns
+            {t("header.columns")}
           </Button>
         }
       />

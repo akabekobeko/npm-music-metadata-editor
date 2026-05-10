@@ -3,6 +3,7 @@ import { type Dispatch, useCallback } from "react";
 import { expandColumnPaste } from "@/features/edit/expandColumnPaste";
 import { applyPaste, parseClipboardText } from "@/features/edit/paste";
 import type { EditAction, EditState } from "@/features/edit/store";
+import { useLocale } from "@/features/i18n/useLocale";
 import type { FormatSupportMap } from "@/features/spreadsheet/types";
 import type { TrackRow } from "@/features/tracks/types";
 
@@ -48,6 +49,7 @@ export const useGridHandlers = ({
   support,
   notify,
 }: Args): GridHandlers => {
+  const { t } = useLocale();
   const onCommit = useCallback(
     ({ row, field, value }: CommitArgs): void => {
       editDispatch({ type: "commit", filePath: row.filePath, field, value });
@@ -76,9 +78,9 @@ export const useGridHandlers = ({
         ...editState.rows.slice(baseRowIndex + values.length),
       ];
       editDispatch({ type: "applyChange", nextRows });
-      notify(formatPasteSummary(outcome));
+      notify(formatPasteSummary(t, outcome));
     },
-    [editState.rows, editDispatch, support, notify],
+    [editState.rows, editDispatch, support, notify, t],
   );
 
   return { onCommit, onUndo, onPaste };
