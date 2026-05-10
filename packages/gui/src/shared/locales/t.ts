@@ -55,6 +55,18 @@ export const tFor =
     return params === undefined ? template : interpolate(template, params);
   };
 
+/**
+ * Resolve `key` to a raw template, falling through the standard dictionary
+ * cascade.
+ *
+ * Shared by both {@link t} and {@link tFor} so the fallback / warning
+ * behaviour stays single-sourced. Emits one `console.warn` per key that
+ * misses every dictionary, deduplicated through {@link warnedKeys}.
+ *
+ * @param key - Translation key.
+ * @param locale - Preferred locale to read first.
+ * @returns The dictionary entry, the English fallback, or `key` itself.
+ */
 const lookup = (key: string, locale: Locale): string => {
   const primary = dictionaries[locale][key];
   if (primary !== undefined) {
@@ -74,6 +86,17 @@ const lookup = (key: string, locale: Locale): string => {
   return key;
 };
 
+/**
+ * Replace `{name}` placeholders in `template` with values from `params`.
+ *
+ * Placeholders without a matching key are left untouched (rather than
+ * silently emptied) so a missing substitution surfaces visually in the UI
+ * instead of disappearing.
+ *
+ * @param template - Resolved dictionary string.
+ * @param params - Substitution map.
+ * @returns The interpolated string.
+ */
 const interpolate = (template: string, params: TranslationParams): string =>
   template.replace(/\{(\w+)\}/g, (match, name: string) => {
     const value = params[name];

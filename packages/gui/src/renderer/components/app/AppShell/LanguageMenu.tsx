@@ -11,6 +11,12 @@ import {
 import { useLocale } from "@/features/i18n/useLocale";
 import type { LocalePreference } from "../../../../shared/locales/types.js";
 
+/**
+ * Radio entries shown inside the dropdown, in display order.
+ *
+ * `key` is the dictionary lookup; the literal value goes straight into
+ * `AppSettings.locale` when the user picks the row.
+ */
 const ITEMS: ReadonlyArray<{ readonly value: LocalePreference; readonly key: string }> = [
   { value: "system", key: "header.language.system" },
   { value: "en", key: "header.language.en" },

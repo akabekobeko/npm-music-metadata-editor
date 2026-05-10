@@ -11,6 +11,12 @@ import {
 import { useLocale } from "@/features/i18n/useLocale";
 import type { ResolvedTheme, ThemePreference } from "@/features/theme/types";
 
+/**
+ * Radio entries shown inside the dropdown, in display order.
+ *
+ * `key` is the dictionary lookup; the literal value goes straight into
+ * `AppSettings.theme` when the user picks the row.
+ */
 const ITEMS: ReadonlyArray<{ readonly value: ThemePreference; readonly key: string }> = [
   { value: "system", key: "header.theme.system" },
   { value: "light", key: "header.theme.light" },
@@ -64,6 +70,15 @@ export function ThemeMenu({ value, resolved, onChange }: ThemeMenuProps) {
   );
 }
 
+/**
+ * Pick the leading icon for a radio item.
+ *
+ * Mirrors the trigger-side icon for `"light"` / `"dark"` and uses the
+ * generic monitor glyph for `"system"` so the row reads as "follow the OS".
+ *
+ * @param value - Theme preference the row represents.
+ * @returns The lucide icon to render.
+ */
 const iconFor = (value: ThemePreference) => {
   switch (value) {
     case "light":
