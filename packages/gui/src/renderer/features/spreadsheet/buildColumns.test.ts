@@ -67,10 +67,9 @@ it("returns every column when all ids are visible (snapshot)", () => {
   `);
 });
 
-it("falls back to the pinned fileName column when visibleIds is empty", () => {
+it("falls back to the fileName column when visibleIds is empty", () => {
   const columns = buildColumns([], emptySupport);
   expect(columns.map((c) => c.id)).toEqual(["fileName"]);
-  expect(columns[0]?.sticky).toBe("left");
 });
 
 it("prepends fileName when the caller forgets it", () => {

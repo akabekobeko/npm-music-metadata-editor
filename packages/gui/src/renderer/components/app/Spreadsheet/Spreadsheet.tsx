@@ -93,7 +93,6 @@ export function Spreadsheet({
         </colgroup>
         <SpreadsheetHeader
           columns={columns}
-          rows={rows}
           selection={selection}
           onHeaderClick={handleColumnHeaderClick}
           onBeginResize={beginResize}
