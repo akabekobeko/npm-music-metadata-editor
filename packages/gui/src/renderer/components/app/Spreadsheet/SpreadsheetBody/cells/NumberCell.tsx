@@ -24,7 +24,7 @@ export function NumberCell({ value, disabled }: NumberCellProps) {
     <span
       className={cn(
         "block truncate text-right tabular-nums",
-        disabled && "text-muted-foreground/60",
+        disabled && "text-muted-foreground",
       )}
     >
       {text}

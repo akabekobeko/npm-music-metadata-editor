@@ -22,7 +22,7 @@ export function TextCell({ value, disabled }: TextCellProps) {
   const text = value === undefined ? "" : String(value);
   return (
     <span
-      className={cn("block truncate", disabled && "text-muted-foreground/60")}
+      className={cn("block truncate", disabled && "text-muted-foreground")}
       title={text === "" ? undefined : text}
     >
       {text}
