@@ -98,7 +98,6 @@ export const COLUMN_REGISTRY: Readonly<Record<ColumnId, ColumnDefinition>> = {
     title: "File",
     width: 240,
     editable: "never",
-    sticky: "left",
     readValue: (row) => basename(row.filePath),
   },
   audioFormat: {

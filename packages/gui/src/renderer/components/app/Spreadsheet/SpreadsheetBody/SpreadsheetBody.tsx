@@ -74,7 +74,7 @@ export function SpreadsheetBody({
         return (
           <tr
             key={row.filePath}
-            className="absolute flex w-full border-b hover:bg-muted/50"
+            className="absolute flex hover:bg-muted/50"
             style={{
               transform: `translateY(${virtualRow.start}px)`,
               height: virtualRow.size,
@@ -100,8 +100,7 @@ export function SpreadsheetBody({
                       : () => onCellDoubleClick(virtualRow.index, column.id)
                   }
                   className={cn(
-                    "flex shrink-0 items-center border-r px-2",
-                    column.sticky === "left" && "sticky left-0 z-10 bg-background",
+                    "flex shrink-0 items-center border-r border-b px-2",
                     isDisabled && "bg-muted",
                     isSelected && "bg-accent/40",
                   )}

@@ -2,7 +2,6 @@ import { type ReactNode, useMemo } from "react";
 
 import { isColumnSelectable } from "@/features/spreadsheet/isColumnSelectable";
 import type { ColumnDefinition } from "@/features/spreadsheet/types";
-import type { TrackRow } from "@/features/tracks/types";
 
 import { renderHeader } from "./renderHeader";
 
@@ -10,8 +9,6 @@ import { renderHeader } from "./renderHeader";
 type Args = {
   /** Visible columns in display order. */
   readonly columns: readonly ColumnDefinition[];
-  /** Track rows passed into per-column header renderers (e.g., for summary state). */
-  readonly rows: readonly TrackRow[];
 };
 
 /** Pre-computed metadata for one header cell. */
@@ -27,19 +24,19 @@ export type HeaderEntry = {
 /**
  * Pre-compute the per-column header metadata the spreadsheet renders.
  *
- * Memoised against `columns / rows` so re-renders driven by selection or
+ * Memoised against `columns` so re-renders driven by selection or
  * edit-mode changes do not re-run `renderHeader`.
  *
- * @param args - Columns and rows.
+ * @param args - Columns.
  * @returns One {@link HeaderEntry} per visible column.
  */
-export const useSpreadsheetHeader = ({ columns, rows }: Args): readonly HeaderEntry[] =>
+export const useSpreadsheetHeader = ({ columns }: Args): readonly HeaderEntry[] =>
   useMemo(
     () =>
       columns.map((column) => ({
         column,
-        node: renderHeader({ column, rows }),
+        node: renderHeader({ column }),
         selectable: isColumnSelectable(column),
       })),
-    [columns, rows],
+    [columns],
   );

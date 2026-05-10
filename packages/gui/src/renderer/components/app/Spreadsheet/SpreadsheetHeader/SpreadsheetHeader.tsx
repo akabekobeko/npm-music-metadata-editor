@@ -1,7 +1,6 @@
 import type { PointerEvent as ReactPointerEvent } from "react";
 
 import type { ColumnDefinition, ColumnId } from "@/features/spreadsheet/types";
-import type { TrackRow } from "@/features/tracks/types";
 import { cn } from "@/libs/utils";
 
 import type { Selection } from "../types.js";
@@ -11,8 +10,6 @@ import { useSpreadsheetHeader } from "./useSpreadsheetHeader.js";
 export type SpreadsheetHeaderProps = {
   /** Visible columns in display order. */
   readonly columns: readonly ColumnDefinition[];
-  /** Track rows — passed through to per-column header renderers for summary state. */
-  readonly rows: readonly TrackRow[];
   /** Current selection — used to highlight a column when one is selected. */
   readonly selection: Selection;
   /** Single-click handler for a column header. */
@@ -31,16 +28,15 @@ export type SpreadsheetHeaderProps = {
  */
 export function SpreadsheetHeader({
   columns,
-  rows,
   selection,
   onHeaderClick,
   onBeginResize,
 }: SpreadsheetHeaderProps) {
-  const headerEntries = useSpreadsheetHeader({ columns, rows });
+  const headerEntries = useSpreadsheetHeader({ columns });
 
   return (
     <thead className="sticky top-0 z-20 bg-background">
-      <tr className="border-b">
+      <tr>
         {headerEntries.map(({ column, node, selectable }) => (
           <th
             key={column.id}
@@ -51,9 +47,8 @@ export function SpreadsheetHeader({
                 : `${column.title} is editable per cell only — column-wide paste is disabled.`
             }
             className={cn(
-              "relative border-r px-2 py-1.5 text-left select-none",
+              "relative border-r border-b px-2 py-1.5 text-left select-none",
               selectable ? "cursor-pointer" : "cursor-default",
-              column.sticky === "left" && "sticky left-0 z-30 bg-background",
               selection.kind === "column" &&
                 selection.columnId === column.id &&
                 "bg-accent text-accent-foreground",

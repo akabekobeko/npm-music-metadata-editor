@@ -96,8 +96,6 @@ export type ColumnDefinition = {
   readonly width: number;
   /** How the column behaves in edit mode. */
   readonly editable: ColumnEditability;
-  /** When `"left"`, the column is pinned to the left edge of the viewport. */
-  readonly sticky?: "left";
   /**
    * Whether the header allows column-wide selection. Defaults to `"column"`
    * (the Phase 4 behaviour); set to `"cell-only"` for columns that should
