@@ -30,7 +30,7 @@ export function FileNameCell({ row }: FileNameCellProps) {
     <Tooltip>
       <TooltipTrigger
         render={
-          <span className="block truncate text-left font-medium">
+          <span className="block truncate text-left font-medium text-muted-foreground">
             {row.saveError !== undefined ? (
               <span role="img" aria-label="save failed" className="mr-1 font-bold text-destructive">
                 !

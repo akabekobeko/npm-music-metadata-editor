@@ -1,6 +1,6 @@
 import type { PointerEvent as ReactPointerEvent } from "react";
 
-import type { ColumnDefinition, ColumnId, FormatSupportMap } from "@/features/spreadsheet/types";
+import type { ColumnDefinition, ColumnId } from "@/features/spreadsheet/types";
 import type { TrackRow } from "@/features/tracks/types";
 import { cn } from "@/libs/utils";
 
@@ -13,8 +13,6 @@ export type SpreadsheetHeaderProps = {
   readonly columns: readonly ColumnDefinition[];
   /** Track rows — passed through to per-column header renderers for summary state. */
   readonly rows: readonly TrackRow[];
-  /** Format support matrix — feeds the header renderers' write-eligibility hints. */
-  readonly support: FormatSupportMap;
   /** Current selection — used to highlight a column when one is selected. */
   readonly selection: Selection;
   /** Single-click handler for a column header. */
@@ -34,12 +32,11 @@ export type SpreadsheetHeaderProps = {
 export function SpreadsheetHeader({
   columns,
   rows,
-  support,
   selection,
   onHeaderClick,
   onBeginResize,
 }: SpreadsheetHeaderProps) {
-  const headerEntries = useSpreadsheetHeader({ columns, rows, support });
+  const headerEntries = useSpreadsheetHeader({ columns, rows });
 
   return (
     <thead className="sticky top-0 z-20 bg-background">

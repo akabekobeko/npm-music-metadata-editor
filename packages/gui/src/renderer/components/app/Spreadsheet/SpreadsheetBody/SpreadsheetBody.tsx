@@ -86,6 +86,7 @@ export function SpreadsheetBody({
                 column,
                 row,
               });
+              const isDisabled = column.editable !== "never" && !cellWritable;
               return (
                 // biome-ignore lint/a11y/useKeyWithClickEvents: container handles all keyboard
                 <td
@@ -101,6 +102,7 @@ export function SpreadsheetBody({
                   className={cn(
                     "flex shrink-0 items-center border-r px-2",
                     column.sticky === "left" && "sticky left-0 z-10 bg-background",
+                    isDisabled && "bg-muted",
                     isSelected && "bg-accent/40",
                   )}
                   style={{ width: widthOf(column.id) }}

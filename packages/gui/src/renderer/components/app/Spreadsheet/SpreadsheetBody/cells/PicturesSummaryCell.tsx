@@ -34,7 +34,7 @@ export function PicturesSummaryCell({ row, disabled, onOpen }: PicturesSummaryCe
       disabled={disabled}
       className={cn(
         "flex w-full items-center gap-1.5 truncate text-left",
-        disabled && "text-muted-foreground/60",
+        disabled && "text-muted-foreground",
       )}
     >
       <ImageIcon className="size-3.5 shrink-0" />

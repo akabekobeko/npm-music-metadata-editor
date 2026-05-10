@@ -63,9 +63,13 @@ export const renderCell = ({ column, row, cellWritable, handlers }: Args): React
     return <DurationCell value={value} />;
   }
 
-  // tag.* and the remaining display-only columns (audioFormat / chapters)
-  // share the plain text/number renderers; per-format disabling shows up as a
-  // muted style without hiding the value.
+  if (column.id === "audioFormat") {
+    return <TextCell value={value} disabled />;
+  }
+
+  // tag.* and the remaining display-only columns (chapters) share the plain
+  // text/number renderers; per-format disabling shows up as a muted style
+  // without hiding the value.
   const disabled = column.editable !== "never" && !cellWritable;
   if (column.editable === "tag" && column.inputKind === "number") {
     return <NumberCell value={value} disabled={disabled} />;

@@ -94,7 +94,6 @@ export function Spreadsheet({
         <SpreadsheetHeader
           columns={columns}
           rows={rows}
-          support={support}
           selection={selection}
           onHeaderClick={handleColumnHeaderClick}
           onBeginResize={beginResize}
