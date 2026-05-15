@@ -74,7 +74,6 @@ export function Header({
   const fileCountKey = fileCount === 1 ? "header.fileCount.singular" : "header.fileCount.plural";
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b bg-background px-3">
-      <h1 className="font-heading text-base font-semibold">Music Metadata Editor</h1>
       <Button variant="outline" size="sm" onClick={onOpenFiles} disabled={loading || saving}>
         <FolderOpen />
         {t("header.openFiles")}
