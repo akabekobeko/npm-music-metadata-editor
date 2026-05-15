@@ -8,6 +8,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useLocale } from "@/features/i18n/useLocale";
 import type { ResolvedTheme, ThemePreference } from "@/features/theme/types";
 
@@ -43,16 +44,23 @@ export function ThemeMenu({ value, resolved, onChange }: ThemeMenuProps) {
   const { t } = useLocale();
   const current: ThemePreference = value ?? "system";
   const TriggerIcon = resolved === "dark" ? Moon : Sun;
+  const label = t("header.theme");
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button variant="outline" size="sm">
-            <TriggerIcon />
-            {t("header.theme")}
-          </Button>
-        }
-      />
+      <Tooltip>
+        <DropdownMenuTrigger
+          render={
+            <TooltipTrigger
+              render={
+                <Button variant="ghost" size="icon-sm" className="w-auto px-3" aria-label={label}>
+                  <TriggerIcon />
+                </Button>
+              }
+            />
+          }
+        />
+        <TooltipContent>{label}</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent align="end" className="w-44">
         <DropdownMenuRadioGroup
           value={current}

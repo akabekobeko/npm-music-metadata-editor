@@ -8,6 +8,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useLocale } from "@/features/i18n/useLocale";
 import type { LocalePreference } from "../../../../shared/locales/types.js";
 
@@ -43,16 +44,23 @@ export type LanguageMenuProps = {
 export function LanguageMenu({ value, onChange }: LanguageMenuProps) {
   const { t } = useLocale();
   const current: LocalePreference = value ?? "system";
+  const label = t("header.language");
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button variant="outline" size="sm">
-            <Languages />
-            {t("header.language")}
-          </Button>
-        }
-      />
+      <Tooltip>
+        <DropdownMenuTrigger
+          render={
+            <TooltipTrigger
+              render={
+                <Button variant="ghost" size="icon-sm" className="w-auto px-3" aria-label={label}>
+                  <Languages />
+                </Button>
+              }
+            />
+          }
+        />
+        <TooltipContent>{label}</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuRadioGroup
           value={current}

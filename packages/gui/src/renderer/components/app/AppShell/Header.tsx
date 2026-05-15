@@ -1,6 +1,7 @@
 import { FolderOpen, RotateCcw, Save } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useLocale } from "@/features/i18n/useLocale";
 import type { ColumnId } from "@/features/spreadsheet/types";
 import type { ResolvedTheme, ThemePreference } from "@/features/theme/types";
@@ -72,32 +73,65 @@ export function Header({
   const { t } = useLocale();
   const hasDirty = dirtyCount > 0;
   const fileCountKey = fileCount === 1 ? "header.fileCount.singular" : "header.fileCount.plural";
+  const openFilesLabel = t("header.openFiles");
+  const saveAllLabel = hasDirty
+    ? t("header.saveAllWithCount", { count: dirtyCount })
+    : t("header.saveAll");
+  const discardChangesLabel = t("header.discardChanges");
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b bg-background px-3">
-      <h1 className="font-heading text-base font-semibold">Music Metadata Editor</h1>
-      <Button variant="outline" size="sm" onClick={onOpenFiles} disabled={loading || saving}>
-        <FolderOpen />
-        {t("header.openFiles")}
-      </Button>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="w-auto px-3"
+              onClick={onOpenFiles}
+              disabled={loading || saving}
+              aria-label={openFilesLabel}
+            >
+              <FolderOpen />
+            </Button>
+          }
+        />
+        <TooltipContent>{openFilesLabel}</TooltipContent>
+      </Tooltip>
       <ColumnsMenu visibleIds={visibleIds} onToggle={onToggleColumn} />
-      <Button
-        variant="default"
-        size="sm"
-        onClick={onSaveAll}
-        disabled={!hasDirty || saving || loading}
-      >
-        <Save />
-        {hasDirty ? t("header.saveAllWithCount", { count: dirtyCount }) : t("header.saveAll")}
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={onDiscardChanges}
-        disabled={!hasDirty || saving || loading}
-      >
-        <RotateCcw />
-        {t("header.discardChanges")}
-      </Button>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="w-auto px-3"
+              onClick={onSaveAll}
+              disabled={!hasDirty || saving || loading}
+              aria-label={saveAllLabel}
+            >
+              <Save />
+            </Button>
+          }
+        />
+        <TooltipContent>{saveAllLabel}</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="w-auto px-3"
+              onClick={onDiscardChanges}
+              disabled={!hasDirty || saving || loading}
+              aria-label={discardChangesLabel}
+            >
+              <RotateCcw />
+            </Button>
+          }
+        />
+        <TooltipContent>{discardChangesLabel}</TooltipContent>
+      </Tooltip>
       <div className="ml-auto flex items-center gap-3">
         <div className="text-sm text-muted-foreground tabular-nums">
           {loading ? t("header.loading") : t(fileCountKey, { count: fileCount })}
