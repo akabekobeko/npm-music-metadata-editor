@@ -52,7 +52,7 @@ export function ThemeMenu({ value, resolved, onChange }: ThemeMenuProps) {
           render={
             <TooltipTrigger
               render={
-                <Button variant="outline" size="icon-sm" aria-label={label}>
+                <Button variant="ghost" size="icon-sm" className="w-auto px-3" aria-label={label}>
                   <TriggerIcon />
                 </Button>
               }

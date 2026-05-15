@@ -52,7 +52,7 @@ export function LanguageMenu({ value, onChange }: LanguageMenuProps) {
           render={
             <TooltipTrigger
               render={
-                <Button variant="outline" size="icon-sm" aria-label={label}>
+                <Button variant="ghost" size="icon-sm" className="w-auto px-3" aria-label={label}>
                   <Languages />
                 </Button>
               }

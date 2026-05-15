@@ -84,8 +84,9 @@ export function Header({
         <TooltipTrigger
           render={
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon-sm"
+              className="w-auto px-3"
               onClick={onOpenFiles}
               disabled={loading || saving}
               aria-label={openFilesLabel}
@@ -101,8 +102,9 @@ export function Header({
         <TooltipTrigger
           render={
             <Button
-              variant="default"
+              variant="ghost"
               size="icon-sm"
+              className="w-auto px-3"
               onClick={onSaveAll}
               disabled={!hasDirty || saving || loading}
               aria-label={saveAllLabel}
@@ -117,8 +119,9 @@ export function Header({
         <TooltipTrigger
           render={
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon-sm"
+              className="w-auto px-3"
               onClick={onDiscardChanges}
               disabled={!hasDirty || saving || loading}
               aria-label={discardChangesLabel}
