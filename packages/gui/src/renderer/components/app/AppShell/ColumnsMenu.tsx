@@ -7,6 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useLocale } from "@/features/i18n/useLocale";
 import { ALL_COLUMN_IDS, COLUMN_REGISTRY } from "@/features/spreadsheet/constants";
 import type { ColumnId } from "@/features/spreadsheet/types";
@@ -33,16 +34,23 @@ export type ColumnsMenuProps = {
 export function ColumnsMenu({ visibleIds, onToggle }: ColumnsMenuProps) {
   const { t } = useLocale();
   const visible = new Set(visibleIds);
+  const label = t("header.columns");
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button variant="outline" size="sm">
-            <Columns3 />
-            {t("header.columns")}
-          </Button>
-        }
-      />
+      <Tooltip>
+        <DropdownMenuTrigger
+          render={
+            <TooltipTrigger
+              render={
+                <Button variant="outline" size="icon-sm" aria-label={label}>
+                  <Columns3 />
+                </Button>
+              }
+            />
+          }
+        />
+        <TooltipContent>{label}</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent align="end" className="w-56">
         {ALL_COLUMN_IDS.map((id) => {
           const column = COLUMN_REGISTRY[id];
