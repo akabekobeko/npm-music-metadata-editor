@@ -32,7 +32,6 @@ export function AppShell() {
     <TooltipProvider>
       <div className="flex h-screen flex-col">
         <Header
-          fileCount={fileCount}
           dirtyCount={model.dirtyCount}
           loading={model.loading}
           saving={save.saving}

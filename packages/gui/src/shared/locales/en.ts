@@ -71,7 +71,6 @@ export const en: Dictionary = {
   "header.saveAll": "Save All",
   "header.saveAllWithCount": "Save All ({count})",
   "header.discardChanges": "Discard Changes",
-  "header.loading": "Loading…",
   "header.fileCount.singular": "{count} file",
   "header.fileCount.plural": "{count} files",
   "empty.title": "No audio files opened",
