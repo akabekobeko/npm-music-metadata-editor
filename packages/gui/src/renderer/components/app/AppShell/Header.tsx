@@ -75,7 +75,7 @@ export function Header({
     : t("header.saveAll");
   const discardChangesLabel = t("header.discardChanges");
   return (
-    <header className="flex h-12 shrink-0 items-center gap-3 border-b bg-background px-3">
+    <header className="flex shrink-0 items-center gap-3 border-b bg-background px-3 py-1.5">
       <Tooltip>
         <TooltipTrigger
           render={
