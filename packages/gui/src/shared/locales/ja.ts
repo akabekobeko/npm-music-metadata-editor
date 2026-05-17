@@ -70,7 +70,6 @@ export const ja: Dictionary = {
   "header.saveAll": "すべて保存",
   "header.saveAllWithCount": "すべて保存 ({count})",
   "header.discardChanges": "変更を破棄",
-  "header.loading": "読み込み中…",
   "header.fileCount.singular": "{count} 件",
   "header.fileCount.plural": "{count} 件",
   "empty.title": "音楽ファイルが開かれていません",

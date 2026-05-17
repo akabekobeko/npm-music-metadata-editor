@@ -13,8 +13,6 @@ import { ThemeMenu } from "./ThemeMenu";
 
 /** Props for {@link Header}. */
 export type HeaderProps = {
-  /** Total number of loaded rows; drives the trailing counter. */
-  readonly fileCount: number;
   /** Number of rows with unsaved edits; gates Save All / Discard. */
   readonly dirtyCount: number;
   /** Whether a load operation is in progress; collapses the toolbar. */
@@ -44,8 +42,8 @@ export type HeaderProps = {
 };
 
 /**
- * Top-level toolbar with the File → Open entry point, the columns picker, the
- * Save / Discard controls, and the file counter.
+ * Top-level toolbar with the File → Open entry point, the columns picker, and
+ * the Save / Discard controls.
  *
  * Save All / Discard Changes are gated on `dirtyCount > 0`, the Columns
  * picker drives `AppSettings.columns.visibleIds`, and the `loading` / `saving`
@@ -55,7 +53,6 @@ export type HeaderProps = {
  * @returns The toolbar.
  */
 export function Header({
-  fileCount,
   dirtyCount,
   loading,
   saving,
@@ -72,14 +69,13 @@ export function Header({
 }: HeaderProps) {
   const { t } = useLocale();
   const hasDirty = dirtyCount > 0;
-  const fileCountKey = fileCount === 1 ? "header.fileCount.singular" : "header.fileCount.plural";
   const openFilesLabel = t("header.openFiles");
   const saveAllLabel = hasDirty
     ? t("header.saveAllWithCount", { count: dirtyCount })
     : t("header.saveAll");
   const discardChangesLabel = t("header.discardChanges");
   return (
-    <header className="flex h-12 shrink-0 items-center gap-3 border-b bg-background px-3">
+    <header className="flex shrink-0 items-center gap-3 border-b bg-background px-3 py-1.5">
       <Tooltip>
         <TooltipTrigger
           render={
@@ -133,9 +129,6 @@ export function Header({
         <TooltipContent>{discardChangesLabel}</TooltipContent>
       </Tooltip>
       <div className="ml-auto flex items-center gap-3">
-        <div className="text-sm text-muted-foreground tabular-nums">
-          {loading ? t("header.loading") : t(fileCountKey, { count: fileCount })}
-        </div>
         <LanguageMenu value={localePreference} onChange={onLocaleChange} />
         <ThemeMenu value={themePreference} resolved={resolvedTheme} onChange={onThemeChange} />
       </div>

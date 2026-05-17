@@ -30,7 +30,7 @@ export function StatusBar({ fileCount, dirtyCount, warningCount, transient }: St
   return (
     <footer
       role="status"
-      className="flex h-7 shrink-0 items-center gap-3 border-t bg-background px-3 text-xs text-muted-foreground tabular-nums"
+      className="flex shrink-0 items-center gap-3 px-6 py-2 border-t bg-background text-xs text-muted-foreground tabular-nums"
     >
       <span>{t(fileCountKey, { count: fileCount })}</span>
       <span>{t("status.edited", { count: dirtyCount })}</span>
