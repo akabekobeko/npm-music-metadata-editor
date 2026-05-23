@@ -95,9 +95,7 @@ export function SpreadsheetBody({
                     isEditingCell ? undefined : () => onCellClick(virtualRow.index, column.id)
                   }
                   onDoubleClick={
-                    isEditingCell
-                      ? undefined
-                      : () => onCellDoubleClick(virtualRow.index, column.id)
+                    isEditingCell ? undefined : () => onCellDoubleClick(virtualRow.index, column.id)
                   }
                   className={cn(
                     "flex shrink-0 items-center border-r border-b px-2",

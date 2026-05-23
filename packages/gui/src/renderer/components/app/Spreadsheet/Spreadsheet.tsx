@@ -32,6 +32,8 @@ export type SpreadsheetProps = {
   readonly onUndo: () => void;
   /** Persist a new width for the dragged column. Called once per drag end. */
   readonly onColumnResize: (columnId: ColumnId, width: number) => void;
+  /** Persist a new column order after a successful header drag-and-drop. */
+  readonly onColumnReorder: (orderedIds: readonly ColumnId[]) => void;
 };
 
 /**
@@ -59,6 +61,7 @@ export function Spreadsheet({
   onPaste,
   onUndo,
   onColumnResize,
+  onColumnReorder,
 }: SpreadsheetProps) {
   const {
     containerRef,
@@ -96,6 +99,7 @@ export function Spreadsheet({
           selection={selection}
           onHeaderClick={handleColumnHeaderClick}
           onBeginResize={beginResize}
+          onColumnReorder={onColumnReorder}
         />
         <SpreadsheetBody
           columns={columns}
