@@ -1,4 +1,4 @@
-import { type PointerEvent as ReactPointerEvent, useCallback, useMemo, useState } from "react";
+import { type PointerEvent as ReactPointerEvent, useCallback, useState } from "react";
 
 import type { ColumnId } from "@/features/spreadsheet/types";
 
@@ -44,13 +44,8 @@ export const useColumnResize = ({ baseWidths, onColumnResize }: Args): ColumnRes
     readonly width: number;
   } | null>(null);
 
-  const liveWidths = useMemo(() => {
-    if (override === null) {
-      return baseWidths;
-    }
-
-    return { ...baseWidths, [override.columnId]: override.width };
-  }, [baseWidths, override]);
+  const liveWidths =
+    override === null ? baseWidths : { ...baseWidths, [override.columnId]: override.width };
 
   const beginResize = useCallback(
     (event: ReactPointerEvent<HTMLElement>, columnId: ColumnId): void => {

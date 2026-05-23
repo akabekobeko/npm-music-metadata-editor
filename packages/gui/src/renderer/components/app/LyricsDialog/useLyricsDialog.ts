@@ -1,5 +1,5 @@
 import type { LyricsInfo } from "@mme/ipc";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { buildLyricsInfoFromDraft } from "@/features/lyrics/buildLyricsInfoFromDraft";
 import { lyricsInfoToDraft } from "@/features/lyrics/lyricsInfoToDraft";
 import type { LyricsDraft, SyncedLine } from "@/features/lyrics/types";
@@ -55,10 +55,12 @@ export const useLyricsDialog = ({
   onApply,
   onNotify,
 }: Args): LyricsDialogState => {
-  const initialDraft = useMemo(() => lyricsInfoToDraft(initialLyrics), [initialLyrics]);
-  const [draft, setDraft] = useState<LyricsDraft>(initialDraft);
+  const [draft, setDraft] = useState<LyricsDraft>(() => lyricsInfoToDraft(initialLyrics));
   const [syncedEntries, setSyncedEntries] = useState<readonly SyncedLineEntry[]>(() =>
-    initialDraft.synchronized.map((line) => ({ id: globalThis.crypto.randomUUID(), line })),
+    lyricsInfoToDraft(initialLyrics).synchronized.map((line) => ({
+      id: globalThis.crypto.randomUUID(),
+      line,
+    })),
   );
 
   const updateDraft = useCallback((patch: Partial<LyricsDraft>): void => {

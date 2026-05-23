@@ -1,5 +1,5 @@
 import type { PictureInfo } from "@mme/ipc";
-import { type ChangeEvent, type DragEvent, useCallback, useMemo, useRef, useState } from "react";
+import { type ChangeEvent, type DragEvent, useCallback, useRef, useState } from "react";
 import { useLocale } from "@/features/i18n/useLocale";
 import { PICTURE_FILE_EXTENSIONS, PICTURE_SIZE_WARNING_BYTES } from "@/features/pictures/constants";
 import { draftsToPictureInfos, pictureInfosToDrafts } from "@/features/pictures/draftConversions";
@@ -158,7 +158,7 @@ export const usePicturesDialog = ({
   onNotify,
 }: Args): PicturesDialogState => {
   const { t } = useLocale();
-  const initialDrafts = useMemo(() => pictureInfosToDrafts(initialPictures), [initialPictures]);
+  const initialDrafts = pictureInfosToDrafts(initialPictures);
   const [drafts, setDrafts] = useState<readonly PictureDraft[]>(initialDrafts);
   const [selectedId, setSelectedId] = useState<string | null>(initialDrafts[0]?.id ?? null);
   const [dragActive, setDragActive] = useState(false);
@@ -166,8 +166,8 @@ export const usePicturesDialog = ({
   const replaceInputRef = useRef<HTMLInputElement | null>(null);
 
   const selected = drafts.find((draft) => draft.id === selectedId) ?? null;
-  const sortedDrafts = useMemo(() => sortByKind(drafts), [drafts]);
-  const dirty = useMemo(() => !equalDraftLists(drafts, initialDrafts), [drafts, initialDrafts]);
+  const sortedDrafts = sortByKind(drafts);
+  const dirty = !equalDraftLists(drafts, initialDrafts);
 
   const updateDraft = useCallback((id: string, patch: Partial<PictureDraft>): void => {
     setDrafts((prev) => prev.map((draft) => (draft.id === id ? { ...draft, ...patch } : draft)));
