@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 
 import { resolveColumnWidths } from "@/features/settings/resolveColumnWidths";
 import type { AppSettings, UpdateSettings } from "@/features/settings/types";
@@ -38,20 +38,19 @@ export type ColumnSettings = {
  *   1. `visibleIds` cast to the `ColumnId` discriminator (the persisted shape
  *      is just `string[]` so settings doesn't depend on the renderer's column
  *      registry).
- *   2. `buildColumns(visibleIds, support)` and `resolveColumnWidths(...)` both
- *      memoised to keep render-time work proportional to actual changes.
+ *   2. `buildColumns(visibleIds, support)` and `resolveColumnWidths(...)`
+ *      derived during render — both are pure projections small enough that
+ *      re-running them on every render is cheaper than the bookkeeping a
+ *      memo would add.
  *   3. Toggle / resize handlers that emit minimal `setSettings` patches.
  *
  * @param args - Settings, patch helper, and format support matrix.
- * @returns Memoised column metadata plus the toggle / resize helpers.
+ * @returns Column metadata plus the toggle / resize helpers.
  */
 export const useColumnSettings = ({ settings, setSettings, support }: Args): ColumnSettings => {
   const visibleIds = settings.columns.visibleIds as readonly ColumnId[];
-  const columns = useMemo(() => buildColumns(visibleIds, support), [visibleIds, support]);
-  const columnWidths = useMemo(
-    () => resolveColumnWidths(columns, settings.columns.widths),
-    [columns, settings.columns.widths],
-  );
+  const columns = buildColumns(visibleIds, support);
+  const columnWidths = resolveColumnWidths(columns, settings.columns.widths);
 
   const toggleColumn = useCallback(
     (id: ColumnId, visible: boolean): void => {

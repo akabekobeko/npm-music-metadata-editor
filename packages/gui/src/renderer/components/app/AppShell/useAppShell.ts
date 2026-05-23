@@ -1,5 +1,5 @@
 import type { FatalPayload } from "@mme/ipc";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDragAndDrop } from "@/features/dnd/useDragAndDrop";
 import { useEditStore } from "@/features/edit/store";
 import { useSettings } from "@/features/settings/store";
@@ -68,6 +68,9 @@ export type AppShellModel = {
   /** Open Files handler (header button + Cmd/Ctrl+O). */
   readonly onOpenFiles: () => void;
 };
+
+/** Snapshot of every column the registry exposes, captured at module load. */
+const ALL_COLUMNS: readonly ColumnDefinition[] = Object.values(COLUMN_REGISTRY);
 
 /** Locale / theme controls surfaced to the header. */
 export type PreferenceControls = {
@@ -191,8 +194,6 @@ export const useAppShell = (): AppShellModel => {
     recentFiles: settings.recentFiles,
   });
 
-  const allColumns: readonly ColumnDefinition[] = useMemo(() => Object.values(COLUMN_REGISTRY), []);
-
   const dirtyCount = editState.rows.filter((row) => row.dirty).length;
   const warningCount = editState.rows.reduce((sum, row) => sum + row.track.warnings.length, 0);
 
@@ -216,7 +217,7 @@ export const useAppShell = (): AppShellModel => {
     recentFiles: settings.recentFiles,
     theme,
     visibleColumnIds: columns.visibleIds as readonly string[],
-    allColumns,
+    allColumns: ALL_COLUMNS,
   });
 
   return {

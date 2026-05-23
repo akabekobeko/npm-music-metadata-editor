@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo } from "react";
+import type { ReactNode } from "react";
 
 import { isColumnSelectable } from "@/features/spreadsheet/isColumnSelectable";
 import type { ColumnDefinition } from "@/features/spreadsheet/types";
@@ -24,19 +24,12 @@ export type HeaderEntry = {
 /**
  * Pre-compute the per-column header metadata the spreadsheet renders.
  *
- * Memoised against `columns` so re-renders driven by selection or
- * edit-mode changes do not re-run `renderHeader`.
- *
  * @param args - Columns.
  * @returns One {@link HeaderEntry} per visible column.
  */
 export const useSpreadsheetHeader = ({ columns }: Args): readonly HeaderEntry[] =>
-  useMemo(
-    () =>
-      columns.map((column) => ({
-        column,
-        node: renderHeader({ column }),
-        selectable: isColumnSelectable(column),
-      })),
-    [columns],
-  );
+  columns.map((column) => ({
+    column,
+    node: renderHeader({ column }),
+    selectable: isColumnSelectable(column),
+  }));
