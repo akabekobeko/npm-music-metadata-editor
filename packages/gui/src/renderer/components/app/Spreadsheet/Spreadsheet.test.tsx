@@ -31,6 +31,7 @@ import type { CommitArgs, PasteArgs } from "./types";
 type CommitFn = (args: CommitArgs) => void;
 type PasteFn = (args: PasteArgs) => void;
 type UndoFn = () => void;
+type ReorderFn = (orderedIds: readonly ColumnId[]) => void;
 
 type ScenarioArgs = {
   readonly visibleIds: readonly ColumnId[];
@@ -40,6 +41,7 @@ type ScenarioArgs = {
     readonly onCommit?: CommitFn;
     readonly onPaste?: PasteFn;
     readonly onUndo?: UndoFn;
+    readonly onColumnReorder?: ReorderFn;
   };
 };
 
@@ -47,6 +49,7 @@ const renderSpreadsheet = ({ visibleIds, rows, support, handlers = {} }: Scenari
   const onCommit: CommitFn = handlers.onCommit ?? vi.fn();
   const onPaste: PasteFn = handlers.onPaste ?? vi.fn();
   const onUndo: UndoFn = handlers.onUndo ?? vi.fn();
+  const onColumnReorder: ReorderFn = handlers.onColumnReorder ?? vi.fn();
   const columns = buildColumns(visibleIds, support);
   const columnWidths = Object.fromEntries(
     columns.map((column) => [column.id, column.width]),
@@ -64,10 +67,11 @@ const renderSpreadsheet = ({ visibleIds, rows, support, handlers = {} }: Scenari
         onPaste={onPaste}
         onUndo={onUndo}
         onColumnResize={() => {}}
+        onColumnReorder={onColumnReorder}
       />
     </TooltipProvider>,
   );
-  return { ...result, onCommit, onPaste, onUndo };
+  return { ...result, onCommit, onPaste, onUndo, onColumnReorder };
 };
 
 type RowSeed = {
@@ -111,6 +115,23 @@ const supportEntry = (
 
 const supportMap = (entries: readonly FormatSupportEntry[]): FormatSupportMap =>
   new Map(entries.map((entry) => [entry.format, entry]));
+
+const draggableFor = (title: string): HTMLElement => {
+  const label = screen.getByText(title, { selector: "span.font-medium" });
+  const draggable = label.closest("[draggable]");
+  if (draggable === null) {
+    throw new Error(`no [draggable] ancestor for header ${title}`);
+  }
+  return draggable as HTMLElement;
+};
+
+const createDataTransfer = (): DataTransfer =>
+  ({
+    setData: vi.fn(),
+    getData: vi.fn(() => ""),
+    effectAllowed: "all",
+    dropEffect: "none",
+  }) as unknown as DataTransfer;
 
 beforeEach(() => {
   vi.unstubAllGlobals();
@@ -170,9 +191,7 @@ it("commits the edited value when the input loses focus", () => {
   fireEvent.change(input, { target: { value: "Text" } });
   fireEvent.blur(input);
 
-  expect(onCommit).toHaveBeenCalledWith(
-    expect.objectContaining({ field: "title", value: "Text" }),
-  );
+  expect(onCommit).toHaveBeenCalledWith(expect.objectContaining({ field: "title", value: "Text" }));
 });
 
 it("discards the edit on blur when the value fails validation", () => {
@@ -226,13 +245,52 @@ it("ignores header clicks on cell-only columns and skips paste afterwards", asyn
   });
 
   const header = screen.getByText("Lyrics", { selector: "span.font-medium" });
-  const headerCell = header.closest("th") as HTMLTableCellElement;
-  expect(headerCell.title).toMatch(/cell only/i);
-  expect(headerCell.className).toContain("cursor-default");
+  const headerDraggable = draggableFor("Lyrics");
+  expect(headerDraggable.title).toMatch(/cell only/i);
+  expect(headerDraggable.className).toContain("cursor-default");
   fireEvent.click(header);
   fireEvent.keyDown(document, { key: "v", ctrlKey: true });
   await Promise.resolve();
   expect(onPaste).not.toHaveBeenCalled();
+});
+
+it("reorders columns when a header is dragged onto another", () => {
+  const onColumnReorder = vi.fn();
+  renderSpreadsheet({
+    visibleIds: ["fileName", "tag.title", "tag.artist", "tag.album"],
+    rows: [],
+    support: supportMap([supportEntry("mp3", ["title", "artist", "album"])]),
+    handlers: { onColumnReorder },
+  });
+
+  const titleDraggable = draggableFor("Title");
+  const albumDraggable = draggableFor("Album");
+
+  const dt = createDataTransfer();
+  fireEvent.dragStart(titleDraggable, { dataTransfer: dt });
+  fireEvent.dragOver(albumDraggable, { dataTransfer: dt, clientX: 200 });
+  fireEvent.drop(albumDraggable, { dataTransfer: dt });
+
+  expect(onColumnReorder).toHaveBeenCalledTimes(1);
+  expect(onColumnReorder).toHaveBeenCalledWith([
+    "fileName",
+    "tag.artist",
+    "tag.album",
+    "tag.title",
+  ]);
+});
+
+it("blocks dragging the pinned fileName column", () => {
+  const onColumnReorder = vi.fn();
+  renderSpreadsheet({
+    visibleIds: ["fileName", "tag.title"],
+    rows: [],
+    support: supportMap([supportEntry("mp3", ["title"])]),
+    handlers: { onColumnReorder },
+  });
+
+  const fileDraggable = draggableFor("File");
+  expect(fileDraggable.getAttribute("draggable")).toBe("false");
 });
 
 it("requests a paste with the selected column id when Cmd+V fires", async () => {

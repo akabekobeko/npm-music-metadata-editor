@@ -24,9 +24,12 @@ export type ColumnsMenuProps = {
  *
  * `fileName` is anchored on by design (it carries the row identity), so the
  * checkbox for it is rendered as disabled — the toggle never fires for that
- * id. The order in the menu matches `ALL_COLUMN_IDS` so users find the same
- * column at the same vertical position regardless of what is currently
- * visible.
+ * id.
+ *
+ * Menu order follows the current display order: visible columns appear in
+ * their on-grid sequence (so the menu reflects the user's drag-and-drop
+ * reordering), then any hidden columns follow in the registry's declaration
+ * order so the catalog stays predictable.
  *
  * @param props - Component props.
  * @returns The dropdown trigger plus its checkbox menu.
@@ -34,6 +37,10 @@ export type ColumnsMenuProps = {
 export function ColumnsMenu({ visibleIds, onToggle }: ColumnsMenuProps) {
   const { t } = useLocale();
   const visible = new Set(visibleIds);
+  const orderedIds: readonly ColumnId[] = [
+    ...visibleIds,
+    ...ALL_COLUMN_IDS.filter((id) => !visible.has(id)),
+  ];
   const label = t("header.columns");
   return (
     <DropdownMenu>
@@ -52,7 +59,7 @@ export function ColumnsMenu({ visibleIds, onToggle }: ColumnsMenuProps) {
         <TooltipContent>{label}</TooltipContent>
       </Tooltip>
       <DropdownMenuContent align="end" className="w-56">
-        {ALL_COLUMN_IDS.map((id) => {
+        {orderedIds.map((id) => {
           const column = COLUMN_REGISTRY[id];
           const isFileName = id === "fileName";
           return (

@@ -22,10 +22,7 @@ export function NumberCell({ value, disabled }: NumberCellProps) {
   const text = value === undefined ? "" : String(value);
   return (
     <span
-      className={cn(
-        "block truncate text-right tabular-nums",
-        disabled && "text-muted-foreground",
-      )}
+      className={cn("block truncate text-right tabular-nums", disabled && "text-muted-foreground")}
     >
       {text}
     </span>

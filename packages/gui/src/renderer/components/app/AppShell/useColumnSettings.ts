@@ -25,6 +25,8 @@ export type ColumnSettings = {
   readonly columnWidths: Readonly<Record<ColumnId, number>>;
   /** Toggle a column's visibility and persist the change. */
   readonly toggleColumn: (id: ColumnId, visible: boolean) => void;
+  /** Persist a new column display order. `fileName` is forced to the front. */
+  readonly reorderColumns: (orderedIds: readonly ColumnId[]) => void;
   /** Persist a new width for the resized column. */
   readonly resizeColumn: (id: ColumnId, width: number) => void;
 };
@@ -64,6 +66,18 @@ export const useColumnSettings = ({ settings, setSettings, support }: Args): Col
     [settings.columns.visibleIds, setSettings],
   );
 
+  const reorderColumns = useCallback(
+    (orderedIds: readonly ColumnId[]): void => {
+      // `fileName` is the row identity column and must stay at the front; the
+      // header DnD already prevents dragging it, but a malformed input here
+      // would otherwise let it slip elsewhere.
+      const withoutFileName = orderedIds.filter((id) => id !== "fileName");
+      const next: readonly ColumnId[] = ["fileName", ...withoutFileName];
+      setSettings({ columns: { visibleIds: next as readonly string[] } });
+    },
+    [setSettings],
+  );
+
   const resizeColumn = useCallback(
     (id: ColumnId, width: number): void => {
       setSettings({ columns: { widths: { [id]: width } } });
@@ -71,5 +85,5 @@ export const useColumnSettings = ({ settings, setSettings, support }: Args): Col
     [setSettings],
   );
 
-  return { visibleIds, columns, columnWidths, toggleColumn, resizeColumn };
+  return { visibleIds, columns, columnWidths, toggleColumn, reorderColumns, resizeColumn };
 };

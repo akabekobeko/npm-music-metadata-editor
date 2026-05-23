@@ -61,6 +61,7 @@ export function AppShell() {
               onPaste={grid.onPaste}
               onUndo={grid.onUndo}
               onColumnResize={columns.resizeColumn}
+              onColumnReorder={columns.reorderColumns}
             />
           )}
         </main>

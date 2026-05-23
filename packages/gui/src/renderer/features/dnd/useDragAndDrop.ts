@@ -33,7 +33,17 @@ export const useDragAndDrop = ({ onPaths, disabled = false }: Args): void => {
       return;
     }
 
+    // Only react to OS-level file drags. Internal drags (column reordering,
+    // text selection) carry `text/plain` or similar — overwriting their
+    // `dropEffect` to "copy" would clash with their `effectAllowed = "move"`
+    // and silently disable the drop on every internal drag-and-drop flow.
+    const isFileDrag = (event: DragEvent): boolean =>
+      event.dataTransfer?.types.includes("Files") ?? false;
+
     const onDragOver = (event: DragEvent): void => {
+      if (!isFileDrag(event)) {
+        return;
+      }
       event.preventDefault();
       if (event.dataTransfer !== null) {
         event.dataTransfer.dropEffect = "copy";
@@ -41,6 +51,9 @@ export const useDragAndDrop = ({ onPaths, disabled = false }: Args): void => {
     };
 
     const onDrop = (event: DragEvent): void => {
+      if (!isFileDrag(event)) {
+        return;
+      }
       event.preventDefault();
       const files = event.dataTransfer?.files;
       if (files === undefined || files.length === 0) {
