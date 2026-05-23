@@ -1,11 +1,10 @@
 import type { MenuAction, MenuActionPayload } from "@mme/ipc";
 import { type Dispatch, useEffect } from "react";
-import type { EditAction } from "@/features/edit/store";
 import { touchRecentFile } from "@/features/settings/touchRecentFile";
 import type { UpdateSettings } from "@/features/settings/types";
 import type { ColumnId } from "@/features/spreadsheet/types";
 import { loadTracks } from "@/features/tracks/loadTracks";
-import type { TracksAction } from "@/features/tracks/store";
+import type { LoadDonePayload, TracksAction } from "@/features/tracks/store";
 
 /** Args for {@link useMenuActions}. */
 type Args = {
@@ -29,10 +28,10 @@ type Args = {
   readonly themePreference: "light" | "dark" | "system" | undefined;
   /** Settings patch helper used by toggle / openRecent actions. */
   readonly setSettings: UpdateSettings;
-  /** Tracks reducer dispatch for `openRecent` loads. */
+  /** Tracks reducer dispatch — only used here for `load:start` on openRecent. */
   readonly tracksDispatch: Dispatch<TracksAction>;
-  /** Edit reducer dispatch for `openRecent` loads. */
-  readonly editDispatch: Dispatch<EditAction>;
+  /** Funnel that turns one load round-trip into both reducer updates. */
+  readonly commitLoadResult: (payload: LoadDonePayload) => void;
   /** Current `recentFiles` list — passed into `touchRecentFile` to dedupe. */
   readonly recentFiles: readonly string[];
 };
@@ -59,7 +58,7 @@ export const useMenuActions = ({
   themePreference,
   setSettings,
   tracksDispatch,
-  editDispatch,
+  commitLoadResult,
   recentFiles,
 }: Args): void => {
   useEffect(() => {
@@ -121,11 +120,7 @@ export const useMenuActions = ({
 
           tracksDispatch({ type: "load:start" });
           const result = await loadTracks([filePath]);
-          tracksDispatch({
-            type: "load:done",
-            payload: { rows: result.rows, errors: result.errors },
-          });
-          editDispatch({ type: "load", rows: result.rows });
+          commitLoadResult({ rows: result.rows, errors: result.errors });
 
           if (result.rows.length > 0) {
             const next = touchRecentFile(
@@ -151,7 +146,7 @@ export const useMenuActions = ({
     themePreference,
     setSettings,
     tracksDispatch,
-    editDispatch,
+    commitLoadResult,
     recentFiles,
   ]);
 };

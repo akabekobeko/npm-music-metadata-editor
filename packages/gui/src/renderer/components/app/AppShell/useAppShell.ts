@@ -1,5 +1,5 @@
 import type { FatalPayload } from "@mme/ipc";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useDragAndDrop } from "@/features/dnd/useDragAndDrop";
 import { useEditStore } from "@/features/edit/store";
 import { useSettings } from "@/features/settings/store";
@@ -9,7 +9,8 @@ import type { ColumnDefinition, FormatSupportMap } from "@/features/spreadsheet/
 import type { ResolvedTheme, ThemePreference } from "@/features/theme/types";
 import { useTheme } from "@/features/theme/useTheme";
 import { loadTracks } from "@/features/tracks/loadTracks";
-import { useTracksStore } from "@/features/tracks/store";
+import { mergeRowsByPath } from "@/features/tracks/mergeRowsByPath";
+import { type LoadDonePayload, useTracksStore } from "@/features/tracks/store";
 import type { TrackRow } from "@/features/tracks/types";
 import type { LocalePreference } from "../../../../shared/locales/types.js";
 import type { ColumnSettings } from "./useColumnSettings.js";
@@ -93,9 +94,11 @@ export type PreferenceControls = {
  * handlers) plus a global-shortcut binding. AppShell.tsx itself is reduced to
  * a JSX-only component that consumes this model.
  *
- * The `editStore.load` mirror effect (sync edit rows whenever the tracks
- * store finishes a load) lives here too — it's the only place that needs to
- * see both reducers, so extracting it would just push the dependency further.
+ * The `commitLoadResult` callback is the single funnel that turns one IPC
+ * `loadMany` round-trip into both reducer updates (tracks + edit) — it lets
+ * sub-hooks dispatch the post-load mirror inline rather than relying on a
+ * tracks→edit `useEffect`, which would otherwise wipe edit history one
+ * render late and create an extra paint.
  *
  * @returns The complete AppShell view model.
  */
@@ -110,11 +113,20 @@ export const useAppShell = (): AppShellModel => {
   const [fatal, dismissFatal] = useFatalHandler();
   const [aboutOpen, setAboutOpen] = useState(false);
 
-  // Mirror the load result into the edit reducer so undo history resets when
-  // the user opens a fresh batch of files.
-  useEffect(() => {
-    editDispatch({ type: "load", rows: tracksState.rows });
-  }, [tracksState.rows, editDispatch]);
+  // Mirror the latest tracks rows into a ref so `commitLoadResult` can read
+  // them without re-creating itself on every load (idempotent ref assignment
+  // during render — safe and avoids a wake-up `useEffect`).
+  const tracksRowsRef = useRef(tracksState.rows);
+  tracksRowsRef.current = tracksState.rows;
+
+  const commitLoadResult = useCallback(
+    (payload: LoadDonePayload): void => {
+      const mergedRows = mergeRowsByPath(tracksRowsRef.current, payload.rows);
+      tracksDispatch({ type: "load:done", payload });
+      editDispatch({ type: "load", rows: mergedRows });
+    },
+    [tracksDispatch, editDispatch],
+  );
 
   const columns = useColumnSettings({ settings, setSettings, support });
   const dialogs = useDialogState({
@@ -132,11 +144,12 @@ export const useAppShell = (): AppShellModel => {
   const save = useSaveAll({
     editState,
     editDispatch,
-    tracksDispatch,
+    commitLoadResult,
     notify: status.show,
   });
   const onOpenFiles = useFileOpen({
     tracksDispatch,
+    commitLoadResult,
     recentFiles: settings.recentFiles,
     setSettings,
   });
@@ -160,10 +173,7 @@ export const useAppShell = (): AppShellModel => {
 
       tracksDispatch({ type: "load:start" });
       const result = await loadTracks(paths);
-      tracksDispatch({
-        type: "load:done",
-        payload: { rows: result.rows, errors: result.errors },
-      });
+      commitLoadResult({ rows: result.rows, errors: result.errors });
 
       if (result.rows.length > 0) {
         const next = touchRecentFile(
@@ -173,7 +183,7 @@ export const useAppShell = (): AppShellModel => {
         setSettings({ recentFiles: next });
       }
     },
-    [tracksDispatch, setSettings, settings.recentFiles],
+    [tracksDispatch, commitLoadResult, setSettings, settings.recentFiles],
   );
 
   useDragAndDrop({ onPaths: onDropPaths, disabled: tracksState.loading || save.saving });
@@ -190,7 +200,7 @@ export const useAppShell = (): AppShellModel => {
     themePreference: settings.theme,
     setSettings,
     tracksDispatch,
-    editDispatch,
+    commitLoadResult,
     recentFiles: settings.recentFiles,
   });
 
