@@ -5,7 +5,7 @@ import { useLocale } from "@/features/i18n/useLocale";
 import { saveDirtyRows } from "@/features/save/saveDirtyRows";
 import type { SaveProgress } from "@/features/save/types";
 import { loadTracks } from "@/features/tracks/loadTracks";
-import type { TracksAction } from "@/features/tracks/store";
+import type { LoadDonePayload } from "@/features/tracks/store";
 
 import { formatSaveSummary } from "./formatSaveSummary.js";
 
@@ -15,8 +15,8 @@ type Args = {
   readonly editState: EditState;
   /** Edit reducer dispatch — drives `markSaveErrors` / `revert`. */
   readonly editDispatch: Dispatch<EditAction>;
-  /** Tracks reducer dispatch — used to refresh successful rows after save. */
-  readonly tracksDispatch: Dispatch<TracksAction>;
+  /** Funnel that turns one load round-trip into both reducer updates. */
+  readonly commitLoadResult: (payload: LoadDonePayload) => void;
   /** Notification sink for the post-save summary toast. */
   readonly notify: (message: string) => void;
 };
@@ -55,7 +55,7 @@ export type SaveAllControls = {
 export const useSaveAll = ({
   editState,
   editDispatch,
-  tracksDispatch,
+  commitLoadResult,
   notify,
 }: Args): SaveAllControls => {
   const { t } = useLocale();
@@ -93,15 +93,12 @@ export const useSaveAll = ({
 
     if (succeededPaths.length > 0) {
       const reload = await loadTracks(succeededPaths);
-      tracksDispatch({
-        type: "load:done",
-        payload: { rows: reload.rows, errors: reload.errors },
-      });
+      commitLoadResult({ rows: reload.rows, errors: reload.errors });
     }
 
     setSaving(false);
     notify(formatSaveSummary({ t, results: summary.results, cancelled: summary.cancelled }));
-  }, [editState.rows, editDispatch, tracksDispatch, notify, t]);
+  }, [editState.rows, editDispatch, commitLoadResult, notify, t]);
 
   const cancelSave = useCallback((): void => {
     cancelRef.current = true;

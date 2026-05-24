@@ -1,4 +1,5 @@
 import { type Dispatch, useReducer } from "react";
+import { mergeRowsByPath } from "./mergeRowsByPath.js";
 import type { TrackLoadError, TrackRow } from "./types.js";
 
 /** Tracks slice of the renderer state. */
@@ -16,7 +17,7 @@ export type TracksState = {
  * `loadMany` round-trip. The reducer merges them into the running state with
  * last-write-wins semantics keyed by file path.
  */
-type LoadDonePayload = {
+export type LoadDonePayload = {
   /** Successfully-loaded rows from this round-trip. */
   readonly rows: readonly TrackRow[];
   /** Per-file failures from this round-trip. */
@@ -73,11 +74,6 @@ export const tracksReducer = (state: TracksState, action: TracksAction): TracksS
  *   same way, errors for any newly-loaded path cleared, and `loading: false`.
  */
 const mergeLoadDone = (state: TracksState, payload: LoadDonePayload): TracksState => {
-  const rowsByPath = new Map<string, TrackRow>(state.rows.map((row) => [row.filePath, row]));
-  for (const row of payload.rows) {
-    rowsByPath.set(row.filePath, row);
-  }
-
   const errorsByPath = new Map<string, TrackLoadError>(
     state.errors.map((entry) => [entry.filePath, entry]),
   );
@@ -90,7 +86,7 @@ const mergeLoadDone = (state: TracksState, payload: LoadDonePayload): TracksStat
   }
 
   return {
-    rows: [...rowsByPath.values()],
+    rows: mergeRowsByPath(state.rows, payload.rows),
     errors: [...errorsByPath.values()],
     loading: false,
   };
