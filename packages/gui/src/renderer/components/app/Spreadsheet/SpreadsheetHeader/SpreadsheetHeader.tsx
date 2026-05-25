@@ -48,7 +48,7 @@ export function SpreadsheetHeader({
   const dnd = useColumnDragAndDrop({ visibleIds, onColumnReorder });
 
   return (
-    <thead className="sticky top-0 z-20 bg-background">
+    <thead className="sticky top-0 z-20 bg-gray-100 dark:bg-gray-800">
       <tr>
         {headerEntries.map(({ column, node, selectable }) => {
           const isDragging = dnd.draggingId === column.id;
