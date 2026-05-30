@@ -1,5 +1,9 @@
 import { spawnSync } from "node:child_process";
 
+/**
+ * Run the shadcn CLI with the renderer tsconfig, then format the generated
+ * files with Biome. Exits with a non-zero code if either step fails.
+ */
 const args = process.argv.slice(2);
 const env = { ...process.env, TS_NODE_PROJECT: "tsconfig.web.json" };
 

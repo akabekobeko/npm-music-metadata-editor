@@ -1,18 +1,25 @@
 import { readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import { getElectronTargetEnv } from "./get-electron-target-env.mjs";
+import { resolve } from "node:path";
+import { getElectronTargetEnv } from "./get-electron-target-env.ts";
+
+/** Arguments for {@link updateTsconfig}. */
+type UpdateTsconfigArgs = {
+  /** Package root directory. */
+  root: string;
+  /** Path to the tsconfig, relative to `root`. */
+  relativePath: string;
+  /** New `target` value. */
+  esTarget: string;
+  /** New `module` value. */
+  moduleTarget: string;
+};
 
 /**
- * Update target and module in a tsconfig JSON file.
+ * Update `target` and `module` in a tsconfig JSON file.
+ *
  * Performs text-level replacement to preserve the original formatting.
- * @param {{ root: string, relativePath: string, esTarget: string, moduleTarget: string }} args
- *  - root: Package root directory.
- *  - relativePath: tsconfig file relative to `root`.
- *  - esTarget: Value to write into `compilerOptions.target`.
- *  - moduleTarget: Value to write into `compilerOptions.module`.
  */
-function updateTsconfig({ root, relativePath, esTarget, moduleTarget }) {
+function updateTsconfig({ root, relativePath, esTarget, moduleTarget }: UpdateTsconfigArgs): void {
   const filePath = resolve(root, relativePath);
   let text = readFileSync(filePath, "utf-8");
   const json = JSON.parse(text);
@@ -29,15 +36,22 @@ function updateTsconfig({ root, relativePath, esTarget, moduleTarget }) {
   );
 }
 
+/** Arguments for {@link updateViteConfig}. */
+type UpdateViteConfigArgs = {
+  /** Package root directory. */
+  root: string;
+  /** Path to the config, relative to `root`. */
+  relativePath: string;
+  /** New build target value (e.g. `"node24"` or `"chrome146"`). */
+  newTarget: string;
+};
+
 /**
- * Update the build target in a vite.config.ts file.
- * Matches the pattern: target: '...' or target: "..."
- * @param {{ root: string, relativePath: string, newTarget: string }} args
- *  - root: Package root directory.
- *  - relativePath: vite config file relative to `root`.
- *  - newTarget: Value to write into `build.target` (e.g. "node24" or "chrome146").
+ * Update the build `target` in a `vite.config.ts` file.
+ *
+ * Matches the pattern `target: '...'` or `target: "..."`.
  */
-function updateViteConfig({ root, relativePath, newTarget }) {
+function updateViteConfig({ root, relativePath, newTarget }: UpdateViteConfigArgs): void {
   const filePath = resolve(root, relativePath);
   let text = readFileSync(filePath, "utf-8");
 
@@ -51,14 +65,16 @@ function updateViteConfig({ root, relativePath, newTarget }) {
 }
 
 /**
- * Update the Node.js version in this package's `.mise.toml`.
- * The root `.mise.toml` is intentionally left untouched so that core / cli
+ * Update the Node.js version in this package's `mise.toml`.
+ *
+ * The root `mise.toml` is intentionally left untouched so that core / cli
  * remain on their own Node version independently of Electron's bundled Node.
- * @param {string} root - Package root directory.
- * @param {string} newVersion - Full version string (e.g. "24.14.1")
+ *
+ * @param root - Package root directory.
+ * @param newVersion - Full version string (e.g. `"24.14.1"`).
  */
-function updateMiseToml(root, newVersion) {
-  const filePath = resolve(root, ".mise.toml");
+function updateMiseToml(root: string, newVersion: string): void {
+  const filePath = resolve(root, "mise.toml");
   let text = readFileSync(filePath, "utf-8");
 
   const match = text.match(/^node\s*=\s*"([^"]*)"/m);
@@ -71,12 +87,11 @@ function updateMiseToml(root, newVersion) {
 }
 
 /**
- * Sync tsconfig, vite.config.ts, and .mise.toml targets
- * with the installed Electron's bundled Chrome and Node.js versions.
+ * Sync tsconfig, `vite.config.ts`, and `mise.toml` targets with the installed
+ * Electron's bundled Chrome and Node.js versions.
  */
-function syncElectronTargets() {
-  const __dirname = dirname(fileURLToPath(import.meta.url));
-  const root = resolve(__dirname, "..");
+function syncElectronTargets(): void {
+  const root = resolve(import.meta.dirname, "..");
 
   const { esTarget, chromeMajor, nodeMajor, nodeVersion } = getElectronTargetEnv();
 
@@ -99,7 +114,7 @@ function syncElectronTargets() {
   updateViteConfig({ root, relativePath: "src/preload/vite.config.ts", newTarget: nodeTarget });
   updateViteConfig({ root, relativePath: "src/renderer/vite.config.ts", newTarget: chromeTarget });
 
-  console.log("\n.mise.toml:");
+  console.log("\nmise.toml:");
   updateMiseToml(root, nodeVersion);
 
   console.log("\nDone.");

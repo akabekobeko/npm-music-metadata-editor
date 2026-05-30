@@ -3,10 +3,11 @@ import electron from "electron";
 
 /**
  * Query a value from the installed Electron's `process.versions`.
- * @param {string} key - Key in `process.versions` (e.g. "chrome", "node").
- * @returns {string} The full version string.
+ *
+ * @param key - Key in `process.versions` (e.g. `"chrome"`, `"node"`).
+ * @returns The full version string.
  */
-function queryElectronVersion(key) {
+function queryElectronVersion(key: string): string {
   return execFileSync(String(electron), ["-e", `process.stdout.write(process.versions.${key})`], {
     encoding: "utf-8",
     timeout: 10_000,
@@ -16,10 +17,11 @@ function queryElectronVersion(key) {
 
 /**
  * Map a Chrome major version to the highest ES target it fully supports.
- * @param {number} major
- * @returns {string} e.g. "ES2024"
+ *
+ * @param major - Chrome major version.
+ * @returns ES target, e.g. `"ES2024"`.
  */
-function chromeToEsTarget(major) {
+function chromeToEsTarget(major: number): string {
   if (major >= 133) return "ES2024";
   if (major >= 117) return "ES2023";
   return "ES2022";
@@ -27,22 +29,33 @@ function chromeToEsTarget(major) {
 
 /**
  * Map a Node.js major version to the highest ES target it fully supports.
- * @param {number} major
- * @returns {string} e.g. "ES2024"
+ *
+ * @param major - Node.js major version.
+ * @returns ES target, e.g. `"ES2024"`.
  */
-function nodeToEsTarget(major) {
+function nodeToEsTarget(major: number): string {
   if (major >= 22) return "ES2024";
   if (major >= 20) return "ES2023";
   return "ES2022";
 }
 
+/** Target environment derived from the installed Electron. */
+export type ElectronTargetEnv = {
+  esTarget: string;
+  chromeMajor: number;
+  nodeMajor: number;
+  nodeVersion: string;
+};
+
 /**
  * Get the target environment information based on the installed Electron.
+ *
  * Returns the lower of Chrome and Node ES targets to ensure compatibility
  * across both main and renderer processes.
- * @returns {{ esTarget: string, chromeMajor: number, nodeMajor: number, nodeVersion: string }}
+ *
+ * @returns The resolved target environment.
  */
-export function getElectronTargetEnv() {
+export function getElectronTargetEnv(): ElectronTargetEnv {
   const chromeVersion = queryElectronVersion("chrome");
   const nodeVersion = queryElectronVersion("node");
   const chromeMajor = Number(chromeVersion.split(".")[0]);
