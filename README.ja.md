@@ -21,7 +21,7 @@
 
 ## 開発
 
-Node.js 24 / pnpm 10 が必要です ([`.mise.toml`](.mise.toml) で固定)。
+Node.js 24 / pnpm 11 が必要です ([`mise.toml`](mise.toml) で固定)。
 
 ```sh
 pnpm install

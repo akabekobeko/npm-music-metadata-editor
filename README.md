@@ -21,7 +21,7 @@ A toolkit for reading and writing audio file metadata in Node.js. The repository
 
 ## Development
 
-Requires Node.js 24 and pnpm 10 (pinned in [`.mise.toml`](.mise.toml)).
+Requires Node.js 24 and pnpm 11 (pinned in [`mise.toml`](mise.toml)).
 
 ```sh
 pnpm install

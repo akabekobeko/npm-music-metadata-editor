@@ -24,8 +24,8 @@ docs/                  # ルール / 実装計画 / 設計資料 (リポジト�
 
 ## 環境とコマンド
 
-- Node.js 24 / pnpm 10 (`.mise.toml` でバージョン固定)
-  - **gui パッケージは `packages/gui/.mise.toml` で別管理**。Electron がバンドルする Node メジャーに `scripts/sync-electron-targets.mjs` で追従させる二段構成。`cd packages/gui` 配下では gui 用 Node、リポジトリ ルートではルート用 Node が解決される
+- Node.js 24 / pnpm 11 (`mise.toml` でバージョン固定)
+  - **gui パッケージは `packages/gui/mise.toml` で別管理**。Electron がバンドルする Node メジャーに `scripts/sync-electron-targets.ts` で追従させる二段構成。`cd packages/gui` 配下では gui 用 Node、リポジトリ ルートではルート用 Node が解決される
 - ルートの主要スクリプトは `pnpm -r` で全パッケージへデリゲート
   - `pnpm typecheck` — 各パッケージで `tsc --noEmit`
   - `pnpm test` / `pnpm test:coverage` — 各パッケージで Vitest
