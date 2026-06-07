@@ -27,6 +27,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  */
 let mainWindow: BrowserWindow | null = null;
 
+// This app does not use safeStorage, so prevent Chromium's cookie encryption
+// from accessing the OS credential store and showing a permission dialog on
+// startup. `use-mock-keychain` covers macOS (the `password-store` switch is
+// Linux-only and has no effect there), while `password-store=basic` avoids the
+// libsecret/kwallet backends on Linux.
+app.commandLine.appendSwitch("use-mock-keychain");
+app.commandLine.appendSwitch("password-store", "basic");
+
 /**
  * Spawn the main BrowserWindow.
  *
