@@ -23,7 +23,7 @@ export type ActiveDialogsProps = {
  * @returns Either a `<PicturesDialog>`, `<LyricsDialog>`, or `null`.
  */
 export function ActiveDialogs({ state, notify }: ActiveDialogsProps) {
-  const { active, activeRow, close, applyPictures, applyLyrics } = state;
+  const { active, activeRow, close, applyPictures, applyLyrics, pictureKindEditable } = state;
 
   if (active === null || activeRow === null) {
     return null;
@@ -34,6 +34,7 @@ export function ActiveDialogs({ state, notify }: ActiveDialogsProps) {
       <PicturesDialog
         filePath={activeRow.filePath}
         initialPictures={activeRow.track.pictures}
+        kindEditable={pictureKindEditable}
         onApply={applyPictures}
         onClose={close}
         onNotify={notify}

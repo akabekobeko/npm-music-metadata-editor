@@ -32,6 +32,7 @@ const supportEntry = (
   supportsPictures: false,
   supportsChapters: false,
   supportsLyrics: false,
+  supportsPictureKind: false,
 });
 
 const supportMap = (entries: readonly FormatSupportEntry[]): FormatSupportMap =>

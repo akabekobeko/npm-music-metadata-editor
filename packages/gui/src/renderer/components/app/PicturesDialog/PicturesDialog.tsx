@@ -21,6 +21,12 @@ export type PicturesDialogProps = {
   readonly filePath: string;
   /** Picture set to seed the dialog with. */
   readonly initialPictures: readonly PictureInfo[];
+  /**
+   * Whether the row's format records a per-picture kind. When `false` (e.g.
+   * MP4 `covr`) the kind selector is disabled because the change cannot be
+   * persisted.
+   */
+  readonly kindEditable: boolean;
   /** Commit the edited picture set back to the edit store. */
   readonly onApply: (pictures: readonly PictureInfo[]) => void;
   /** Close the dialog without applying. */
@@ -43,6 +49,7 @@ export type PicturesDialogProps = {
 export function PicturesDialog({
   filePath,
   initialPictures,
+  kindEditable,
   onApply,
   onClose,
   onNotify,
@@ -105,6 +112,7 @@ export function PicturesDialog({
                 <PicturePreview bytes={selected.data} mimeType={selected.mimeType} />
                 <PictureForm
                   draft={selected}
+                  kindEditable={kindEditable}
                   onChangeKind={(kind) => updateDraft(selected.id, { kind })}
                   onChangeMimeType={(mimeType) => updateDraft(selected.id, { mimeType })}
                   onChangeDescription={(description) => updateDraft(selected.id, { description })}

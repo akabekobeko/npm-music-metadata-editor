@@ -52,6 +52,11 @@ type FormatCapability = {
   readonly chapters: boolean;
   /** Whether the format can carry lyrics. */
   readonly lyrics: boolean;
+  /**
+   * Whether the format records a per-picture kind (picture type). `false` for
+   * MP4 `covr`, which has no role field — only the image bytes round-trip.
+   */
+  readonly pictureKind: boolean;
   /** When set, replaces {@link COMMON_TAG_FIELDS} for this format. */
   readonly tagFields?: ReadonlyArray<keyof TagData>;
 };
@@ -64,16 +69,16 @@ type FormatCapability = {
  * so any divergence with a future core release surfaces as a visible diff.
  */
 const CAPABILITIES: Readonly<Record<AudioFormat, FormatCapability>> = {
-  mp3: { pictures: true, chapters: true, lyrics: true },
-  flac: { pictures: true, chapters: false, lyrics: true },
-  mp4: { pictures: true, chapters: true, lyrics: true },
-  m4a: { pictures: true, chapters: true, lyrics: true },
-  ogg: { pictures: true, chapters: false, lyrics: true },
-  opus: { pictures: true, chapters: false, lyrics: true },
-  wav: { pictures: true, chapters: true, lyrics: true },
-  aiff: { pictures: true, chapters: true, lyrics: true },
-  wma: { pictures: true, chapters: false, lyrics: true },
-  ape: { pictures: true, chapters: false, lyrics: true },
+  mp3: { pictures: true, chapters: true, lyrics: true, pictureKind: true },
+  flac: { pictures: true, chapters: false, lyrics: true, pictureKind: true },
+  mp4: { pictures: true, chapters: true, lyrics: true, pictureKind: false },
+  m4a: { pictures: true, chapters: true, lyrics: true, pictureKind: false },
+  ogg: { pictures: true, chapters: false, lyrics: true, pictureKind: true },
+  opus: { pictures: true, chapters: false, lyrics: true, pictureKind: true },
+  wav: { pictures: true, chapters: true, lyrics: true, pictureKind: true },
+  aiff: { pictures: true, chapters: true, lyrics: true, pictureKind: true },
+  wma: { pictures: true, chapters: false, lyrics: true, pictureKind: true },
+  ape: { pictures: true, chapters: false, lyrics: true, pictureKind: true },
 };
 
 /**
@@ -113,5 +118,6 @@ export const buildFormatSupportMatrix = (): readonly FormatSupportEntry[] =>
       supportsPictures: capability.pictures,
       supportsChapters: capability.chapters,
       supportsLyrics: capability.lyrics,
+      supportsPictureKind: capability.pictureKind,
     };
   });
