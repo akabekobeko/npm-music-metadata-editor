@@ -100,6 +100,7 @@ export const ja: Dictionary = {
   "pictures.remove": "削除",
   "pictures.applyChanges": "変更を適用",
   "pictures.kind": "種類",
+  "pictures.kindUnsupported": "この形式は画像の種類を保存できません。",
   "pictures.mimeType": "MIME タイプ",
   "pictures.mimePreset": "MIME タイプ プリセット",
   "pictures.mimePresetPlaceholder": "選択",

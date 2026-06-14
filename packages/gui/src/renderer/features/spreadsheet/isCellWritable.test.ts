@@ -35,6 +35,7 @@ const supportEntry = ({
   supportsPictures: extras.supportsPictures ?? false,
   supportsChapters: extras.supportsChapters ?? false,
   supportsLyrics: extras.supportsLyrics ?? false,
+  supportsPictureKind: extras.supportsPictureKind ?? false,
 });
 
 const supportMap = (entries: readonly FormatSupportEntry[]): FormatSupportMap =>

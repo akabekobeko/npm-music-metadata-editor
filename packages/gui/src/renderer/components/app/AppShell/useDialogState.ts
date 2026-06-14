@@ -39,6 +39,12 @@ export type DialogState = {
   readonly applyPictures: (pictures: readonly PictureInfo[]) => void;
   /** Commit lyrics from the Lyrics modal and close it. */
   readonly applyLyrics: (lyrics: LyricsInfo | undefined) => void;
+  /**
+   * Whether the active row's format records a per-picture kind. `false` for
+   * containers like MP4 `covr` so the Pictures modal can disable the kind
+   * selector instead of letting the user make an edit that can't be saved.
+   */
+  readonly pictureKindEditable: boolean;
 };
 
 /**
@@ -123,5 +129,22 @@ export const useDialogState = ({ rows, editDispatch, support, notify }: Args): D
   const activeRow =
     active === null ? null : (rows.find((row) => row.filePath === active.filePath) ?? null);
 
-  return { active, activeRow, openPictures, openLyrics, close, applyPictures, applyLyrics };
+  // Default to editable when the row or its support entry is unknown so an
+  // unresolved matrix never over-disables the selector (mirrors the open-gate
+  // policy, which only blocks on an explicit `false`).
+  const pictureKindEditable =
+    activeRow === null
+      ? true
+      : support.get(activeRow.track.audioFormat)?.supportsPictureKind !== false;
+
+  return {
+    active,
+    activeRow,
+    openPictures,
+    openLyrics,
+    close,
+    applyPictures,
+    applyLyrics,
+    pictureKindEditable,
+  };
 };

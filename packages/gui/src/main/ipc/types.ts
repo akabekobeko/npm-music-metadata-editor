@@ -252,6 +252,12 @@ export type FormatSupportEntry = {
   readonly supportsChapters: boolean;
   /** Whether the format can carry lyrics. */
   readonly supportsLyrics: boolean;
+  /**
+   * Whether the format records a per-picture kind (e.g. ID3v2 APIC's picture
+   * type). `false` for containers like MP4 `covr`, which store image bytes
+   * with no role/kind field — editing the kind there cannot be persisted.
+   */
+  readonly supportsPictureKind: boolean;
 };
 
 /**

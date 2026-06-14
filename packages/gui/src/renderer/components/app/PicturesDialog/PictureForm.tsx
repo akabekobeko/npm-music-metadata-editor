@@ -18,6 +18,12 @@ import type { PictureDraft } from "@/features/pictures/types";
 export type PictureFormProps = {
   /** Currently-selected picture being edited. */
   readonly draft: PictureDraft;
+  /**
+   * Whether the row's format records a per-picture kind. When `false` (e.g.
+   * MP4 `covr`) the kind selector is disabled with an explanatory note, since
+   * the change would be dropped on save.
+   */
+  readonly kindEditable: boolean;
   /** Update the picture's kind (cover, back, …). */
   readonly onChangeKind: (kind: PictureDraft["kind"]) => void;
   /** Update the picture's MIME type. */
@@ -57,6 +63,7 @@ const formatSize = (byteLength: number): string => {
  */
 export function PictureForm({
   draft,
+  kindEditable,
   onChangeKind,
   onChangeMimeType,
   onChangeDescription,
@@ -69,6 +76,7 @@ export function PictureForm({
         <span className="text-xs text-muted-foreground">{t("pictures.kind")}</span>
         <Select
           value={String(draft.kind)}
+          disabled={!kindEditable}
           onValueChange={(next) => {
             if (next !== null) {
               onChangeKind(Number.parseInt(next, 10) as PictureDraft["kind"]);
@@ -76,7 +84,7 @@ export function PictureForm({
           }}
         >
           <SelectTrigger className="w-full" aria-label={t("pictures.kind")}>
-            <SelectValue />
+            <SelectValue>{(value) => t(`pictures.kind.${value}`)}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             {PICTURE_KIND_VALUES.map((value) => (
@@ -86,6 +94,9 @@ export function PictureForm({
             ))}
           </SelectContent>
         </Select>
+        {kindEditable ? null : (
+          <span className="text-xs text-muted-foreground">{t("pictures.kindUnsupported")}</span>
+        )}
       </div>
       <div className="flex flex-col gap-1">
         <span className="text-xs text-muted-foreground">{t("pictures.mimeType")}</span>

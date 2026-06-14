@@ -101,6 +101,7 @@ export const en: Dictionary = {
   "pictures.remove": "Remove",
   "pictures.applyChanges": "Apply changes",
   "pictures.kind": "Kind",
+  "pictures.kindUnsupported": "This format can't store the picture kind.",
   "pictures.mimeType": "MIME type",
   "pictures.mimePreset": "MIME type preset",
   "pictures.mimePresetPlaceholder": "Pick",
