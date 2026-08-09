@@ -3,6 +3,7 @@ import type { Atom } from "../types.js";
 import { decodeType } from "./decodeType.js";
 import { detectMetaChildStart } from "./detectMetaChildStart.js";
 import { isContainerAtom } from "./isContainerAtom.js";
+import { isPlausibleAtomType } from "./isPlausibleAtomType.js";
 import { readUInt32 } from "./readUInt32.js";
 import { readUInt64 } from "./readUInt64.js";
 
@@ -16,6 +17,12 @@ type Args = {
   end: number;
   /** Type of the parent atom (drives `ilst` / `meta` special cases). */
   parentType?: string;
+  /**
+   * `true` when parsing the file's top-level atom sequence. Only there may
+   * trailing garbage be tolerated (see {@link parseRange} doc); nested
+   * containers always stay strict.
+   */
+  topLevel?: boolean;
 };
 
 /**
@@ -24,11 +31,19 @@ type Args = {
  * atoms (or atoms past the range boundary) are returned without a `children`
  * field.
  *
+ * Real-world files sometimes carry trailing garbage after the last top-level
+ * atom (typically leftovers of an in-place tag rewrite that shrank `mdat`
+ * without truncating the file). When `topLevel` is set, a `moov` atom has
+ * already been parsed, and the offending header's type bytes cannot be a real
+ * atom type, parsing stops there and the remaining bytes are excluded from the
+ * tree. A header whose type looks like a genuine atom (e.g. a truncated
+ * `mdat`) still raises an error.
+ *
  * @returns The parsed sibling atoms in file order.
  * @throws when an atom claims a size that extends past `end`, or when the
  *   declared size is smaller than the header.
  */
-export const parseRange = ({ source, start, end, parentType }: Args): readonly Atom[] => {
+export const parseRange = ({ source, start, end, parentType, topLevel }: Args): readonly Atom[] => {
   const atoms: Atom[] = [];
   let pos = start;
   while (pos + BOX_HEADER_SIZE <= end) {
@@ -36,41 +51,40 @@ export const parseRange = ({ source, start, end, parentType }: Args): readonly A
     const type = decodeType(source, pos + 4);
 
     let headerSize = BOX_HEADER_SIZE;
-    let size: number;
+    let size = declaredSize;
+    let failure: string | undefined;
     if (declaredSize === 1) {
       // Extended size: read the 64-bit `largesize` that follows the type.
       if (pos + LARGE_BOX_HEADER_SIZE > end) {
-        throw new Error(
-          `parseAtomTree: atom "${type}" at offset ${pos} declares extended size but header is truncated`,
-        );
+        failure = `parseAtomTree: atom "${type}" at offset ${pos} declares extended size but header is truncated`;
+      } else {
+        const big = readUInt64(source, pos + BOX_HEADER_SIZE);
+        if (big > Number.MAX_SAFE_INTEGER) {
+          failure = `parseAtomTree: atom "${type}" at offset ${pos} has size ${big} exceeding MAX_SAFE_INTEGER`;
+        } else {
+          size = Number(big);
+          headerSize = LARGE_BOX_HEADER_SIZE;
+        }
       }
-
-      const big = readUInt64(source, pos + BOX_HEADER_SIZE);
-      if (big > Number.MAX_SAFE_INTEGER) {
-        throw new Error(
-          `parseAtomTree: atom "${type}" at offset ${pos} has size ${big} exceeding MAX_SAFE_INTEGER`,
-        );
-      }
-
-      size = Number(big);
-      headerSize = LARGE_BOX_HEADER_SIZE;
     } else if (declaredSize === 0) {
       // Size 0 means "extends to end of file" per ISO BMFF.
       size = end - pos;
-    } else {
-      size = declaredSize;
     }
 
-    if (size < headerSize) {
-      throw new Error(
-        `parseAtomTree: atom "${type}" at offset ${pos} declares size ${size} smaller than header ${headerSize}`,
-      );
+    if (failure === undefined && size < headerSize) {
+      failure = `parseAtomTree: atom "${type}" at offset ${pos} declares size ${size} smaller than header ${headerSize}`;
     }
 
-    if (pos + size > end) {
-      throw new Error(
-        `parseAtomTree: atom "${type}" at offset ${pos} (size ${size}) extends past parent end ${end}`,
-      );
+    if (failure === undefined && pos + size > end) {
+      failure = `parseAtomTree: atom "${type}" at offset ${pos} (size ${size}) extends past parent end ${end}`;
+    }
+
+    if (failure !== undefined) {
+      if (isTrailingGarbage({ topLevel, atoms, type })) {
+        break;
+      }
+
+      throw new Error(failure);
     }
 
     const payloadOffset = pos + headerSize;
@@ -92,6 +106,31 @@ export const parseRange = ({ source, start, end, parentType }: Args): readonly A
 
   return atoms;
 };
+
+/** Arguments for {@link isTrailingGarbage}. */
+type GarbageArgs = {
+  /** `true` when the current range is the file's top-level atom sequence. */
+  topLevel: boolean | undefined;
+  /** Atoms parsed so far in the current range. */
+  atoms: readonly Atom[];
+  /** Type decoded from the offending header. */
+  type: string;
+};
+
+/**
+ * Decide whether an invalid box header marks trailing garbage that may be
+ * skipped rather than a structural error.
+ *
+ * All three conditions must hold: the range is the top-level sequence, a
+ * `moov` atom has already been parsed (so the file's real content is intact),
+ * and the header's type bytes are implausible as an atom type. The last
+ * condition keeps genuinely truncated atoms (whose type decodes to a valid
+ * 4-character code) on the strict error path.
+ *
+ * @returns `true` when the remaining bytes can safely be ignored.
+ */
+const isTrailingGarbage = ({ topLevel, atoms, type }: GarbageArgs): boolean =>
+  topLevel === true && atoms.some((atom) => atom.type === "moov") && !isPlausibleAtomType(type);
 
 /** Arguments for {@link resolveChildren}. */
 type ResolveArgs = {
