@@ -111,6 +111,21 @@ it("rebuilds files where the moov atom is missing entries we add", async () => {
   expect(stcoOffset).toBe(mdatOffset);
 });
 
+it("preserves trailing garbage bytes across a metadata rewrite", async () => {
+  const bytes = await loadFixture("basic.m4a");
+  // Non-atom bytes such as leftovers of an in-place rewrite by another tool.
+  const garbage = Buffer.from([0x51, 0xfe, 0xff, 0x72, 0xe6, 0x1c, 0x80, 0xd3, 0x30, 0xd8]);
+  const source = new Uint8Array(Buffer.concat([Buffer.from(bytes), garbage]));
+
+  const updated = await writeMp4(source, { tag: { title: "Kept tail" } });
+
+  const reread = await readMp4(updated);
+  expect(reread.tag.title).toBe("Kept tail");
+  expect(Array.from(updated.subarray(updated.length - garbage.length))).toEqual(
+    Array.from(garbage),
+  );
+});
+
 it("can be reached via the public readMetadata / writeMetadata path", async () => {
   const bytes = await loadFixture("basic.m4a");
   const ilstAtom = findAtom(parseAtomTree(bytes), ["moov", "udta", "meta", "ilst"]);

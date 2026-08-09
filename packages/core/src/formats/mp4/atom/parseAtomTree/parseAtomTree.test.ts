@@ -115,3 +115,49 @@ it("throws when a child atom would extend past its parent", () => {
 
   expect(() => parseAtomTree(out)).toThrow(/extends past parent end/);
 });
+
+/**
+ * Trailing bytes that cannot be a box header: the bogus size (0x51FEFF72)
+ * points far past the buffer and the type bytes are not printable ASCII.
+ */
+const garbage = (): Buffer =>
+  Buffer.from([0x51, 0xfe, 0xff, 0x72, 0xe6, 0x1c, 0x80, 0xd3, 0x30, 0xd8, 0x97, 0x4f]);
+
+it("ignores trailing garbage after moov at the top level", () => {
+  const buffer = Buffer.concat([
+    atom("ftyp", Buffer.from("M4A mp42isom", "latin1")),
+    atom("moov", atom("mvhd", Buffer.alloc(4))),
+    atom("mdat", Buffer.from([0x01, 0x02, 0x03])),
+    garbage(),
+  ]);
+
+  const tree = parseAtomTree(buffer);
+
+  expect(tree.map((a) => a.type)).toEqual(["ftyp", "moov", "mdat"]);
+});
+
+it("throws on top-level garbage when no moov has been parsed", () => {
+  const buffer = Buffer.concat([atom("ftyp", Buffer.from("M4A mp42isom", "latin1")), garbage()]);
+
+  expect(() => parseAtomTree(buffer)).toThrow(/extends past parent end/);
+});
+
+it("throws when a trailing atom has a plausible type but a truncated body", () => {
+  // Type "mdat" decodes as a real atom type, so this must stay an error even
+  // though moov was already parsed.
+  const truncated = Buffer.alloc(12);
+  truncated.writeUInt32BE(100, 0);
+  truncated.write("mdat", 4, 4, "latin1");
+  const buffer = Buffer.concat([atom("moov", atom("mvhd", Buffer.alloc(4))), truncated]);
+
+  expect(() => parseAtomTree(buffer)).toThrow(/extends past parent end/);
+});
+
+it("throws on garbage inside a container even after moov was parsed", () => {
+  const buffer = Buffer.concat([
+    atom("moov", atom("mvhd", Buffer.alloc(4))),
+    atom("udta", garbage()),
+  ]);
+
+  expect(() => parseAtomTree(buffer)).toThrow(/extends past parent end/);
+});
