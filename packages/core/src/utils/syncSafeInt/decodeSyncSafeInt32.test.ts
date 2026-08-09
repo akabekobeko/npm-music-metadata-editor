@@ -24,15 +24,9 @@ it("rejects too-short input", () => {
   expect(() => decodeSyncSafeInt32(new Uint8Array([0, 0, 0]))).toThrow(RangeError);
 });
 
-it.each([
-  0,
-  1,
-  0x7f,
-  0x80,
-  0xff,
-  0x3fff,
-  0x100000,
-  SYNC_SAFE_INT32_MAX,
-])("round-trips %d through encode / decode", (value) => {
-  expect(decodeSyncSafeInt32(encodeSyncSafeInt32(value))).toBe(value);
-});
+it.each([0, 1, 0x7f, 0x80, 0xff, 0x3fff, 0x100000, SYNC_SAFE_INT32_MAX])(
+  "round-trips %d through encode / decode",
+  (value) => {
+    expect(decodeSyncSafeInt32(encodeSyncSafeInt32(value))).toBe(value);
+  },
+);
