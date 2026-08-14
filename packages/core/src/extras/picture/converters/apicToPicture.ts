@@ -3,6 +3,7 @@ import type { PictureInfo, PictureKindValue } from "../../../types.js";
 import { PictureKind } from "../../../types.js";
 import { decodeText } from "../../../utils/encoding/decodeText.js";
 import type { TextEncoding } from "../../../utils/encoding/types.js";
+import { detectMime } from "../detectMime.js";
 
 /** Map an ID3v2 encoding byte to a {@link TextEncoding} known to `decodeText`. */
 const ENCODING_BY_BYTE: Readonly<Record<number, TextEncoding>> = {
@@ -20,6 +21,11 @@ const ENCODING_BY_BYTE: Readonly<Record<number, TextEncoding>> = {
  * The MIME field is always Latin-1 (per the ID3v2 spec). The description uses
  * the same encoding as the leading byte; the terminator size matches the
  * encoding (1 byte for Latin-1 / UTF-8, 2 bytes for UTF-16 family).
+ *
+ * The declared MIME is frequently wrong in the wild (e.g. iTunes writes
+ * "PNG"-flavoured frames around JPEG bytes), so the image magic bytes win
+ * when {@link detectMime} recognises them; the declared string is only a
+ * fallback (then `image/jpeg` per the spec's empty-MIME rule).
  *
  * @param body - APIC frame body (post unsync / data-length unwrap).
  * @returns The decoded picture, or `undefined` when the body is malformed.
@@ -40,8 +46,8 @@ export const apicToPicture = (body: Uint8Array): PictureInfo | undefined => {
   }
 
   const mimeBytes = body.subarray(1, mimeEnd);
-  const mimeType =
-    mimeBytes.length === 0 ? "image/jpeg" : Buffer.from(mimeBytes).toString("latin1");
+  const declaredMime =
+    mimeBytes.length === 0 ? undefined : Buffer.from(mimeBytes).toString("latin1");
 
   const kindOffset = mimeEnd + 1;
   if (kindOffset >= body.length) {
@@ -59,7 +65,7 @@ export const apicToPicture = (body: Uint8Array): PictureInfo | undefined => {
 
   const description = decodeText(split.first, encoding);
   return {
-    mimeType,
+    mimeType: detectMime(split.second) ?? declaredMime ?? "image/jpeg",
     kind: kind ?? PictureKind.Other,
     description,
     data: split.second,

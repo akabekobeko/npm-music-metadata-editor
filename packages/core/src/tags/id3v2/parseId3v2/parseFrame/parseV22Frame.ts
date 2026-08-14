@@ -1,5 +1,6 @@
 import { Buffer } from "node:buffer";
 import { ID3V2_2_TO_2_3_FRAME_ID } from "../../constants.js";
+import { convertPicBodyToApicBody } from "./convertPicBodyToApicBody.js";
 import { NO_FLAGS, type ParseFrameResult } from "./types.js";
 
 /**
@@ -30,11 +31,13 @@ export const parseV22Frame = (body: Uint8Array, offset: number): ParseFrameResul
   }
 
   const data = body.subarray(dataStart, dataStart + size);
-  // Promote to v2.3/2.4 ID so downstream parsers share one path.
+  // Promote to v2.3/2.4 ID so downstream parsers share one path. PIC is the
+  // one promoted frame whose body layout differs from its v2.3 counterpart
+  // (3-char image format vs NUL-terminated MIME), so rewrite it as well.
   const id = ID3V2_2_TO_2_3_FRAME_ID[id22] ?? id22;
   return {
     kind: "frame",
-    frame: { id, flags: NO_FLAGS, data },
+    frame: { id, flags: NO_FLAGS, data: id22 === "PIC" ? convertPicBodyToApicBody(data) : data },
     consumed: 6 + size,
   };
 };
