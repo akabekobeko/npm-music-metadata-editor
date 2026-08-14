@@ -1,7 +1,7 @@
 {
   "name": "@akabeko/music-metadata-editor",
   "description": "This is a library for reading and writing metadata of music files.",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "akabeko (http://akabeko.me/)",
   "license": "MIT",
   "keywords": [
@@ -90,7 +90,7 @@
   "devDependencies": {
     "@tsconfig/node24": "^24.0.4",
     "@types/node": "^26.2.0",
-    "tsx": "^4.23.11",
+    "tsx": "^4.23.12",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   }
