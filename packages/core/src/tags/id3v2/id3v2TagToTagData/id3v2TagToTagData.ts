@@ -1,4 +1,10 @@
 import type { TagData } from "../../../types.js";
+import {
+  INVOLVED_PEOPLE_FRAME_IDS,
+  INVOLVED_PEOPLE_ROLE_PRODUCER,
+} from "../involvedPeople/constants.js";
+import { parseInvolvedPeopleFrame } from "../involvedPeople/parseInvolvedPeopleFrame.js";
+import { readInvolvedPeopleRole } from "../involvedPeople/readInvolvedPeopleRole.js";
 import { parseCommentFrame } from "../parseId3v2/parseCommentFrame/parseCommentFrame.js";
 import type { Id3v2Tag } from "../types.js";
 import { assignTextFrame } from "./assignTextFrame.js";
@@ -20,6 +26,20 @@ export const id3v2TagToTagData = (tag: Id3v2Tag): TagData => {
       const comment = parseCommentFrame(frame.data);
       if (comment !== undefined && comment.text !== "") {
         result.comment = comment.text;
+      }
+
+      continue;
+    }
+
+    if (INVOLVED_PEOPLE_FRAME_IDS.has(frame.id)) {
+      if (result.producer === undefined) {
+        const producer = readInvolvedPeopleRole(
+          parseInvolvedPeopleFrame(frame.data),
+          INVOLVED_PEOPLE_ROLE_PRODUCER,
+        );
+        if (producer !== undefined) {
+          result.producer = producer;
+        }
       }
 
       continue;

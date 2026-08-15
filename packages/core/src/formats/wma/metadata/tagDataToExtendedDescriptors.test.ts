@@ -24,6 +24,23 @@ it("preserves descriptors not managed by this writer", () => {
   expect(result[1]?.value).toBe("New");
 });
 
+it("emits producer as WM/Producer and replaces the existing descriptor", () => {
+  const result = tagDataToExtendedDescriptors({
+    tag: { producer: "New producer" },
+    existing: [
+      {
+        name: "WM/Producer",
+        type: ASF_DESCRIPTOR_TYPE.UnicodeString,
+        value: "Old producer",
+        rawValue: new Uint8Array(),
+      },
+    ],
+  });
+  const producers = result.filter((d) => d.name === "WM/Producer");
+  expect(producers).toHaveLength(1);
+  expect(producers[0]?.value).toBe("New producer");
+});
+
 it("emits track / disc as X/Y strings", () => {
   const result = tagDataToExtendedDescriptors({
     tag: { trackNumber: 4, trackTotal: 12, discNumber: 1 },

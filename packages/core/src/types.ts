@@ -33,6 +33,8 @@ export type TagData = {
   composer?: string;
   /** Conductor of the recording. */
   conductor?: string;
+  /** Producer of the recording. */
+  producer?: string;
   /** Lyricist / text writer. */
   lyricist?: string;
   /** Publisher / record label. */

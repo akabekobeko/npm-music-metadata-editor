@@ -31,6 +31,9 @@ export const applyFreeformAtom = ({ tag, atom }: Args): void => {
     case "CONDUCTOR":
       tag.conductor = text;
       return;
+    case "PRODUCER":
+      tag.producer = text;
+      return;
     case "LANGUAGE":
       tag.language = text;
       return;

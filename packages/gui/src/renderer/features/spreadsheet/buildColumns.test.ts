@@ -43,6 +43,7 @@ it("returns every column when all ids are visible (snapshot)", () => {
       "tag.albumArtist",
       "tag.composer",
       "tag.conductor",
+      "tag.producer",
       "tag.lyricist",
       "tag.publisher",
       "tag.copyright",

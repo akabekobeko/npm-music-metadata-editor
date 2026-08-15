@@ -66,3 +66,29 @@ it("loadTrack populates the default empty additionalFields and warnings", async 
   expect(track.additionalFields).toEqual({});
   expect(track.warnings).toEqual([]);
 });
+
+it("loadTrack → saveTrack → loadTrack preserves edited producer (mp3, involved-people frame)", async () => {
+  const bytes = await readFile(fixturePath("mp3/v23-basic.mp3"));
+  const original = await loadTrack(bytes);
+  const edited = { ...original, tag: { ...original.tag, producer: "Roundtrip Producer" } };
+  const rebuilt = await saveTrack(edited, { source: bytes });
+  if (rebuilt === undefined) {
+    expect.fail("expected rebuilt bytes for buffer source");
+  }
+
+  const reloaded = await loadTrack(rebuilt);
+  expect(reloaded.tag.producer).toBe("Roundtrip Producer");
+});
+
+it("loadTrack → saveTrack → loadTrack preserves edited producer (flac)", async () => {
+  const bytes = await readFile(fixturePath("flac/basic.flac"));
+  const original = await loadTrack(bytes);
+  const edited = { ...original, tag: { ...original.tag, producer: "Roundtrip Producer" } };
+  const rebuilt = await saveTrack(edited, { source: bytes });
+  if (rebuilt === undefined) {
+    expect.fail("expected rebuilt bytes for buffer source");
+  }
+
+  const reloaded = await loadTrack(rebuilt);
+  expect(reloaded.tag.producer).toBe("Roundtrip Producer");
+});

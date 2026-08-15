@@ -20,7 +20,7 @@ it("matches the snapshot of supported formats", () => {
         "supportsLyrics": true,
         "supportsPictureKind": true,
         "supportsPictures": true,
-        "tagFieldCount": 26,
+        "tagFieldCount": 27,
       },
       {
         "format": "flac",
@@ -28,7 +28,7 @@ it("matches the snapshot of supported formats", () => {
         "supportsLyrics": true,
         "supportsPictureKind": true,
         "supportsPictures": true,
-        "tagFieldCount": 26,
+        "tagFieldCount": 27,
       },
       {
         "format": "mp4",
@@ -36,7 +36,7 @@ it("matches the snapshot of supported formats", () => {
         "supportsLyrics": true,
         "supportsPictureKind": false,
         "supportsPictures": true,
-        "tagFieldCount": 26,
+        "tagFieldCount": 27,
       },
       {
         "format": "m4a",
@@ -44,7 +44,7 @@ it("matches the snapshot of supported formats", () => {
         "supportsLyrics": true,
         "supportsPictureKind": false,
         "supportsPictures": true,
-        "tagFieldCount": 26,
+        "tagFieldCount": 27,
       },
       {
         "format": "ogg",
@@ -52,7 +52,7 @@ it("matches the snapshot of supported formats", () => {
         "supportsLyrics": true,
         "supportsPictureKind": true,
         "supportsPictures": true,
-        "tagFieldCount": 26,
+        "tagFieldCount": 27,
       },
       {
         "format": "opus",
@@ -60,7 +60,7 @@ it("matches the snapshot of supported formats", () => {
         "supportsLyrics": true,
         "supportsPictureKind": true,
         "supportsPictures": true,
-        "tagFieldCount": 26,
+        "tagFieldCount": 27,
       },
       {
         "format": "wav",
@@ -68,7 +68,7 @@ it("matches the snapshot of supported formats", () => {
         "supportsLyrics": true,
         "supportsPictureKind": true,
         "supportsPictures": true,
-        "tagFieldCount": 26,
+        "tagFieldCount": 27,
       },
       {
         "format": "aiff",
@@ -76,7 +76,7 @@ it("matches the snapshot of supported formats", () => {
         "supportsLyrics": true,
         "supportsPictureKind": true,
         "supportsPictures": true,
-        "tagFieldCount": 26,
+        "tagFieldCount": 27,
       },
       {
         "format": "wma",
@@ -84,7 +84,7 @@ it("matches the snapshot of supported formats", () => {
         "supportsLyrics": true,
         "supportsPictureKind": true,
         "supportsPictures": true,
-        "tagFieldCount": 26,
+        "tagFieldCount": 27,
       },
       {
         "format": "ape",
@@ -92,7 +92,7 @@ it("matches the snapshot of supported formats", () => {
         "supportsLyrics": true,
         "supportsPictureKind": true,
         "supportsPictures": true,
-        "tagFieldCount": 26,
+        "tagFieldCount": 27,
       },
     ]
   `);
