@@ -21,6 +21,7 @@ const TAG_FIELDS: readonly { label: string; key: keyof TagData }[] = [
   { label: "Album", key: "album" },
   { label: "Composer", key: "composer" },
   { label: "Conductor", key: "conductor" },
+  { label: "Producer", key: "producer" },
   { label: "Lyricist", key: "lyricist" },
   { label: "Publisher", key: "publisher" },
   { label: "Copyright", key: "copyright" },

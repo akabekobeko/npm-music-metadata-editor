@@ -42,6 +42,7 @@ export const tagDataToExtendedDescriptors = ({
     ["WM/Composer", merged.composer],
     ["WM/AlbumArtist", merged.albumArtist],
     ["WM/Conductor", merged.conductor],
+    ["WM/Producer", merged.producer],
     ["WM/ContentGroupDescription", merged.group],
     ["WM/SubTitleDescription", merged.description],
     ["WM/Language", merged.language],

@@ -15,6 +15,7 @@ export const FIELD_KEYS: Readonly<Partial<Record<keyof TagData, readonly string[
   albumArtist: ["Album Artist", "AlbumArtist"],
   composer: ["Composer"],
   conductor: ["Conductor"],
+  producer: ["Producer"],
   lyricist: ["Lyricist"],
   publisher: ["Publisher"],
   copyright: ["Copyright"],

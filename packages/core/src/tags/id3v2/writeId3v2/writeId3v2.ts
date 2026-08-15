@@ -1,6 +1,7 @@
 import type { TagData } from "../../../types.js";
 import { buildId3v2 } from "../buildId3v2/buildId3v2.js";
 import type { Id3v2Frame } from "../types.js";
+import { mergeProducerFrame } from "./mergeProducerFrame.js";
 import { synthesizeFrames } from "./synthesizeFrames.js";
 
 /** Arguments for {@link writeId3v2}. */
@@ -32,6 +33,18 @@ export type WriteId3v2Args = {
  */
 export const writeId3v2 = (args: WriteId3v2Args): Uint8Array => {
   const frames = synthesizeFrames(args.tag, args.majorVersion);
-  const all = args.preserveFrames === undefined ? frames : [...frames, ...args.preserveFrames];
-  return buildId3v2({ majorVersion: args.majorVersion, frames: all, padding: args.padding });
+  const involvedPeople = mergeProducerFrame({
+    producer: args.tag.producer,
+    majorVersion: args.majorVersion,
+    preserveFrames: args.preserveFrames ?? [],
+  });
+  if (involvedPeople.frame !== undefined) {
+    frames.push(involvedPeople.frame);
+  }
+
+  return buildId3v2({
+    majorVersion: args.majorVersion,
+    frames: [...frames, ...involvedPeople.preserveFrames],
+    padding: args.padding,
+  });
 };

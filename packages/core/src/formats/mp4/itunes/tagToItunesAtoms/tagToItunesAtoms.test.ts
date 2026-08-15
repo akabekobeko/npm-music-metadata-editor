@@ -45,6 +45,13 @@ it("emits LYRICIST as a `----` freeform atom", () => {
   expect(freeform?.meanName).toBe("LYRICIST");
 });
 
+it("emits PRODUCER as a `----` freeform atom", () => {
+  const atoms = tagToItunesAtoms({ tag: { producer: "Alice" } });
+
+  const freeform = atoms.find((a) => a.name === "----");
+  expect(freeform?.meanName).toBe("PRODUCER");
+});
+
 it("prefers recordingDate over year when both are set", () => {
   const atoms = tagToItunesAtoms({ tag: { recordingDate: "2025-04-30", year: 2024 } });
 

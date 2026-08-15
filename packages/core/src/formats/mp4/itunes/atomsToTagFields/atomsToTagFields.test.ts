@@ -81,6 +81,21 @@ it("decodes freeform `----` LYRICIST entries into tag.lyricist", () => {
   expect(tag.lyricist).toBe("Someone");
 });
 
+it("decodes freeform `----` PRODUCER entries into tag.producer", () => {
+  const atoms: ItunesAtom[] = [
+    {
+      name: "----",
+      meanNamespace: "com.apple.iTunes",
+      meanName: "PRODUCER",
+      values: [utf8("Alice")],
+    },
+  ];
+
+  const { tag } = atomsToTagFields(atoms);
+
+  expect(tag.producer).toBe("Alice");
+});
+
 it("ignores covr atoms whose type indicator is unknown", () => {
   const atoms: ItunesAtom[] = [
     {

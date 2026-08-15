@@ -15,6 +15,7 @@ const COMMON_TAG_FIELDS: ReadonlyArray<keyof TagData> = [
   "albumArtist",
   "composer",
   "conductor",
+  "producer",
   "lyricist",
   "publisher",
   "copyright",

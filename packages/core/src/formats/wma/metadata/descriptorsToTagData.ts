@@ -16,6 +16,7 @@ export const MANAGED_EXTENDED_NAMES: ReadonlySet<string> = new Set([
   "WM/Composer",
   "WM/AlbumArtist",
   "WM/Conductor",
+  "WM/Producer",
   "WM/ContentGroupDescription",
   "WM/SubTitleDescription",
   "WM/BeatsPerMinute",
@@ -132,6 +133,9 @@ const applyExtended = (tag: TagData, descriptor: ExtendedDescriptor): void => {
       break;
     case "WM/Conductor":
       tag.conductor = text;
+      break;
+    case "WM/Producer":
+      tag.producer = text;
       break;
     case "WM/ContentGroupDescription":
       tag.group = text;

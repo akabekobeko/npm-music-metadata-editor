@@ -96,6 +96,14 @@ export const tagToItunesAtoms = ({ tag, pictures }: Args): readonly ItunesAtom[]
     });
   }
 
+  if (tag.producer !== undefined) {
+    out.push({
+      name: "----",
+      meanName: "PRODUCER",
+      values: [utf8Value(tag.producer)],
+    });
+  }
+
   if (tag.language !== undefined) {
     out.push({
       name: "----",

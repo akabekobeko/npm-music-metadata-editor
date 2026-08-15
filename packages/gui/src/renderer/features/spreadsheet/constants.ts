@@ -187,6 +187,13 @@ export const COLUMN_REGISTRY: Readonly<Record<ColumnId, ColumnDefinition>> = {
     readValue: (row) => row.track.tag.conductor,
     inputKind: "text",
   }),
+  "tag.producer": tagColumn({
+    id: "tag.producer",
+    title: "Producer",
+    width: 160,
+    readValue: (row) => row.track.tag.producer,
+    inputKind: "text",
+  }),
   "tag.lyricist": tagColumn({
     id: "tag.lyricist",
     title: "Lyricist",

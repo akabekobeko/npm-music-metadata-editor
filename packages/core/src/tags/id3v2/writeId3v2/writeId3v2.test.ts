@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
 import { buildTextFrameBody } from "../buildId3v2/buildTextFrameBody.js";
 import { id3v2TagToTagData } from "../id3v2TagToTagData/id3v2TagToTagData.js";
+import { parseInvolvedPeopleFrame } from "../involvedPeople/parseInvolvedPeopleFrame.js";
 import { parseId3v2 } from "../parseId3v2/parseId3v2.js";
 import { writeId3v2 } from "./writeId3v2.js";
 
@@ -64,6 +65,87 @@ it("preserves unknown frames passed via preserveFrames", () => {
   const tag = parseId3v2(bytes);
   const ids = tag?.frames.map((f) => f.id);
   expect(ids).toEqual(["TIT2", "TENC"]);
+});
+
+it.each([
+  [3, "IPLS"],
+  [4, "TIPL"],
+] as const)(
+  "round-trips producer via the involved-people frame (v2.%d)",
+  (majorVersion, frameId) => {
+    const bytes = writeId3v2({ majorVersion, tag: { producer: "Alice" } });
+    const tag = parseId3v2(bytes);
+    expect(tag).toBeDefined();
+    if (tag === undefined) throw new Error("tag should be defined");
+    expect(tag.frames.map((f) => f.id)).toEqual([frameId]);
+    expect(id3v2TagToTagData(tag)).toEqual({ producer: "Alice" });
+  },
+);
+
+it("merges producer into an existing involved-people frame, keeping other roles", () => {
+  const existing = {
+    id: "TIPL",
+    flags: FRAME_FLAGS,
+    data: buildTextFrameBody({
+      encoding: "utf8",
+      text: "engineer\u0000Bob\u0000producer\u0000Old",
+    }),
+  };
+  const bytes = writeId3v2({
+    majorVersion: 4,
+    tag: { producer: "New" },
+    preserveFrames: [existing],
+  });
+  const tag = parseId3v2(bytes);
+  const frames = tag?.frames.filter((f) => f.id === "TIPL") ?? [];
+  expect(frames).toHaveLength(1);
+  const frame = frames[0];
+  if (frame === undefined) throw new Error("frame should be defined");
+  expect(parseInvolvedPeopleFrame(frame.data)).toEqual(["engineer", "Bob", "producer", "New"]);
+});
+
+it("removes the producer role when producer is an empty string", () => {
+  const existing = {
+    id: "TIPL",
+    flags: FRAME_FLAGS,
+    data: buildTextFrameBody({ encoding: "utf8", text: "producer\u0000Old" }),
+  };
+  const bytes = writeId3v2({
+    majorVersion: 4,
+    tag: { title: "Hi", producer: "" },
+    preserveFrames: [existing],
+  });
+  const tag = parseId3v2(bytes);
+  expect(tag?.frames.map((f) => f.id)).toEqual(["TIT2"]);
+});
+
+it("leaves an existing involved-people frame untouched when producer is undefined", () => {
+  const existing = {
+    id: "TIPL",
+    flags: FRAME_FLAGS,
+    data: buildTextFrameBody({ encoding: "utf8", text: "engineer\u0000Bob" }),
+  };
+  const bytes = writeId3v2({
+    majorVersion: 4,
+    tag: { title: "Hi" },
+    preserveFrames: [existing],
+  });
+  const tag = parseId3v2(bytes);
+  expect(tag?.frames.map((f) => f.id)).toEqual(["TIT2", "TIPL"]);
+  const frame = tag?.frames.find((f) => f.id === "TIPL");
+  if (frame === undefined) throw new Error("frame should be defined");
+  expect(parseInvolvedPeopleFrame(frame.data)).toEqual(["engineer", "Bob"]);
+});
+
+it("strips NUL separators from the producer value to prevent role injection", () => {
+  const bytes = writeId3v2({
+    majorVersion: 4,
+    tag: { producer: "X\u0000engineer\u0000Mallory" },
+  });
+  const tag = parseId3v2(bytes);
+  const frame = tag?.frames.find((f) => f.id === "TIPL");
+  if (frame === undefined) throw new Error("frame should be defined");
+  expect(parseInvolvedPeopleFrame(frame.data)).toEqual(["producer", "XengineerMallory"]);
 });
 
 it("includes padding when requested", () => {

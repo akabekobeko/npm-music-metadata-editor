@@ -20,6 +20,7 @@
 | `album` | `TALB` | `ALB` (offset 63) | `ALBUM` | `ALBUM` | `©alb` | `IPRD` | — | `WM/AlbumTitle` |
 | `composer` | `TCOM` | — | `COMPOSER` | `COMPOSER` | `©wrt` | `IMUS` | — | `WM/Composer` |
 | `conductor` | `TPE3` | — | `CONDUCTOR` | `CONDUCTOR` | `©con` | — | — | `WM/Conductor` |
+| `producer` | `TIPL` (v2.4) / `IPLS` (v2.3) — involved people list の `producer` role | — | `PRODUCER` | `PRODUCER` | `----:PRODUCER` (freeform) | — | — | `WM/Producer` |
 | `lyricist` | `TEXT` | — | `LYRICIST` | `LYRICIST` | — | — | — | `WM/Writer` |
 | `publisher` | `TPUB` | — | `PUBLISHER` | `PUBLISHER` | `©pub` / `publ` | — | — | `WM/Publisher` |
 | `copyright` | `TCOP` | — | `COPYRIGHT` | `COPYRIGHT` | `cprt` | `ICOP` | `(c) ` | `WM/COPYRIGHT` |
@@ -42,6 +43,11 @@
 | `rating` | — | — | — | — | `rtng` (0–100 → `[0, 1]` に正規化) | — | — | `WM/SharedUserRating` (0–99 → `[0, 1]` に正規化) |
 
 ## 補足
+
+### ID3v2
+
+- `producer` は専用のテキスト フレームを持たず、involved people list (v2.4 は `TIPL`、v2.3 は `IPLS`、v2.2 の `IPL` はパース時に `TIPL` へ昇格) の中に role / name のペアとして格納される。読み取り時の role 照合は大文字小文字を区別せず、書き込み時は小文字の `producer` role を出力する。
+- 書き込みでは involved people frame 内の `producer` エントリーのみを置換し、同じフレームに格納された他の role (engineer、mixer など) は保持する。`producer` に `""` を指定すると role を削除し、エントリーが残らない場合はフレーム自体を出力しない。
 
 ### ID3v1 / ID3v1.1
 

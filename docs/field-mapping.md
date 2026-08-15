@@ -21,6 +21,7 @@ This document maps each tag format to the common `TagData` shape exposed by `loa
 | `album` | `TALB` | `ALB` (offset 63) | `ALBUM` | `ALBUM` | `©alb` | `IPRD` | — | `WM/AlbumTitle` |
 | `composer` | `TCOM` | — | `COMPOSER` | `COMPOSER` | `©wrt` | `IMUS` | — | `WM/Composer` |
 | `conductor` | `TPE3` | — | `CONDUCTOR` | `CONDUCTOR` | `©con` | — | — | `WM/Conductor` |
+| `producer` | `TIPL` (v2.4) / `IPLS` (v2.3) — the `producer` role in the involved-people list | — | `PRODUCER` | `PRODUCER` | `----:PRODUCER` (freeform) | — | — | `WM/Producer` |
 | `lyricist` | `TEXT` | — | `LYRICIST` | `LYRICIST` | — | — | — | `WM/Writer` |
 | `publisher` | `TPUB` | — | `PUBLISHER` | `PUBLISHER` | `©pub` / `publ` | — | — | `WM/Publisher` |
 | `copyright` | `TCOP` | — | `COPYRIGHT` | `COPYRIGHT` | `cprt` | `ICOP` | `(c) ` | `WM/COPYRIGHT` |
@@ -43,6 +44,11 @@ This document maps each tag format to the common `TagData` shape exposed by `loa
 | `rating` | — | — | — | — | `rtng` (0–100, normalized to `[0, 1]`) | — | — | `WM/SharedUserRating` (0–99, normalized to `[0, 1]`) |
 
 ## Notes
+
+### ID3v2
+
+- `producer` has no standalone text frame; it lives as a role/name pair inside the involved-people list (`TIPL` for v2.4, `IPLS` for v2.3, and v2.2 `IPL` is upgraded to `TIPL` at parse time). Role names are matched case-insensitively on read, and the writer emits the lower-case `producer` role.
+- On write, only the `producer` entries in the involved-people frame are replaced — other roles stored in the same frame (engineer, mixer, ...) are preserved. Setting `producer` to `""` removes the role; the frame itself is dropped when no entries remain.
 
 ### ID3v1 / ID3v1.1
 

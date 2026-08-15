@@ -14,6 +14,7 @@ export const STRING_TAG_FIELDS = [
   "albumArtist",
   "composer",
   "conductor",
+  "producer",
   "lyricist",
   "publisher",
   "copyright",

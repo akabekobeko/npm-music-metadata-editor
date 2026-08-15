@@ -19,6 +19,7 @@ export const FIELD_MAP: Readonly<Record<string, keyof TagData>> = {
   "ALBUM ARTIST": "albumArtist",
   COMPOSER: "composer",
   CONDUCTOR: "conductor",
+  PRODUCER: "producer",
   LYRICIST: "lyricist",
   PUBLISHER: "publisher",
   COPYRIGHT: "copyright",

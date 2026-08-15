@@ -59,3 +59,18 @@ it("decodes WM/* descriptors of common types", () => {
     rating: 1,
   });
 });
+
+it("decodes WM/Producer into tag.producer", () => {
+  const tag = descriptorsToTagData({
+    content: undefined,
+    extended: [
+      {
+        name: "WM/Producer",
+        type: ASF_DESCRIPTOR_TYPE.UnicodeString,
+        value: "Alice",
+        rawValue: new Uint8Array(),
+      },
+    ],
+  });
+  expect(tag).toEqual({ producer: "Alice" });
+});
