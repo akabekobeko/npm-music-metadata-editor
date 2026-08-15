@@ -44,13 +44,18 @@ export const mergeProducerFrame = ({ producer, majorVersion, preserveFrames }: A
     return { frame: undefined, preserveFrames };
   }
 
+  // NUL is the structural separator of the involved-people string list; strip
+  // it from the caller's value so a crafted producer cannot inject extra
+  // role/name pairs into the frame.
+  const sanitizedProducer = producer.replaceAll("\u0000", "");
+
   const existing = preserveFrames.filter((frame) => INVOLVED_PEOPLE_FRAME_IDS.has(frame.id));
   const rest = preserveFrames.filter((frame) => !INVOLVED_PEOPLE_FRAME_IDS.has(frame.id));
   const values = existing.flatMap((frame) => parseInvolvedPeopleFrame(frame.data));
   const merged = replaceInvolvedPeopleRole({
     values,
     role: INVOLVED_PEOPLE_ROLE_PRODUCER,
-    name: producer,
+    name: sanitizedProducer,
   });
   if (merged.length === 0) {
     return { frame: undefined, preserveFrames: rest };

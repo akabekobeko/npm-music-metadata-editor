@@ -137,6 +137,17 @@ it("leaves an existing involved-people frame untouched when producer is undefine
   expect(parseInvolvedPeopleFrame(frame.data)).toEqual(["engineer", "Bob"]);
 });
 
+it("strips NUL separators from the producer value to prevent role injection", () => {
+  const bytes = writeId3v2({
+    majorVersion: 4,
+    tag: { producer: "X\u0000engineer\u0000Mallory" },
+  });
+  const tag = parseId3v2(bytes);
+  const frame = tag?.frames.find((f) => f.id === "TIPL");
+  if (frame === undefined) throw new Error("frame should be defined");
+  expect(parseInvolvedPeopleFrame(frame.data)).toEqual(["producer", "XengineerMallory"]);
+});
+
 it("includes padding when requested", () => {
   const bytes = writeId3v2({
     majorVersion: 4,
