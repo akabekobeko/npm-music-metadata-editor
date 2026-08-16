@@ -202,8 +202,9 @@ export type LyricsInfo = {
  * Tag flavours that can coexist inside a single MP3 file.
  *
  * Used by {@link ReadOptions.tagPriority} to decide which tag wins when
- * multiple are present. The default order matches ATL.NET: ID3v2 → APE →
- * ID3v1.
+ * multiple are present, and reported back via
+ * {@link MetadataReadResult.tagSources} / {@link Track.tagSources}. The
+ * default order matches ATL.NET: ID3v2 → APE → ID3v1.
  */
 export type TagSource = "id3v2" | "ape" | "id3v1";
 
@@ -299,6 +300,14 @@ export type MetadataReadResult = {
   readonly audioFormat: AudioFormat;
   /** Common metadata fields. */
   readonly tag: TagData;
+  /**
+   * Tag flavours physically present in the source, in the reader's default
+   * priority order — independent of the {@link ReadOptions.tagPriority}
+   * filtering. Populated by readers that support multiple coexisting tag
+   * flavours (currently MP3, where an empty array means "no tag at all");
+   * other readers leave it `undefined`.
+   */
+  readonly tagSources?: readonly TagSource[];
   /** Embedded pictures (cover art, etc.). Empty array when none. */
   readonly pictures: readonly PictureInfo[];
   /** Chapter marks. Empty array when none. */
@@ -338,6 +347,12 @@ export type Track = {
   readonly durationMs?: number;
   /** Common metadata fields. */
   readonly tag: TagData;
+  /**
+   * Tag flavours physically present in the source. See
+   * {@link MetadataReadResult.tagSources}; `undefined` when the reader does
+   * not report them.
+   */
+  readonly tagSources?: readonly TagSource[];
   /** Embedded pictures (cover art, etc.). */
   readonly pictures: readonly PictureInfo[];
   /** Chapter marks. */

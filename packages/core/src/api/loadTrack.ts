@@ -23,6 +23,7 @@ export const loadTrack = async (
     audioFormat: result.audioFormat,
     ...(result.durationMs === undefined ? {} : { durationMs: result.durationMs }),
     tag: result.tag,
+    ...(result.tagSources === undefined ? {} : { tagSources: result.tagSources }),
     pictures: result.pictures,
     chapters: result.chapters,
     ...(result.lyrics === undefined ? {} : { lyrics: result.lyrics }),

@@ -90,3 +90,21 @@ it("skips tag sources omitted from priority", async () => {
   // ID3v2 / APE excluded — `album` from ID3v1 wins.
   expect(result.tag.album).toBe("ID3v1 Album");
 });
+
+it("reports the tag sources present in the file", async () => {
+  const bytes = await loadFixture("v23-with-ape-and-id3v1.mp3");
+  const result = await readMetadata(bytes);
+  expect(result.tagSources).toEqual(["id3v2", "ape", "id3v1"]);
+});
+
+it("reports only the tag sources the file actually carries", async () => {
+  const bytes = await loadFixture("v24-with-extras.mp3");
+  const result = await readMetadata(bytes);
+  expect(result.tagSources).toEqual(["id3v2"]);
+});
+
+it("reports tag sources independently of tagPriority filtering", async () => {
+  const bytes = await loadFixture("v23-with-ape-and-id3v1.mp3");
+  const result = await readMetadata(bytes, { tagPriority: ["id3v1"] });
+  expect(result.tagSources).toEqual(["id3v2", "ape", "id3v1"]);
+});
