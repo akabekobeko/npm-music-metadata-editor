@@ -1,4 +1,3 @@
-import { ID3V1_NO_GENRE } from "../../../tags/id3v1/constants.js";
 import type { Id3v1Tag } from "../../../tags/id3v1/types.js";
 import type { TagData } from "../../../types.js";
 
@@ -16,6 +15,6 @@ export const buildId3v1FromTag = (tag: Partial<TagData>): Id3v1Tag => ({
   year: tag.year === undefined ? "" : String(tag.year).padStart(4, "0").slice(0, 4),
   comment: tag.comment ?? "",
   ...(tag.trackNumber !== undefined ? { trackNumber: tag.trackNumber } : {}),
+  // No genreCode here: the writer resolves the byte from the genre name.
   ...(tag.genre !== undefined ? { genre: tag.genre } : {}),
-  genreCode: ID3V1_NO_GENRE,
 });

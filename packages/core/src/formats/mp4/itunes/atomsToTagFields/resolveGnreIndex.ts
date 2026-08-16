@@ -1,4 +1,4 @@
-import { ID3V1_GENRES } from "./constants.js";
+import { ID3V1_GENRES } from "../../../../tags/id3v1/constants.js";
 
 /**
  * Resolve a `gnre` index (1-based) to the matching ID3v1 genre name.

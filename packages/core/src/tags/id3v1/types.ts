@@ -22,6 +22,10 @@ export type Id3v1Tag = {
   trackNumber?: number;
   /** Resolved genre name when the genre byte maps into {@link ID3V1_GENRES}, otherwise `undefined`. */
   genre?: string;
-  /** Raw genre byte from the file (`0xFF` means "no genre"). */
-  genreCode: number;
+  /**
+   * Raw genre byte from the file (`0xFF` means "no genre"). Always set when
+   * parsed from a file; may be omitted when building a tag for writing, in
+   * which case the writer resolves the byte from {@link genre} instead.
+   */
+  genreCode?: number;
 };
