@@ -3,7 +3,7 @@ import type { Atom } from "../types.js";
 import { decodeType } from "./decodeType.js";
 import { detectMetaChildStart } from "./detectMetaChildStart.js";
 import { isContainerAtom } from "./isContainerAtom.js";
-import { isPlausibleAtomType } from "./isPlausibleAtomType.js";
+import { isKnownTopLevelAtomType } from "./isKnownTopLevelAtomType.js";
 import { readUInt32 } from "./readUInt32.js";
 import { readUInt64 } from "./readUInt64.js";
 
@@ -34,10 +34,10 @@ type Args = {
  * Real-world files sometimes carry trailing garbage after the last top-level
  * atom (typically leftovers of an in-place tag rewrite that shrank `mdat`
  * without truncating the file). When `topLevel` is set, a `moov` atom has
- * already been parsed, and the offending header's type bytes cannot be a real
- * atom type, parsing stops there and the remaining bytes are excluded from the
- * tree. A header whose type looks like a genuine atom (e.g. a truncated
- * `mdat`) still raises an error.
+ * already been parsed, and the offending header's type bytes are not a known
+ * top-level atom type, parsing stops there and the remaining bytes are
+ * excluded from the tree. A header whose type is a genuine top-level atom
+ * (e.g. a truncated `mdat`) still raises an error.
  *
  * @returns The parsed sibling atoms in file order.
  * @throws when an atom claims a size that extends past `end`, or when the
@@ -123,14 +123,16 @@ type GarbageArgs = {
  *
  * All three conditions must hold: the range is the top-level sequence, a
  * `moov` atom has already been parsed (so the file's real content is intact),
- * and the header's type bytes are implausible as an atom type. The last
- * condition keeps genuinely truncated atoms (whose type decodes to a valid
- * 4-character code) on the strict error path.
+ * and the header's type bytes are not a known top-level atom type. The last
+ * condition keeps genuinely truncated atoms (e.g. a cut-off `mdat`) on the
+ * strict error path while tolerating garbage whose type bytes happen to
+ * decode as printable ASCII — random bytes do so roughly 2% of the time, so
+ * plausibility of the characters alone is not a reliable signal.
  *
  * @returns `true` when the remaining bytes can safely be ignored.
  */
 const isTrailingGarbage = ({ topLevel, atoms, type }: GarbageArgs): boolean =>
-  topLevel === true && atoms.some((atom) => atom.type === "moov") && !isPlausibleAtomType(type);
+  topLevel === true && atoms.some((atom) => atom.type === "moov") && !isKnownTopLevelAtomType(type);
 
 /** Arguments for {@link resolveChildren}. */
 type ResolveArgs = {

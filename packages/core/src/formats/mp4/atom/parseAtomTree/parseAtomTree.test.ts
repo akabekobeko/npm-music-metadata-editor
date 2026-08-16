@@ -136,15 +136,34 @@ it("ignores trailing garbage after moov at the top level", () => {
   expect(tree.map((a) => a.type)).toEqual(["ftyp", "moov", "mdat"]);
 });
 
+it("ignores trailing garbage whose type bytes happen to be printable ASCII", () => {
+  // Real-world leftovers of an in-place rewrite: the bogus size points far
+  // past the buffer and the type decodes to `"ReX` — printable, yet not a
+  // known top-level atom type.
+  const printableGarbage = Buffer.from([
+    0x48, 0x50, 0x2d, 0x3b, 0x22, 0x52, 0x65, 0x58, 0xca, 0x86, 0xd5, 0x46,
+  ]);
+  const buffer = Buffer.concat([
+    atom("ftyp", Buffer.from("M4A mp42isom", "latin1")),
+    atom("moov", atom("mvhd", Buffer.alloc(4))),
+    atom("mdat", Buffer.from([0x01, 0x02, 0x03])),
+    printableGarbage,
+  ]);
+
+  const tree = parseAtomTree(buffer);
+
+  expect(tree.map((a) => a.type)).toEqual(["ftyp", "moov", "mdat"]);
+});
+
 it("throws on top-level garbage when no moov has been parsed", () => {
   const buffer = Buffer.concat([atom("ftyp", Buffer.from("M4A mp42isom", "latin1")), garbage()]);
 
   expect(() => parseAtomTree(buffer)).toThrow(/extends past parent end/);
 });
 
-it("throws when a trailing atom has a plausible type but a truncated body", () => {
-  // Type "mdat" decodes as a real atom type, so this must stay an error even
-  // though moov was already parsed.
+it("throws when a trailing atom has a known top-level type but a truncated body", () => {
+  // Type "mdat" is a known top-level atom type, so this must stay an error
+  // even though moov was already parsed.
   const truncated = Buffer.alloc(12);
   truncated.writeUInt32BE(100, 0);
   truncated.write("mdat", 4, 4, "latin1");
