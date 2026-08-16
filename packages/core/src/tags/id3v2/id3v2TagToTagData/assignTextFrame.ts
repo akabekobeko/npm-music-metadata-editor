@@ -2,6 +2,7 @@ import type { TagData } from "../../../types.js";
 import { ID3V2_TEXT_FRAME_MAP } from "../constants.js";
 import { parseTextFrame } from "../parseId3v2/parseTextFrame/parseTextFrame.js";
 import { assignSlashPair } from "./assignSlashPair.js";
+import { resolveGenreText } from "./resolveGenreText.js";
 
 /** Numeric `TagData` fields. Resolved from text frames via `Number.parseInt`. */
 const NUMERIC_TAG_FIELDS: ReadonlySet<keyof TagData> = new Set([
@@ -30,6 +31,11 @@ export const assignTextFrame = ({ target, frameId, body }: Args): void => {
 
   const text = parseTextFrame(body);
   if (text === undefined || text === "") {
+    return;
+  }
+
+  if (field === "genre") {
+    target.genre = resolveGenreText(text);
     return;
   }
 
