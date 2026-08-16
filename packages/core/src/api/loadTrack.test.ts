@@ -31,6 +31,24 @@ it("returns a Track populated with defaults when the reader omits optional field
   expect(track.warnings).toEqual([]);
   expect(track.durationMs).toBeUndefined();
   expect(track.lyrics).toBeUndefined();
+  expect(track.tagSources).toBeUndefined();
+});
+
+it("forwards reader-provided tagSources", async () => {
+  registerFormat({
+    format: "mp3",
+    extensions: [".mp3"],
+    detectSignature: (h) => h.length >= 3 && h[0] === 0x49 && h[1] === 0x44 && h[2] === 0x33,
+    read: async () => ({
+      audioFormat: "mp3",
+      tag: {},
+      tagSources: ["id3v2", "id3v1"],
+      pictures: [],
+      chapters: [],
+    }),
+  });
+  const track = await loadTrack(new Uint8Array([0x49, 0x44, 0x33, 0x03]));
+  expect(track.tagSources).toEqual(["id3v2", "id3v1"]);
 });
 
 it("forwards reader-provided durationMs / additionalFields / warnings", async () => {

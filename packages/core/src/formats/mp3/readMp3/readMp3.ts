@@ -35,6 +35,8 @@ const DEFAULT_TAG_PRIORITY: readonly TagSource[] = ["id3v2", "ape", "id3v1"];
  * @returns A {@link MetadataReadResult} populated with the merged tag data.
  *   `pictures` / `chapters` / `lyrics` are decoded from APIC / CHAP / USLT
  *   frames (ID3v2) and `Cover Art (...)` items (APE) when present.
+ *   `tagSources` lists the flavours physically present, regardless of
+ *   `tagPriority` filtering.
  */
 export const readMp3 = async (
   input: Uint8Array,
@@ -46,6 +48,12 @@ export const readMp3 = async (
 
   const id3v2 = parseId3v2(input);
   const ape = readApeTag(input);
+  const tagSources: TagSource[] = [
+    ...(id3v2 === undefined ? [] : (["id3v2"] as const)),
+    ...(ape === undefined ? [] : (["ape"] as const)),
+    ...(readId3v1(input) === undefined ? [] : (["id3v1"] as const)),
+  ];
+
   const id3Extras = id3v2 === undefined ? undefined : readId3v2Extras(id3v2);
   const apeExtras = ape === undefined ? undefined : readApeExtras(ape);
 
@@ -58,6 +66,7 @@ export const readMp3 = async (
   return {
     audioFormat: "mp3",
     tag,
+    tagSources,
     pictures,
     chapters,
     ...(lyrics === undefined ? {} : { lyrics }),
