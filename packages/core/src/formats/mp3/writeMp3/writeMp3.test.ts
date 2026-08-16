@@ -51,6 +51,16 @@ it("re-emits the ID3v1 trailer when the input had one", async () => {
   expect(v1?.trackNumber).toBe(5);
 });
 
+it("resolves the ID3v1 genre byte from the genre name", async () => {
+  const original = await loadFixture("v23-with-id3v1.mp3");
+  const rewritten = await writeMetadata(original, {
+    tag: { title: "Genre Test", genre: "Rock" },
+  });
+  const v1 = readId3v1(rewritten);
+  expect(v1?.genreCode).toBe(17);
+  expect(v1?.genre).toBe("Rock");
+});
+
 it("opts out of the ID3v1 trailer via includeId3v1=false", async () => {
   const original = await loadFixture("v23-with-id3v1.mp3");
   const rewritten = await writeMetadata(original, {

@@ -12,8 +12,14 @@ import type { Id3v1Tag } from "../types.js";
  * @returns A byte in `[0, 255]`; `0xFF` means "no genre".
  */
 export const resolveGenreByte = (tag: Id3v1Tag): number => {
-  if (Number.isInteger(tag.genreCode) && tag.genreCode >= 0 && tag.genreCode <= 0xff) {
-    return tag.genreCode;
+  const { genreCode } = tag;
+  if (
+    genreCode !== undefined &&
+    Number.isInteger(genreCode) &&
+    genreCode >= 0 &&
+    genreCode <= 0xff
+  ) {
+    return genreCode;
   }
 
   if (tag.genre !== undefined) {

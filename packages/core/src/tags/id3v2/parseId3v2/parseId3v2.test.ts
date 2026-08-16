@@ -83,6 +83,29 @@ it("promotes ID3v2.2 frame IDs to their v2.3 equivalents", () => {
   expect(data.title).toBe("v22Title");
 });
 
+it("resolves a v2.2 TCO numeric genre reference through the tag-data projection", () => {
+  // Hand-build a tiny v2.2 tag: header + one TCO (genre) frame carrying "(17)".
+  const genreBytes = new Uint8Array([0x00, ...Buffer.from("(17)", "latin1")]);
+  const frame = Buffer.alloc(6 + genreBytes.length);
+  frame.write("TCO", 0, 3, "latin1");
+  frame[3] = 0;
+  frame[4] = 0;
+  frame[5] = genreBytes.length;
+  frame.set(genreBytes, 6);
+
+  const out = Buffer.alloc(10 + frame.length);
+  out.write("ID3", 0, 3, "latin1");
+  out[3] = 2; // v2.2
+  out[9] = frame.length;
+  out.set(frame, 10);
+
+  const tag = parseId3v2(out);
+  expect(tag?.frames[0]?.id).toBe("TCON");
+  if (tag === undefined) throw new Error("tag should be defined");
+  const data = id3v2TagToTagData(tag);
+  expect(data.genre).toBe("Rock");
+});
+
 it("rewrites a v2.2 PIC frame into the APIC body layout", () => {
   // iTunes-style PIC: encoding 0, format "PNG", kind 0, empty description,
   // then JPEG bytes (the declared format is wrong on purpose — common in the

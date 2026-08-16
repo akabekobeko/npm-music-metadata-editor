@@ -30,6 +30,7 @@ export { saveTrack } from "./api/saveTrack.js";
 export { writeMetadata } from "./api/writeMetadata.js";
 export type { MmeError, MmeErrorCode } from "./errors/mmeError.js";
 export { createMmeError, isMmeError } from "./errors/mmeError.js";
+export { ID3V1_GENRES } from "./tags/id3v1/constants.js";
 export type {
   AudioFormat,
   ChapterInfo,
