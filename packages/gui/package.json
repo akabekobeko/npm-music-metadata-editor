@@ -1,7 +1,7 @@
 {
   "name": "@akabeko/music-metadata-editor-gui",
   "description": "Electron desktop application for @akabeko/music-metadata-editor.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": "akabeko (http://akabeko.me/)",
   "license": "MIT",
   "private": true,
