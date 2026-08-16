@@ -10,7 +10,11 @@ import { registerWmaFormat } from "./formats/wma/wma.js";
 // Register all built-in formats on module load. The registry-driven design
 // keeps `readMetadata` / `writeMetadata` / `loadTrack` / `saveTrack` agnostic
 // of the individual format modules.
-registerMp3Format();
+//
+// Order matters: the first registration whose signature matches wins, so
+// formats with strong multi-byte magic (fLaC / ftyp / OggS / ...) come first
+// and MP3 — whose frame-sync signature is only ~2 bytes of effective magic —
+// is registered last.
 registerFlacFormat();
 registerMp4Format();
 registerOggFormat();
@@ -18,6 +22,7 @@ registerApeFormat();
 registerWavFormat();
 registerAiffFormat();
 registerWmaFormat();
+registerMp3Format();
 
 export { loadTrack } from "./api/loadTrack.js";
 export { readMetadata } from "./api/readMetadata.js";
