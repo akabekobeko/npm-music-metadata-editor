@@ -15,7 +15,7 @@ export default defineConfig({
     },
   },
   build: {
-    target: "chrome150",
+    target: "chrome152",
     outDir: "../../dist/renderer",
     emptyOutDir: true,
   },
