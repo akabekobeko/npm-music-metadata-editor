@@ -28,7 +28,7 @@ docs/                  # ルール / 実装計画 / 設計資料 (リポジト�
   - **gui パッケージは `packages/gui/mise.toml` で別管理**。Electron がバンドルする Node メジャーに `scripts/sync-electron-targets.ts` で追従させる二段構成。`cd packages/gui` 配下では gui 用 Node、リポジトリ ルートではルート用 Node が解決される
 - ルートの主要スクリプトは `pnpm -r` で全パッケージへデリゲート
   - `pnpm typecheck` — 各パッケージで `tsc --noEmit`
-  - `pnpm test` / `pnpm test:coverage` — 各パッケージで Vitest
+  - `pnpm test` — 各パッケージで Vitest
   - `pnpm test:watch` — `@akabeko/music-metadata-editor` のみ watch
   - `pnpm build` — 各パッケージのビルド (core は `tsc -p tsconfig.build.json` で `packages/core/dist/` に ESM + 型定義を出力)
   - `pnpm check` — Biome のフォーマット + Lint + import 整理 (書き込み、ワークスペース全体)

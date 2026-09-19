@@ -146,7 +146,6 @@ CI / シェル運用は `if [ $? -eq 0 ]; then ...; fi` を前提にできます
 ```sh
 pnpm typecheck
 pnpm test
-pnpm test:coverage
 pnpm build
 ```
 

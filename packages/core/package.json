@@ -73,11 +73,10 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "prepublishOnly": "pnpm clean && pnpm build",
-    "clean": "rm -rf dist coverage",
+    "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
     "fixtures:mp3": "tsx scripts/fixtures/mp3.ts",
     "fixtures:flac": "tsx scripts/fixtures/flac.ts",
     "fixtures:mp4": "tsx scripts/fixtures/mp4.ts",
@@ -89,9 +88,9 @@
   },
   "devDependencies": {
     "@tsconfig/node24": "^24.0.5",
-    "@types/node": "^26.4.0",
+    "@types/node": "^26.6.1",
     "tsx": "^4.23.13",
     "typescript": "^7.0.2",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.1"
   }
 }
