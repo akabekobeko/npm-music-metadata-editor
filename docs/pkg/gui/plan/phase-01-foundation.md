@@ -31,11 +31,10 @@
     - `build:main`: `vite build --config src/main/vite.config.ts`
     - `build:preload`: `vite build --config src/preload/vite.config.ts`
     - `build:renderer`: `vite build --config src/renderer/vite.config.ts`
-    - `clean`: `rm -rf dist release coverage`
+    - `clean`: `rm -rf dist release`
     - `typecheck`: `tsc --build`
     - `test`: `vitest run`
     - `test:watch`: `vitest`
-    - `test:coverage`: `vitest run --coverage`
     - `package`: `pnpm build && electron-builder`
     - `sync-targets`: `node scripts/sync-electron-targets.mjs`
     - `shadcn`: `node scripts/shadcn.mjs`

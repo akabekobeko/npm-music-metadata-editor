@@ -12,7 +12,6 @@
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "test:watch": "pnpm --filter @akabeko/music-metadata-editor test:watch",
-    "test:coverage": "pnpm -r test:coverage",
     "lint": "biome lint .",
     "format": "biome format --write .",
     "check": "biome check --write ."

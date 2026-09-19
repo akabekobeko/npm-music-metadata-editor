@@ -22,11 +22,10 @@
   - `devDependencies`: core と同じ tsx / vitest / `@types/node` / typescript / `@tsconfig/node24`
   - `scripts`:
     - `build`: `tsc -p tsconfig.build.json`
-    - `clean`: `rm -rf dist coverage`
+    - `clean`: `rm -rf dist`
     - `typecheck`: `tsc --noEmit`
     - `test`: `vitest run`
     - `test:watch`: `vitest`
-    - `test:coverage`: `vitest run --coverage`
     - `prepublishOnly`: Phase 5 で追加
 - `tsconfig.json` / `tsconfig.build.json` は core を踏襲する。`outDir` は `dist/`。
 

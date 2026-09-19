@@ -146,7 +146,6 @@ Inside `packages/cli`:
 ```sh
 pnpm typecheck
 pnpm test
-pnpm test:coverage
 pnpm build
 ```
 

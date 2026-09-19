@@ -39,11 +39,10 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json && tsx scripts/postBuildShebang.ts",
     "prepublishOnly": "pnpm clean && pnpm build && pnpm test",
-    "clean": "rm -rf dist coverage",
+    "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
     "fixtures:mp3": "tsx scripts/fixtures/mp3.ts"
   },
   "dependencies": {
