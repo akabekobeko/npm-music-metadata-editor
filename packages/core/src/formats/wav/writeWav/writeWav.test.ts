@@ -96,3 +96,16 @@ it("rewrites the RIFF size to match the new total length", async () => {
   const declaredSize = view.getUint32(4, true);
   expect(declaredSize).toBe(updated.length - 8);
 });
+
+it("skips LIST/INFO and id3 fields set to null", async () => {
+  const bytes = await loadFixture("list-info.wav");
+  const track = await readMetadata(bytes);
+  const updated = await writeMetadata(bytes, {
+    tag: { ...track.tag, year: null, trackNumber: null, comment: "" },
+  });
+  const reparsed = await readMetadata(updated);
+  expect(reparsed.tag.year).toBeUndefined();
+  expect(reparsed.tag.trackNumber).toBeUndefined();
+  expect(reparsed.tag.comment).toBeUndefined();
+  expect(reparsed.tag.title).toBe("WAV title");
+});

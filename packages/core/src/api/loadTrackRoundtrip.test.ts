@@ -92,3 +92,37 @@ it("loadTrack → saveTrack → loadTrack preserves edited producer (flac)", asy
   const reloaded = await loadTrack(rebuilt);
   expect(reloaded.tag.producer).toBe("Roundtrip Producer");
 });
+
+it.each([
+  ["flac", "flac/basic.flac"],
+  ["m4a", "mp4/basic.m4a"],
+  ["ape", "ape/basic.ape"],
+  ["ogg vorbis", "ogg/vorbis-basic.ogg"],
+  ["wma", "wma/extended-only.wma"],
+  ["mp3", "mp3/v23-basic.mp3"],
+])("saveTrack deletes a numeric field set to null (%s)", async (_label, rel) => {
+  const bytes = await readFile(fixturePath(rel));
+  const original = await loadTrack(bytes);
+  const withBpm = await saveTrack(
+    { ...original, tag: { ...original.tag, bpm: 128 } },
+    { source: bytes },
+  );
+  if (withBpm === undefined) {
+    expect.fail("expected rebuilt bytes for buffer source");
+  }
+
+  expect((await loadTrack(withBpm)).tag.bpm).toBe(128);
+
+  const track = await loadTrack(withBpm);
+  const cleared = await saveTrack(
+    { ...track, tag: { ...track.tag, bpm: null } },
+    { source: withBpm },
+  );
+  if (cleared === undefined) {
+    expect.fail("expected rebuilt bytes for buffer source");
+  }
+
+  const reloaded = await loadTrack(cleared);
+  expect(reloaded.tag.bpm).toBeUndefined();
+  expect(reloaded.tag.title).toBe(track.tag.title);
+});

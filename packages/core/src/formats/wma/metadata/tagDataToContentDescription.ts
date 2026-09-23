@@ -1,10 +1,11 @@
-import type { TagData } from "../../../types.js";
+import type { TagPatch } from "../../../types.js";
+import { resolvePatchValue } from "../../../utils/tagPatch/resolvePatchValue.js";
 import type { ContentDescription } from "./types.js";
 
 /** Arguments for {@link tagDataToContentDescription}. */
 type Args = {
-  /** New tag fields the caller wants to apply. */
-  tag: Partial<TagData>;
+  /** New tag fields the caller wants to apply (`null` / `""` clears the slot). */
+  tag: TagPatch;
   /** Pre-existing Content Description (preserved for fields the caller leaves untouched). */
   existing: ContentDescription | undefined;
 };
@@ -12,6 +13,7 @@ type Args = {
 /**
  * Build a fresh Content Description from new tag fields, falling back to the
  * existing Content Description for fields the caller doesn't override.
+ * Fields set to `null` / `""` are blanked instead of falling back.
  *
  * Returning `undefined` for an empty result lets the writer decide whether
  * to emit the Content Description Object at all — avoiding a useless
@@ -25,10 +27,10 @@ export const tagDataToContentDescription = ({
   existing,
 }: Args): ContentDescription | undefined => {
   const result: ContentDescription = {
-    title: tag.title ?? existing?.title ?? "",
-    author: tag.artist ?? existing?.author ?? "",
-    copyright: tag.copyright ?? existing?.copyright ?? "",
-    description: tag.comment ?? existing?.description ?? "",
+    title: resolvePatchValue(tag.title, existing?.title) ?? "",
+    author: resolvePatchValue(tag.artist, existing?.author) ?? "",
+    copyright: resolvePatchValue(tag.copyright, existing?.copyright) ?? "",
+    description: resolvePatchValue(tag.comment, existing?.description) ?? "",
     rating: existing?.rating ?? "",
   };
   const empty =

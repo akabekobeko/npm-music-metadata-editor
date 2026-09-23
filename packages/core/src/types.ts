@@ -229,13 +229,34 @@ export type ReadOptions = {
 };
 
 /**
+ * Tag fields accepted by the writers (`writeMetadata` / `saveTrack`).
+ *
+ * Every {@link TagData} field is optional and additionally accepts `null`
+ * as an explicit deletion marker. The three states a field can be in:
+ *
+ * - `undefined` (or absent) → the value already stored in the file is
+ *   preserved as-is.
+ * - `null` → the field is removed from the file. This is the only way to
+ *   delete numeric fields (`year` / `bpm` / `rating` / `trackNumber`, ...).
+ * - `""` (string fields only) → same as `null`, kept for backwards
+ *   compatibility.
+ *
+ * Because `TagData` is assignable to `TagPatch`, a `Track.tag` obtained from
+ * `loadTrack` can be spread and edited before being passed back.
+ */
+export type TagPatch = { [K in keyof TagData]?: TagData[K] | null };
+
+/**
  * Options accepted by `writeMetadata`.
  *
  * `tag` is required because writing always needs at least one field to merge in.
  */
 export type WriteOptions = {
-  /** Metadata fields to merge into the file. Fields left `undefined` are preserved as-is. */
-  tag: Partial<TagData>;
+  /**
+   * Metadata fields to merge into the file. See {@link TagPatch} for the
+   * preserve (`undefined`) / delete (`null` or `""`) semantics.
+   */
+  tag: TagPatch;
   /**
    * Embedded pictures to write. When omitted the existing pictures are
    * preserved; when present (even an empty array), the existing pictures are
@@ -363,6 +384,19 @@ export type Track = {
   readonly additionalFields: Readonly<Record<string, string>>;
   /** Non-fatal diagnostics collected while loading the track. */
   readonly warnings: readonly Warning[];
+};
+
+/**
+ * A {@link Track} whose `tag` may carry deletion markers.
+ *
+ * `saveTrack` accepts this shape so callers can delete a field by spreading
+ * the loaded track and setting the field to `null`:
+ * `{ ...track, tag: { ...track.tag, bpm: null } }`. Every `Track` is also a
+ * valid `SavableTrack`, so unchanged tracks pass through untouched.
+ */
+export type SavableTrack = Omit<Track, "tag"> & {
+  /** Common metadata fields, with `null` allowed as an explicit delete. */
+  readonly tag: TagPatch;
 };
 
 /**

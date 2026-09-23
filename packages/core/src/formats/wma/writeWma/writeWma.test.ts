@@ -79,3 +79,33 @@ it("round-trips through write -> read with size variation", async () => {
   expect(reread.tag.title).toBe("S");
   expect(reread.tag.album).toBe("Album that did not exist on the source");
 });
+
+it("removes extended fields when they are set to null", async () => {
+  const bytes = await loadFixture("extended-only.wma");
+  const result = await writeMetadata(bytes, {
+    tag: { year: null, rating: null, trackTotal: null },
+  });
+  const reread = await readMetadata(result);
+  expect(reread.tag.year).toBeUndefined();
+  expect(reread.tag.rating).toBeUndefined();
+  expect(reread.tag.trackTotal).toBeUndefined();
+  expect(reread.tag.trackNumber).toBe(5);
+  expect(reread.tag.album).toBe("Extended only album");
+});
+
+it("preserves extended fields left undefined", async () => {
+  const bytes = await loadFixture("extended-only.wma");
+  const result = await writeMetadata(bytes, { tag: { album: "Renamed", year: undefined } });
+  const reread = await readMetadata(result);
+  expect(reread.tag.album).toBe("Renamed");
+  expect(reread.tag.year).toBe(2025);
+});
+
+it("blanks Content Description fields when they are set to null", async () => {
+  const bytes = await loadFixture("both-descriptions.wma");
+  const result = await writeMetadata(bytes, { tag: { title: null, comment: "" } });
+  const reread = await readMetadata(result);
+  expect(reread.tag.title).toBeUndefined();
+  expect(reread.tag.comment).toBeUndefined();
+  expect(reread.tag.artist).toBe("Both author");
+});

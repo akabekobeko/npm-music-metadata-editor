@@ -1,9 +1,12 @@
 import { writeFileBuffer } from "../io/file.js";
-import type { SaveTrackOptions, Track, WriteOptions } from "../types.js";
+import type { SavableTrack, SaveTrackOptions, WriteOptions } from "../types.js";
 import { writeMetadata } from "./writeMetadata.js";
 
 /**
  * Persist a modified {@link Track}.
+ *
+ * The `tag` may carry `null` (or `""`) to delete a field — see
+ * {@link TagPatch}. Fields left `undefined` keep their stored value.
  *
  * Behaviour by `options.source` / `options.outputPath`:
  * - `source: string` and no `outputPath` → overwrite the source path on disk;
@@ -14,13 +17,14 @@ import { writeMetadata } from "./writeMetadata.js";
  *   to `undefined`.
  * - `source: Uint8Array` and no `outputPath` → resolves to the rebuilt bytes.
  *
- * @param track - The modified track to persist.
+ * @param track - The modified track to persist (a plain `Track`, or one whose
+ *   `tag` marks fields for deletion).
  * @param options - Source bytes / path plus optional output path.
  * @returns The rebuilt bytes when no output path was provided; otherwise `undefined`.
  * @throws {@link MmeError} on unsupported / undetectable formats.
  */
 export const saveTrack = async (
-  track: Track,
+  track: SavableTrack,
   options: SaveTrackOptions,
 ): Promise<Uint8Array | undefined> => {
   const writeOptions = trackToWriteOptions(track);
@@ -35,7 +39,7 @@ export const saveTrack = async (
 };
 
 /**
- * Project a {@link Track} into the {@link WriteOptions} accepted by `writeMetadata`.
+ * Project a {@link SavableTrack} into the {@link WriteOptions} accepted by `writeMetadata`.
  *
  * The `format` field is forwarded so callers can save back to a different
  * physical container (rare, but supported by the lower-level API).
@@ -43,7 +47,7 @@ export const saveTrack = async (
  * @param track - Track to project.
  * @returns The equivalent `WriteOptions`.
  */
-const trackToWriteOptions = (track: Track): WriteOptions => ({
+const trackToWriteOptions = (track: SavableTrack): WriteOptions => ({
   tag: track.tag,
   pictures: track.pictures,
   chapters: track.chapters,

@@ -135,3 +135,32 @@ it("refreshes the APE Tag on a layered MP3 + APE + ID3v1 file", async () => {
   const id3v2 = parseId3v2(rewritten);
   expect(id3v2).toBeDefined();
 });
+
+it("skips frames for fields set to null", async () => {
+  const original = await loadFixture("v24-with-extras.mp3");
+  const track = await readMetadata(original);
+  const rewritten = await writeMetadata(original, {
+    tag: { ...track.tag, bpm: null, discNumber: null, discTotal: null, comment: "" },
+  });
+  const reread = await readMetadata(rewritten);
+  expect(reread.tag.bpm).toBeUndefined();
+  expect(reread.tag.discNumber).toBeUndefined();
+  expect(reread.tag.comment).toBeUndefined();
+  expect(reread.tag.title).toBe("v24 extras");
+  const ids = (parseId3v2(rewritten)?.frames ?? []).map((f) => f.id);
+  expect(ids).not.toContain("TBPM");
+  expect(ids).not.toContain("TPOS");
+});
+
+it("blanks ID3v1 fields set to null", async () => {
+  const original = await loadFixture("v23-with-id3v1.mp3");
+  const track = await readMetadata(original);
+  const rewritten = await writeMetadata(original, {
+    tag: { ...track.tag, year: null, trackNumber: null },
+  });
+  const v1 = readId3v1(rewritten);
+  expect(v1).toBeDefined();
+  expect(v1?.year).toBe("");
+  expect(v1?.trackNumber).toBeUndefined();
+  expect(v1?.title).toBe("Both tags");
+});

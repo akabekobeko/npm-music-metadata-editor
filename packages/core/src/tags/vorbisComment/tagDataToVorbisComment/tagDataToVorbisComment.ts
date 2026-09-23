@@ -1,5 +1,8 @@
-import type { TagData } from "../../../types.js";
+import type { TagData, TagPatch } from "../../../types.js";
+import { fillNumberPairs } from "../../../utils/tagPatch/fillNumberPairs.js";
+import { hasTagValue } from "../../../utils/tagPatch/hasTagValue.js";
 import type { VorbisComment, VorbisCommentEntry } from "../types.js";
+import { vorbisCommentToTagData } from "../vorbisCommentToTagData/vorbisCommentToTagData.js";
 import { FIELD_KEYS } from "./constants.js";
 import { stringifyValue } from "./stringifyValue.js";
 
@@ -7,9 +10,9 @@ import { stringifyValue } from "./stringifyValue.js";
 type Args = {
   /**
    * Tag fields to write. Fields left `undefined` are preserved as-is from
-   * `preserveEntries`; fields set to `""` are explicitly removed.
+   * `preserveEntries`; fields set to `null` / `""` are explicitly removed.
    */
-  tag: Partial<TagData>;
+  tag: TagPatch;
   /**
    * Vendor string to embed in the new block. Pass through the value from the
    * existing tag (Vorbis Comment requires a vendor).
@@ -33,12 +36,25 @@ type Args = {
  * - Each recognised field whose value is set is emitted under the canonical
  *   key, and *all* aliases (`TRACKTOTAL`/`TOTALTRACKS`, ...) are dropped from
  *   `preserveEntries` so we don't end up with stale duplicates.
- * - `year` doubles as the source of `DATE` only when `recordingDate` is not
- *   provided.
+ * - Each recognised field set to `null` / `""` drops the canonical key and
+ *   its aliases without emitting a replacement.
+ * - `year` doubles as the source of `DATE` only when `recordingDate` carries
+ *   no value (left `undefined` or cleared).
+ * - Touching only one half of a `(number, total)` pair keeps the other half
+ *   from `preserveEntries` (see {@link fillNumberPairs}), since the pair may
+ *   live in a single `X/Y` entry.
  *
  * @returns A {@link VorbisComment} ready to encode with `writeVorbisComment`.
  */
-export const tagDataToVorbisComment = ({ tag, vendor, preserveEntries }: Args): VorbisComment => {
+export const tagDataToVorbisComment = ({
+  tag: patch,
+  vendor,
+  preserveEntries,
+}: Args): VorbisComment => {
+  const tag = fillNumberPairs({
+    patch,
+    existing: vorbisCommentToTagData({ vendor, comments: preserveEntries ?? [] }),
+  });
   const comments: VorbisCommentEntry[] = [];
   const managedKeys = new Set<string>();
 
@@ -58,15 +74,15 @@ export const tagDataToVorbisComment = ({ tag, vendor, preserveEntries }: Args): 
       continue;
     }
 
-    const text = stringifyValue(raw as string | number);
+    const text = stringifyValue(raw);
     if (text !== undefined) {
       comments.push({ key: canonicalKey, value: text });
     }
   }
 
   // `year` shares the `DATE` key with `recordingDate`. Only fall back to
-  // `year` when the caller did not provide `recordingDate`.
-  if (tag.year !== undefined && tag.recordingDate === undefined) {
+  // `year` when `recordingDate` carries no value of its own.
+  if (tag.year !== undefined && !hasTagValue(tag.recordingDate)) {
     managedKeys.add("DATE");
     const yearText = stringifyValue(tag.year);
     if (yearText !== undefined) {

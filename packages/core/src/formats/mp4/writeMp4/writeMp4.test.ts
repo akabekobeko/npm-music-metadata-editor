@@ -6,6 +6,7 @@ import { expect, it } from "vitest";
 import { findAllAtoms } from "../atom/findAllAtoms.js";
 import { findAtom } from "../atom/findAtom.js";
 import { parseAtomTree } from "../atom/parseAtomTree/parseAtomTree.js";
+import { parseMp4 } from "../readMp4/parseMp4.js";
 import { readMp4 } from "../readMp4/readMp4.js";
 import { writeMp4 } from "./writeMp4.js";
 
@@ -130,4 +131,63 @@ it("can be reached via the public readMetadata / writeMetadata path", async () =
   const bytes = await loadFixture("basic.m4a");
   const ilstAtom = findAtom(parseAtomTree(bytes), ["moov", "udta", "meta", "ilst"]);
   expect(ilstAtom).toBeDefined();
+});
+
+it("removes a numeric field when it is set to null", async () => {
+  const bytes = await loadFixture("basic.m4a");
+  const withBpm = await writeMp4(bytes, { tag: { bpm: 128, rating: 0.8 } });
+  const before = await readMp4(withBpm);
+  expect(before.tag.bpm).toBe(128);
+  expect(before.tag.rating).toBeCloseTo(0.8);
+
+  const cleared = await writeMp4(withBpm, { tag: { bpm: null, rating: null, trackTotal: null } });
+  const reread = await readMp4(cleared);
+  expect(reread.tag.bpm).toBeUndefined();
+  expect(reread.tag.rating).toBeUndefined();
+  expect(reread.tag.trackTotal).toBeUndefined();
+  expect(reread.tag.trackNumber).toBe(2);
+  expect(reread.tag.album).toBe("Phase4 Album");
+
+  const names = parseMp4(cleared).metadata.ilstAtoms.map((a) => a.name);
+  expect(names).not.toContain("tmpo");
+  expect(names).not.toContain("rtng");
+});
+
+it("drops the atom instead of writing an empty one for a text field set to empty string", async () => {
+  const bytes = await loadFixture("basic.m4a");
+  const cleared = await writeMp4(bytes, { tag: { album: "", artist: null } });
+  const reread = await readMp4(cleared);
+  expect(reread.tag.album).toBeUndefined();
+  expect(reread.tag.artist).toBeUndefined();
+  expect(reread.tag.title).toBe("MP4 basic");
+
+  const names = parseMp4(cleared).metadata.ilstAtoms.map((a) => a.name);
+  expect(names).not.toContain("©alb");
+  expect(names).not.toContain("©ART");
+});
+
+it("drops ©day when year and recordingDate are both cleared", async () => {
+  const bytes = await loadFixture("basic.m4a");
+  const cleared = await writeMp4(bytes, { tag: { year: null, recordingDate: null } });
+  const reread = await readMp4(cleared);
+  expect(reread.tag.year).toBeUndefined();
+  expect(reread.tag.recordingDate).toBeUndefined();
+});
+
+it("drops existing cover art for an empty pictures array", async () => {
+  const bytes = await loadFixture("with-picture.m4a");
+  const cleared = await writeMp4(bytes, { tag: {}, pictures: [] });
+  const reread = await readMp4(cleared);
+  expect(reread.pictures).toHaveLength(0);
+  expect(parseMp4(cleared).metadata.ilstAtoms.map((a) => a.name)).not.toContain("covr");
+});
+
+it("drops existing lyrics when the supplied lyrics hold no text", async () => {
+  const bytes = await loadFixture("basic.m4a");
+  const withLyrics = await writeMp4(bytes, { tag: {}, lyrics: { unsynchronized: "la la" } });
+  expect((await readMp4(withLyrics)).lyrics?.unsynchronized).toBe("la la");
+
+  const cleared = await writeMp4(withLyrics, { tag: {}, lyrics: {} });
+  expect((await readMp4(cleared)).lyrics).toBeUndefined();
+  expect(parseMp4(cleared).metadata.ilstAtoms.map((a) => a.name)).not.toContain("©lyr");
 });

@@ -1,12 +1,13 @@
-import type { TagData } from "../../../types.js";
+import type { TagPatch } from "../../../types.js";
+import { applyTagPatch } from "../../../utils/tagPatch/applyTagPatch.js";
 import { ASF_DESCRIPTOR_TYPE } from "../constants.js";
 import { descriptorsToTagData, MANAGED_EXTENDED_NAMES } from "./descriptorsToTagData.js";
 import type { ExtendedDescriptor } from "./types.js";
 
 /** Arguments for {@link tagDataToExtendedDescriptors}. */
 type Args = {
-  /** New tag fields the caller wants to apply. */
-  tag: Partial<TagData>;
+  /** New tag fields the caller wants to apply (`null` / `""` removes the descriptor). */
+  tag: TagPatch;
   /** Pre-existing extended descriptors, used for round-tripping unknown ones. */
   existing: readonly ExtendedDescriptor[];
 };
@@ -22,9 +23,10 @@ type Args = {
  * - Unmanaged names round-trip verbatim, preserving the bytes the reader
  *   captured on `rawValue`.
  *
- * Managed fields the caller doesn't override fall back to the existing
+ * Managed fields the caller leaves `undefined` fall back to the existing
  * value, so a partial edit (`tag: { album: "New" }`) doesn't accidentally
  * blank out the composer / genre / track number that were already there.
+ * Fields set to `null` / `""` drop the descriptor instead.
  *
  * @returns Descriptors in emission order.
  */
@@ -33,7 +35,7 @@ export const tagDataToExtendedDescriptors = ({
   existing,
 }: Args): readonly ExtendedDescriptor[] => {
   const fromExisting = descriptorsToTagData({ content: undefined, extended: existing });
-  const merged: Partial<TagData> = { ...fromExisting, ...tag };
+  const merged = applyTagPatch({ existing: fromExisting, patch: tag });
 
   const out: ExtendedDescriptor[] = existing.filter((d) => !MANAGED_EXTENDED_NAMES.has(d.name));
   const stringFields: ReadonlyArray<[string, string | undefined]> = [

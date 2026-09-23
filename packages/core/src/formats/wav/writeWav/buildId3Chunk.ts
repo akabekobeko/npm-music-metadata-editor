@@ -8,6 +8,7 @@ import type { Id3v2Frame, Id3v2MajorVersion } from "../../../tags/id3v2/types.js
 import { KNOWN_FRAME_IDS } from "../../../tags/id3v2/writeId3v2/knownFrameIds.js";
 import { writeId3v2 } from "../../../tags/id3v2/writeId3v2/writeId3v2.js";
 import type { ChapterInfo, LyricsInfo, PictureInfo, WriteOptions } from "../../../types.js";
+import { hasTagValue } from "../../../utils/tagPatch/hasTagValue.js";
 import { WAV_CHUNK_ID3 } from "../constants.js";
 
 /** Arguments for {@link buildId3Chunk}. */
@@ -40,7 +41,7 @@ type Args = {
  */
 export const buildId3Chunk = ({ tag, existing, pictures, chapters, lyrics }: Args): Uint8Array => {
   const existingTag = existing === undefined ? undefined : parseId3v2(existing);
-  const hasTagFields = Object.values(tag).some((value) => value !== undefined && value !== "");
+  const hasTagFields = Object.values(tag).some((value) => hasTagValue(value));
   const hasExtras = pictures !== undefined || chapters !== undefined || lyrics !== undefined;
   if (existingTag === undefined && !hasTagFields && !hasExtras) {
     return new Uint8Array();

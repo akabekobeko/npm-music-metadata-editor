@@ -67,3 +67,45 @@ it("falls back to existing managed values for fields the caller omitted", () => 
   const composer = result.find((d) => d.name === "WM/Composer");
   expect(composer?.value).toBe("Existing composer");
 });
+
+it("drops a managed descriptor when its field is set to null", () => {
+  const result = tagDataToExtendedDescriptors({
+    tag: { year: null, bpm: null },
+    existing: [
+      {
+        name: "WM/Year",
+        type: ASF_DESCRIPTOR_TYPE.UnicodeString,
+        value: "2020",
+        rawValue: new Uint8Array(),
+      },
+      {
+        name: "WM/BeatsPerMinute",
+        type: ASF_DESCRIPTOR_TYPE.UnicodeString,
+        value: "128",
+        rawValue: new Uint8Array(),
+      },
+      {
+        name: "WM/Genre",
+        type: ASF_DESCRIPTOR_TYPE.UnicodeString,
+        value: "Rock",
+        rawValue: new Uint8Array(),
+      },
+    ],
+  });
+  expect(result.map((d) => d.name)).toEqual(["WM/Genre"]);
+});
+
+it("keeps a managed descriptor whose field is explicitly undefined", () => {
+  const result = tagDataToExtendedDescriptors({
+    tag: { year: undefined },
+    existing: [
+      {
+        name: "WM/Year",
+        type: ASF_DESCRIPTOR_TYPE.UnicodeString,
+        value: "2020",
+        rawValue: new Uint8Array(),
+      },
+    ],
+  });
+  expect(result.map((d) => [d.name, d.value])).toEqual([["WM/Year", "2020"]]);
+});

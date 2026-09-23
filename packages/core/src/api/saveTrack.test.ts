@@ -91,3 +91,10 @@ it("writes Uint8Array sources to outputPath when provided", async () => {
   const written = await readFile(out);
   expect(written.byteLength).toBe(4);
 });
+
+it("forwards null deletion markers on the tag to the writer", async () => {
+  const source = new Uint8Array([0x49, 0x44, 0x33]);
+  const track = trackOf();
+  await saveTrack({ ...track, tag: { ...track.tag, bpm: null, album: "" } }, { source });
+  expect(receivedOptions?.tag).toEqual({ title: "Edited", bpm: null, album: "" });
+});

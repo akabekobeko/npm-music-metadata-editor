@@ -86,3 +86,18 @@ it("rewrites the FORM size to match the new total length", async () => {
   const declaredSize = view.getUint32(4, false);
   expect(declaredSize).toBe(updated.length - 8);
 });
+
+it("skips native chunks for fields set to null", async () => {
+  const bytes = await loadFixture("native.aiff");
+  const track = await readMetadata(bytes);
+  const updated = await writeMetadata(bytes, {
+    tag: { ...track.tag, copyright: null, comment: null },
+  });
+  const reparsed = await readMetadata(updated);
+  expect(reparsed.tag.copyright).toBeUndefined();
+  expect(reparsed.tag.comment).toBeUndefined();
+  expect(reparsed.tag.title).toBe("AIFF title");
+  const ids = collectChunkIds(updated);
+  expect(ids).not.toContain("(c) ");
+  expect(ids).not.toContain("ANNO");
+});
