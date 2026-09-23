@@ -20,6 +20,16 @@ it("strips NUL from the email and clamps the rating byte", () => {
   expect(Array.from(body)).toEqual([0x61, 0x62, 0x00, 255]);
 });
 
+it("strips code points whose Latin-1 encoding would become a NUL byte", () => {
+  // U+0100 encodes to 0x00 under lossy Latin-1 conversion.
+  const body = buildPopularimeterFrameBody({
+    email: "a\u0100b",
+    rating: 1,
+    counter: new Uint8Array(),
+  });
+  expect(Array.from(body)).toEqual([0x61, 0x62, 0x00, 1]);
+});
+
 it("round-trips through parsePopularimeterFrame", () => {
   const input = { email: "user@example.com", rating: 54, counter: Uint8Array.from([0, 0, 0, 1]) };
   expect(parsePopularimeterFrame(buildPopularimeterFrameBody(input))).toEqual(input);

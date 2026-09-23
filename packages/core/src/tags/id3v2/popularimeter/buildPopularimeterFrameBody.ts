@@ -5,8 +5,10 @@ import type { Popularimeter } from "./types.js";
 /**
  * Serialize a {@link Popularimeter} into a `POPM` frame body.
  *
- * NUL is the structural separator between e-mail and rating; it is stripped
- * from the e-mail so a crafted value cannot shift the rating byte.
+ * NUL is the structural separator between e-mail and rating; zero bytes are
+ * stripped from the encoded e-mail (after Latin-1 encoding, so code points
+ * whose low byte is `0x00` cannot smuggle one in) to keep the rating byte in
+ * place.
  *
  * @param popularimeter - Fields to encode.
  * @returns The frame body (`<email><00><rating><counter...>`).
@@ -16,7 +18,7 @@ export const buildPopularimeterFrameBody = ({
   rating,
   counter,
 }: Popularimeter): Uint8Array => {
-  const emailBytes = encodeText(email.replaceAll("\u0000", ""), "latin1");
+  const emailBytes = encodeText(email, "latin1").filter((byte) => byte !== 0x00);
   const out = Buffer.alloc(emailBytes.length + 2 + counter.length);
   out.set(emailBytes, 0);
   out[emailBytes.length] = 0x00;
