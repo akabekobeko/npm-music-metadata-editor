@@ -30,6 +30,7 @@ export const FIELD_KEYS: Readonly<Partial<Record<keyof TagData, readonly string[
   originalReleaseDate: ["ORIGINALDATE"],
   publishingDate: ["RELEASEDATE"],
   bpm: ["BPM"],
+  rating: ["RATING"],
   trackNumber: ["TRACKNUMBER"],
   trackTotal: ["TRACKTOTAL", "TOTALTRACKS"],
   discNumber: ["DISCNUMBER"],

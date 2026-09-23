@@ -1,4 +1,5 @@
 import type { TagData } from "../../../types.js";
+import { decodePercentRating } from "../../../utils/rating/decodePercentRating.js";
 import { assignSlashPair } from "../../vorbisComment/vorbisCommentToTagData/assignSlashPair.js";
 import { ApeItemKind } from "../constants.js";
 import type { ApeTag } from "../types.js";
@@ -11,6 +12,8 @@ import { FIELD_MAP, NUMERIC_FIELDS } from "./constants.js";
  * - `TRACK`/`TRACKNUMBER` and `DISC`/`DISCNUMBER` accept either bare numbers
  *   or `"X/Y"` form, in which case the second value populates the
  *   corresponding `*Total` field.
+ * - `RATING` / `PREFERENCE` accept either a `0` .. `100` percentage or a
+ *   `0` .. `5` star count (see {@link decodePercentRating}).
  * - Binary / external items are skipped — the bytes round-trip via the
  *   underlying {@link ApeTag} but they do not have a slot in `TagData`.
  *
@@ -49,6 +52,16 @@ export const apeTagToTagData = (tag: ApeTag): TagData => {
     }
 
     if (assigned.has(field)) {
+      continue;
+    }
+
+    if (field === "rating") {
+      const rating = decodePercentRating(item.value);
+      if (rating !== undefined) {
+        out.rating = rating;
+        assigned.add(field);
+      }
+
       continue;
     }
 

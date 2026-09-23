@@ -79,3 +79,14 @@ it("preserves numeric fields left undefined", async () => {
   const reparsed = await readMetadata(updated);
   expect(reparsed.tag.year).toBe(2024);
 });
+
+it("round-trips rating through the Rating item", async () => {
+  const bytes = await loadFixture("basic.ape");
+  const rewritten = await writeMetadata(bytes, { tag: { rating: 0.9 } });
+  expect((await readMetadata(rewritten)).tag.rating).toBeCloseTo(0.9, 10);
+  const keys = readApeTag(rewritten)?.items.map((item) => item.key) ?? [];
+  expect(keys).toContain("Rating");
+
+  const cleared = await writeMetadata(rewritten, { tag: { rating: null } });
+  expect((await readMetadata(cleared)).tag.rating).toBeUndefined();
+});

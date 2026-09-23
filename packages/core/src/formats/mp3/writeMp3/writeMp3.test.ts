@@ -164,3 +164,13 @@ it("blanks ID3v1 fields set to null", async () => {
   expect(v1?.trackNumber).toBeUndefined();
   expect(v1?.title).toBe("Both tags");
 });
+
+it("round-trips rating through a POPM frame", async () => {
+  const original = await loadFixture("v23-basic.mp3");
+  const rewritten = await writeMetadata(original, { tag: { rating: 0.7 } });
+  expect((await readMetadata(rewritten)).tag.rating).toBeCloseTo(0.7, 10);
+
+  const cleared = await writeMetadata(rewritten, { tag: { rating: null } });
+  expect((await readMetadata(cleared)).tag.rating).toBeUndefined();
+  expect((parseId3v2(cleared)?.frames ?? []).map((f) => f.id)).not.toContain("POPM");
+});

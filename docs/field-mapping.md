@@ -41,7 +41,7 @@ This document maps each tag format to the common `TagData` shape exposed by `loa
 | `discNumber` | `TPOS` (`X[/Y]`) | — | `DISCNUMBER` (`X[/Y]`) | `DISC` / `DISCNUMBER` (`X[/Y]`) | `disk` (number) | — | — | `WM/PartOfSet` (`X[/Y]`) |
 | `discTotal` | `Y` part of `TPOS` | — | `DISCTOTAL` / `TOTALDISCS` / `Y` part of `DISCNUMBER` | `DISCTOTAL` / `TOTALDISCS` / `Y` part of `DISCNUMBER` | `disk` (total) | — | — | `Y` part of `WM/PartOfSet` |
 | `bpm` | `TBPM` | — | `BPM` | `BPM` | `tmpo` | — | — | `WM/BeatsPerMinute` |
-| `rating` | — | — | — | — | `rtng` (0–100, normalized to `[0, 1]`) | — | — | `WM/SharedUserRating` (0–99, normalized to `[0, 1]`) |
+| `rating` | `POPM` (rating byte 0–255, Windows / MediaMonkey half-star convention) | — | `RATING` (0–100; 0–5 stars also accepted on read) | `RATING` / `PREFERENCE` (0–100; 0–5 stars also accepted on read) | `rtng` (0–100, normalized to `[0, 1]`) | — | — | `WM/SharedUserRating` (0–99, normalized to `[0, 1]`) |
 
 ## Notes
 
@@ -49,6 +49,7 @@ This document maps each tag format to the common `TagData` shape exposed by `loa
 
 - `producer` has no standalone text frame; it lives as a role/name pair inside the involved-people list (`TIPL` for v2.4, `IPLS` for v2.3, and v2.2 `IPL` is upgraded to `TIPL` at parse time). Role names are matched case-insensitively on read, and the writer emits the lower-case `producer` role.
 - On write, only the `producer` entries in the involved-people frame are replaced — other roles stored in the same frame (engineer, mixer, ...) are preserved. Setting `producer` to `""` removes the role; the frame itself is dropped when no entries remain.
+- `rating` comes from the first `POPM` frame. The rating byte follows the de facto Windows Explorer / MediaMonkey / MusicBee convention (same as ATL.NET): `1` / `64` / `128` / `196` / `255` for 1–5 stars and `13` / `54` / `118` / `186` / `242` for half stars; on read, `1`–`5` is a star count and `6`–`10` a 0–10 scale, and other values snap to the nearest half star. On write the normalized value is snapped to the nearest half star. The existing frame's e-mail and play counter are kept; a new frame uses the e-mail `Windows Media Player 9 Series`.
 
 ### ID3v1 / ID3v1.1
 
@@ -61,6 +62,7 @@ This document maps each tag format to the common `TagData` shape exposed by `loa
 - `TRACKNUMBER` (`DISCNUMBER`) accepts both `"X"` and `"X/Y"` form; the `/Y` portion populates `trackTotal` (`discTotal`).
 - For multi-value entries (the same key appearing more than once), **the first value wins**, because `TagData` is a single-value model.
 - Unrecognised keys never reach `TagData`, but the writer round-trips them via the original tag block.
+- `RATING` (APE: `RATING` / `PREFERENCE`) is written as a 0–100 integer (`Math.round(rating * 100)`). On read, values of 5 or less are treated as a 0–5 star count (fractional stars allowed, e.g. `2.5`) and larger values as a percentage clamped to 100, matching ATL.NET.
 
 ### MP4 / iTunes atoms
 

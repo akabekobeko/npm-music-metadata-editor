@@ -2,6 +2,7 @@ import type { TagPatch } from "../../../types.js";
 import { buildId3v2 } from "../buildId3v2/buildId3v2.js";
 import type { Id3v2Frame } from "../types.js";
 import { mergeProducerFrame } from "./mergeProducerFrame.js";
+import { mergeRatingFrame } from "./mergeRatingFrame.js";
 import { synthesizeFrames } from "./synthesizeFrames.js";
 
 /** Arguments for {@link writeId3v2}. */
@@ -27,6 +28,7 @@ export type WriteId3v2Args = {
  * - `comment` becomes a `COMM` frame with empty description and language `"eng"`.
  * - `trackNumber` / `trackTotal` collapse into a single `TRCK` value (`"X/Y"`),
  *   `discNumber` / `discTotal` collapse into `TPOS` similarly.
+ * - `rating` is merged into a `POPM` frame (see {@link mergeRatingFrame}).
  * - `preserveFrames` are emitted verbatim (used for unknown frames captured on read).
  *
  * @returns The encoded ID3v2 tag bytes ready to prepend to the audio payload.
@@ -42,9 +44,17 @@ export const writeId3v2 = (args: WriteId3v2Args): Uint8Array => {
     frames.push(involvedPeople.frame);
   }
 
+  const popularimeter = mergeRatingFrame({
+    rating: args.tag.rating,
+    preserveFrames: involvedPeople.preserveFrames,
+  });
+  if (popularimeter.frame !== undefined) {
+    frames.push(popularimeter.frame);
+  }
+
   return buildId3v2({
     majorVersion: args.majorVersion,
-    frames: [...frames, ...involvedPeople.preserveFrames],
+    frames: [...frames, ...popularimeter.preserveFrames],
     padding: args.padding,
   });
 };

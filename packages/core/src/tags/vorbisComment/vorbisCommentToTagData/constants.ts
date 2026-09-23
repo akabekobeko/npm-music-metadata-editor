@@ -39,6 +39,7 @@ export const FIELD_MAP: Readonly<Record<string, keyof TagData>> = {
   DISCTOTAL: "discTotal",
   TOTALDISCS: "discTotal",
   BPM: "bpm",
+  RATING: "rating",
 };
 
 /** Fields that should be parsed as integers (they have numeric `TagData` types). */
