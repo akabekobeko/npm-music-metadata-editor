@@ -119,3 +119,40 @@ it("preserves unmanaged Vorbis Comment entries (e.g. multi-value ARTIST)", async
   const artistEntries = reparsed.vorbisComment?.comments.filter((c) => c.key === "ARTIST") ?? [];
   expect(artistEntries.map((c) => c.value)).toEqual(["Tester", "Tester (alternate)"]);
 });
+
+it("removes a numeric field when it is set to null", async () => {
+  const original = await loadFixture("basic.flac");
+  const withBpm = await writeMetadata(original, { tag: { bpm: 128 } });
+  expect((await readMetadata(withBpm)).tag.bpm).toBe(128);
+
+  const cleared = await writeMetadata(withBpm, { tag: { bpm: null } });
+  const result = await readMetadata(cleared);
+  expect(result.tag.bpm).toBeUndefined();
+  // Untouched fields survive the deletion.
+  expect(result.tag.album).toBe("Phase3 Album");
+});
+
+it("preserves a numeric field left undefined", async () => {
+  const original = await loadFixture("basic.flac");
+  const withBpm = await writeMetadata(original, { tag: { bpm: 128 } });
+  const rewritten = await writeMetadata(withBpm, { tag: { title: "Renamed", bpm: undefined } });
+  const result = await readMetadata(rewritten);
+  expect(result.tag.title).toBe("Renamed");
+  expect(result.tag.bpm).toBe(128);
+});
+
+it("drops DATE when both year and recordingDate are cleared", async () => {
+  const original = await loadFixture("basic.flac");
+  const cleared = await writeMetadata(original, { tag: { year: null, recordingDate: null } });
+  const result = await readMetadata(cleared);
+  expect(result.tag.year).toBeUndefined();
+  expect(result.tag.recordingDate).toBeUndefined();
+});
+
+it("falls back to year for DATE when only recordingDate is cleared", async () => {
+  const original = await loadFixture("basic.flac");
+  const rewritten = await writeMetadata(original, { tag: { recordingDate: "", year: 2020 } });
+  const result = await readMetadata(rewritten);
+  expect(result.tag.recordingDate).toBe("2020");
+  expect(result.tag.year).toBe(2020);
+});

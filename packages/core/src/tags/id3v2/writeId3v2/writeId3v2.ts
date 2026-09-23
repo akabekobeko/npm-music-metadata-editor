@@ -1,4 +1,4 @@
-import type { TagData } from "../../../types.js";
+import type { TagPatch } from "../../../types.js";
 import { buildId3v2 } from "../buildId3v2/buildId3v2.js";
 import type { Id3v2Frame } from "../types.js";
 import { mergeProducerFrame } from "./mergeProducerFrame.js";
@@ -6,8 +6,8 @@ import { synthesizeFrames } from "./synthesizeFrames.js";
 
 /** Arguments for {@link writeId3v2}. */
 export type WriteId3v2Args = {
-  /** Source `TagData` whose fields are folded into frames. */
-  tag: Partial<TagData>;
+  /** Source `TagPatch` whose fields are folded into frames (`null` / `""` skip the frame). */
+  tag: TagPatch;
   /** Major version to emit (`3` or `4`). */
   majorVersion: 3 | 4;
   /**
@@ -20,7 +20,7 @@ export type WriteId3v2Args = {
 };
 
 /**
- * Build an ID3v2 tag from a {@link TagData} value plus optional preserved frames.
+ * Build an ID3v2 tag from a {@link TagPatch} value plus optional preserved frames.
  *
  * - Recognised text fields are emitted as `T*` frames with UTF-8 encoding for
  *   v2.4 and Latin-1 for v2.3.

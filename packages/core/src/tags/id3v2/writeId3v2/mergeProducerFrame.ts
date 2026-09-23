@@ -10,8 +10,8 @@ import { buildTextFrame } from "./buildTextFrame.js";
 
 /** Arguments for {@link mergeProducerFrame}. */
 type Args = {
-  /** `tag.producer` value. `undefined` leaves existing frames untouched; `""` removes the role. */
-  producer: string | undefined;
+  /** `tag.producer` value. `undefined` leaves existing frames untouched; `null` / `""` removes the role. */
+  producer: string | null | undefined;
   /** Target ID3v2 major version (`4` emits `TIPL`, `3` emits `IPLS`). */
   majorVersion: 3 | 4;
   /** Frames the caller intends to preserve verbatim (may include `TIPL` / `IPLS`). */
@@ -33,7 +33,7 @@ type Result = {
  * inside the involved-people list, alongside roles this library does not
  * model (engineer, mixer, ...). When the caller sets `producer`, the existing
  * involved-people frames are decoded, the producer entries are replaced (or
- * removed for `""`), and a single fresh frame is emitted — other roles ride
+ * removed for `null` / `""`), and a single fresh frame is emitted — other roles ride
  * along unchanged. When `producer` is `undefined`, the existing frames stay
  * in `preserveFrames` verbatim.
  *
@@ -47,7 +47,7 @@ export const mergeProducerFrame = ({ producer, majorVersion, preserveFrames }: A
   // NUL is the structural separator of the involved-people string list; strip
   // it from the caller's value so a crafted producer cannot inject extra
   // role/name pairs into the frame.
-  const sanitizedProducer = producer.replaceAll("\u0000", "");
+  const sanitizedProducer = (producer ?? "").replaceAll("\u0000", "");
 
   const existing = preserveFrames.filter((frame) => INVOLVED_PEOPLE_FRAME_IDS.has(frame.id));
   const rest = preserveFrames.filter((frame) => !INVOLVED_PEOPLE_FRAME_IDS.has(frame.id));

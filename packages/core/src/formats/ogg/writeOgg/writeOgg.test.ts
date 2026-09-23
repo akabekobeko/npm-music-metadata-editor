@@ -121,3 +121,24 @@ it("preserves untouched tag entries via preserveEntries", async () => {
   expect(result.tag.album).toBe("Phase5 Album");
   expect(result.tag.trackNumber).toBe(3);
 });
+
+it("removes a numeric field when it is set to null (Vorbis)", async () => {
+  const original = await loadFixture("vorbis-basic.ogg");
+  const withBpm = await writeMetadata(original, { tag: { bpm: 140 } });
+  expect((await readMetadata(withBpm)).tag.bpm).toBe(140);
+
+  const cleared = await writeMetadata(withBpm, { tag: { bpm: null, trackTotal: null } });
+  const result = await readMetadata(cleared);
+  expect(result.tag.bpm).toBeUndefined();
+  expect(result.tag.trackTotal).toBeUndefined();
+  expect(result.tag.trackNumber).toBe(3);
+  expect(allCrcsValid(cleared)).toBe(true);
+});
+
+it("removes a numeric field when it is set to null (Opus)", async () => {
+  const original = await loadFixture("opus-basic.opus");
+  const cleared = await writeMetadata(original, { tag: { trackNumber: null } });
+  const result = await readMetadata(cleared);
+  expect(result.tag.trackNumber).toBeUndefined();
+  expect(result.tag.title).toBe("Opus basic");
+});

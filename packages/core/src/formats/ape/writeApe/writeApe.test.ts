@@ -59,3 +59,23 @@ it("clears a field when the tag value is set to an empty string", async () => {
   const reparsed = await readMetadata(updated);
   expect(reparsed.tag.genre).toBeUndefined();
 });
+
+it("removes numeric fields when they are set to null", async () => {
+  const bytes = await loadFixture("basic.ape");
+  const updated = await writeMetadata(bytes, { tag: { year: null, trackTotal: null } });
+  const reparsed = await readMetadata(updated);
+  expect(reparsed.tag.year).toBeUndefined();
+  expect(reparsed.tag.trackTotal).toBeUndefined();
+  expect(reparsed.tag.trackNumber).toBe(2);
+  expect(reparsed.tag.genre).toBe("Rock");
+
+  const items = readApeTag(updated)?.items.map((item) => item.key.toUpperCase()) ?? [];
+  expect(items).not.toContain("YEAR");
+});
+
+it("preserves numeric fields left undefined", async () => {
+  const bytes = await loadFixture("basic.ape");
+  const updated = await writeMetadata(bytes, { tag: { title: "Renamed", year: undefined } });
+  const reparsed = await readMetadata(updated);
+  expect(reparsed.tag.year).toBe(2024);
+});

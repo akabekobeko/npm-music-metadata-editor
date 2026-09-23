@@ -1,6 +1,7 @@
 import { Buffer } from "node:buffer";
-import type { TagData } from "../../../types.js";
+import type { TagPatch } from "../../../types.js";
 import { encodeText } from "../../../utils/encoding/encodeText.js";
+import { hasTagValue } from "../../../utils/tagPatch/hasTagValue.js";
 import {
   AIFF_CHUNK_ANNO,
   AIFF_CHUNK_AUTH,
@@ -11,7 +12,8 @@ import { buildChunk } from "./buildChunk.js";
 
 /**
  * Build the native AIFF metadata chunks (`NAME`, `AUTH`, `(c) `, `ANNO`)
- * that match the supplied {@link TagData}.
+ * that match the supplied {@link TagPatch} (`undefined` / `null` / `""`
+ * fields emit nothing).
  *
  * Text is latin1-encoded — that is what the AIFF spec mandates for these
  * chunks; characters outside the latin1 range are replaced by their
@@ -25,23 +27,23 @@ import { buildChunk } from "./buildChunk.js";
  * @param tag - Source tag fields.
  * @returns Concatenated chunk bytes in `NAME, AUTH, (c) , ANNO*` order.
  */
-export const buildNativeChunks = (tag: Partial<TagData>): Uint8Array => {
+export const buildNativeChunks = (tag: TagPatch): Uint8Array => {
   const parts: Uint8Array[] = [];
-  if (tag.title !== undefined && tag.title !== "") {
+  if (hasTagValue(tag.title)) {
     parts.push(buildChunk({ id: AIFF_CHUNK_NAME, payload: encodeText(tag.title, "latin1") }));
   }
 
-  if (tag.artist !== undefined && tag.artist !== "") {
+  if (hasTagValue(tag.artist)) {
     parts.push(buildChunk({ id: AIFF_CHUNK_AUTH, payload: encodeText(tag.artist, "latin1") }));
   }
 
-  if (tag.copyright !== undefined && tag.copyright !== "") {
+  if (hasTagValue(tag.copyright)) {
     parts.push(
       buildChunk({ id: AIFF_CHUNK_COPYRIGHT, payload: encodeText(tag.copyright, "latin1") }),
     );
   }
 
-  if (tag.comment !== undefined && tag.comment !== "") {
+  if (hasTagValue(tag.comment)) {
     for (const line of tag.comment.split("\n")) {
       parts.push(buildChunk({ id: AIFF_CHUNK_ANNO, payload: encodeText(line, "latin1") }));
     }

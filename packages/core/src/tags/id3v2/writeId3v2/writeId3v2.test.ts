@@ -158,3 +158,21 @@ it("includes padding when requested", () => {
   expect(tag).toBeDefined();
   expect(tag?.totalSize).toBe(bytes.length);
 });
+
+it("emits no frame for fields set to null", () => {
+  const bytes = writeId3v2({
+    majorVersion: 4,
+    tag: {
+      title: "Only title",
+      year: null,
+      bpm: null,
+      trackNumber: null,
+      trackTotal: 9,
+      comment: null,
+      producer: null,
+    },
+  });
+  const tag = parseId3v2(bytes);
+  if (tag === undefined) throw new Error("tag should be defined");
+  expect(id3v2TagToTagData(tag)).toEqual({ title: "Only title" });
+});

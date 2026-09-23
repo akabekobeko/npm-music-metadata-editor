@@ -1,5 +1,6 @@
-import type { TagData } from "../../../types.js";
+import type { TagData, TagPatch } from "../../../types.js";
 import type { TextEncoding } from "../../../utils/encoding/types.js";
+import { hasTagValue } from "../../../utils/tagPatch/hasTagValue.js";
 import { buildCommentFrameBody } from "../buildId3v2/buildCommentFrameBody/buildCommentFrameBody.js";
 import type { Id3v2Frame } from "../types.js";
 import { appendSlashPair } from "./appendSlashPair.js";
@@ -7,13 +8,13 @@ import { buildTextFrame } from "./buildTextFrame.js";
 import { NO_FRAME_FLAGS, TAG_FIELD_TO_FRAME_ID } from "./constants.js";
 
 /**
- * Convert a {@link TagData} value into the ordered list of frames to emit.
+ * Convert a {@link TagPatch} value into the ordered list of frames to emit.
  *
- * @param tag - High-level tag fields. Empty / undefined values are skipped.
+ * @param tag - High-level tag fields. `undefined` / `null` / `""` values are skipped.
  * @param majorVersion - Target ID3v2 major version (`3` selects Latin-1, `4` selects UTF-8 inside frame bodies).
  * @returns Frames in emission order (text frames first, then `TRCK` / `TPOS`, then `COMM`).
  */
-export const synthesizeFrames = (tag: Partial<TagData>, majorVersion: 3 | 4): Id3v2Frame[] => {
+export const synthesizeFrames = (tag: TagPatch, majorVersion: 3 | 4): Id3v2Frame[] => {
   const encoding: TextEncoding = majorVersion === 4 ? "utf8" : "latin1";
   const frames: Id3v2Frame[] = [];
 
@@ -40,7 +41,7 @@ export const synthesizeFrames = (tag: Partial<TagData>, majorVersion: 3 | 4): Id
   ];
   for (const field of textFields) {
     const value = tag[field];
-    if (value === undefined || value === "") {
+    if (!hasTagValue(value)) {
       continue;
     }
 
@@ -69,7 +70,7 @@ export const synthesizeFrames = (tag: Partial<TagData>, majorVersion: 3 | 4): Id
     encoding,
   });
 
-  if (tag.comment !== undefined && tag.comment !== "") {
+  if (hasTagValue(tag.comment)) {
     frames.push({
       id: "COMM",
       flags: NO_FRAME_FLAGS,

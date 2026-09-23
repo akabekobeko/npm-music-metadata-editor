@@ -74,6 +74,30 @@ await saveTrack(edited, { source: "./song.mp3", outputPath: "./out.mp3" });
 const bytes = await saveTrack(edited, { source: await readFile("./song.mp3") });
 ```
 
+### Delete a field
+
+`Track.tag` (and `WriteOptions.tag`) accepts three states per field:
+
+| Value | Effect |
+| --- | --- |
+| `undefined` (or absent) | Keep the value already stored in the file |
+| `null` | Remove the field from the file |
+| `""` (string fields only) | Same as `null`, kept for backwards compatibility |
+
+`null` is the only way to remove numeric fields such as `year` / `bpm` / `rating` / `trackNumber`:
+
+```ts
+const edited = {
+  ...track,
+  tag: { ...track.tag, bpm: null, comment: null },
+};
+
+await saveTrack(edited, { source: "./song.flac" });
+// (await loadTrack("./song.flac")).tag.bpm === undefined
+```
+
+`saveTrack` accepts a `SavableTrack` (a `Track` whose `tag` may carry `null`), so spreading a loaded track and setting a field to `null` type-checks as-is. Formats that store several fields in one physical entry (`year` / `recordingDate` in Vorbis `DATE` or MP4 `©day`, `trackNumber` / `trackTotal` in `trkn`) keep the sibling value when only one side is cleared.
+
 ### Edit cover art
 
 ```ts

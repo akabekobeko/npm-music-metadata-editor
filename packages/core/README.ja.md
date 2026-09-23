@@ -74,6 +74,30 @@ await saveTrack(edited, { source: "./song.mp3", outputPath: "./out.mp3" });
 const bytes = await saveTrack(edited, { source: await readFile("./song.mp3") });
 ```
 
+### フィールドの削除
+
+`Track.tag` (および `WriteOptions.tag`) の各フィールドは 3 つの状態を取ります:
+
+| 値 | 効果 |
+| --- | --- |
+| `undefined` (またはキーなし) | ファイルに保存済みの値を保持 |
+| `null` | フィールドをファイルから削除 |
+| `""` (文字列フィールドのみ) | `null` と同じ。後方互換のために維持 |
+
+`year` / `bpm` / `rating` / `trackNumber` などの数値フィールドを削除する手段は `null` だけです:
+
+```ts
+const edited = {
+  ...track,
+  tag: { ...track.tag, bpm: null, comment: null },
+};
+
+await saveTrack(edited, { source: "./song.flac" });
+// (await loadTrack("./song.flac")).tag.bpm === undefined
+```
+
+`saveTrack` は `SavableTrack` (`tag` に `null` を含められる `Track`) を受け取るため、読み込んだトラックをスプレッドしてフィールドに `null` を設定するだけで型チェックが通ります。複数フィールドを 1 つの物理エントリーに格納する形式 (Vorbis `DATE` や MP4 `©day` の `year` / `recordingDate`、`trkn` の `trackNumber` / `trackTotal`) では、片側だけを削除しても相方の値は保持されます。
+
 ### カバー アートの編集
 
 ```ts

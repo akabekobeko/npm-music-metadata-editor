@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import { expect, it } from "vitest";
 import { ItunesDataType } from "../../constants.js";
 import { tagToItunesAtoms } from "./tagToItunesAtoms.js";
@@ -64,4 +65,44 @@ it("emits no covr atom when no pictures are passed", () => {
   const atoms = tagToItunesAtoms({ tag: { title: "Hello" } });
 
   expect(atoms.some((a) => a.name === "covr")).toBe(false);
+});
+
+it("emits a tombstone (atom without values) for a text field set to null or empty string", () => {
+  const atoms = tagToItunesAtoms({ tag: { title: null, album: "" } });
+  expect(atoms).toEqual([
+    { name: "©nam", values: [] },
+    { name: "©alb", values: [] },
+  ]);
+});
+
+it("emits tombstones for numeric fields set to null", () => {
+  const atoms = tagToItunesAtoms({ tag: { bpm: null, rating: null, trackNumber: null } });
+  expect(atoms.map((a) => a.name)).toEqual(["tmpo", "rtng", "trkn"]);
+  expect(atoms.every((a) => a.values.length === 0)).toBe(true);
+});
+
+it("skips fields left undefined entirely", () => {
+  expect(tagToItunesAtoms({ tag: { bpm: undefined, title: undefined } })).toEqual([]);
+});
+
+it("falls back to year for ©day when recordingDate is cleared", () => {
+  const atoms = tagToItunesAtoms({ tag: { recordingDate: "", year: 2024 } });
+  const day = atoms.find((a) => a.name === "©day");
+  expect(day).toBeDefined();
+  expect(Buffer.from(day?.values[0]?.data ?? []).toString("utf8")).toBe("2024");
+});
+
+it("emits a ©day tombstone when both year and recordingDate are cleared", () => {
+  const atoms = tagToItunesAtoms({ tag: { recordingDate: null, year: null } });
+  expect(atoms).toEqual([{ name: "©day", values: [] }]);
+});
+
+it("emits a freeform tombstone keyed by meanName", () => {
+  const atoms = tagToItunesAtoms({ tag: { lyricist: null } });
+  expect(atoms).toEqual([{ name: "----", meanName: "LYRICIST", values: [] }]);
+});
+
+it("emits a covr tombstone for an empty pictures array", () => {
+  const atoms = tagToItunesAtoms({ tag: {}, pictures: [] });
+  expect(atoms).toEqual([{ name: "covr", values: [] }]);
 });

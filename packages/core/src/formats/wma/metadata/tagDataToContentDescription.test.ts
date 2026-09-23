@@ -24,3 +24,31 @@ it("falls back to the existing description when a field is omitted", () => {
     rating: "",
   });
 });
+
+it("blanks a slot instead of falling back when the field is null or empty", () => {
+  const result = tagDataToContentDescription({
+    tag: { title: null, artist: "" },
+    existing: {
+      title: "Old",
+      author: "Existing",
+      copyright: "(C)",
+      description: "",
+      rating: "",
+    },
+  });
+  expect(result).toEqual({
+    title: "",
+    author: "",
+    copyright: "(C)",
+    description: "",
+    rating: "",
+  });
+});
+
+it("returns undefined when null markers empty out every slot", () => {
+  const result = tagDataToContentDescription({
+    tag: { title: null },
+    existing: { title: "Old", author: "", copyright: "", description: "", rating: "" },
+  });
+  expect(result).toBeUndefined();
+});

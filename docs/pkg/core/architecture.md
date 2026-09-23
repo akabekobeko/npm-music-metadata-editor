@@ -210,6 +210,7 @@ sequenceDiagram
 書き込みのポイント:
 
 - **タグ部分のみ差し替え、音声フレームは無加工**。FLAC / MP4 などはパディングや atom 構造を保つように再構築します。
+- `WriteOptions.tag` は `TagPatch` 型で、フィールドごとに **`undefined` = 既存値を保持 / `null` = 削除 / `""` (文字列のみ) = 削除** の 3 状態を取ります。判定は `src/utils/tagPatch/` の `hasTagValue` / `isClearedValue` に集約し、再構築型 writer (ID3v2 / ASF / RIFF INFO / AIFF native) は `applyTagPatch` で既存タグへ合成、保持型 writer (Vorbis Comment / APE / MP4 ilst) は managed key を落とすことで削除を表現します。MP4 は値を持たない atom (tombstone) を `mergeIlstAtoms` に渡して既存 atom を除去します。`(number, total)` 対を 1 エントリーに持つ形式では `fillNumberPairs` で相方を既存値から補完します。
 - `WriteOptions.pictures` / `chapters` / `lyrics` は **省略時は既存値を保持**、配列を渡すと **丸ごと差し替え** という二択モデルです。
 - `saveTrack` はファイルへの書き戻し / Buffer 戻り値の使い分けを担当します。プロセスの **一時ファイル + rename** はファイル形式によって writer 側が担当します。
 
