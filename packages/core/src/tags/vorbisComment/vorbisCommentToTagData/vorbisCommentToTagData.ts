@@ -1,4 +1,5 @@
 import type { TagData } from "../../../types.js";
+import { decodePercentRating } from "../../../utils/rating/decodePercentRating.js";
 import type { VorbisComment } from "../types.js";
 import { assignSlashPair } from "./assignSlashPair.js";
 import { FIELD_MAP, NUMERIC_FIELDS } from "./constants.js";
@@ -11,6 +12,8 @@ import { FIELD_MAP, NUMERIC_FIELDS } from "./constants.js";
  *   in which case the second value populates the corresponding `*Total` field.
  * - `DATE` is stored verbatim under `recordingDate`; if the first 4 chars
  *   parse as a year, `year` is also populated.
+ * - `RATING` accepts either a `0` .. `100` percentage or a `0` .. `5` star
+ *   count (see {@link decodePercentRating}).
  * - For repeated keys (multi-value), the *first* value wins on `TagData`. The
  *   raw multi-value list remains accessible via the underlying
  *   {@link VorbisComment} entries.
@@ -49,6 +52,16 @@ export const vorbisCommentToTagData = (comment: VorbisComment): TagData => {
     }
 
     if (assigned.has(field)) {
+      continue;
+    }
+
+    if (field === "rating") {
+      const rating = decodePercentRating(entry.value);
+      if (rating !== undefined) {
+        out.rating = rating;
+        assigned.add(field);
+      }
+
       continue;
     }
 

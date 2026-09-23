@@ -1,4 +1,5 @@
 import type { TagData } from "../../../types.js";
+import { decodePopmRating } from "../../../utils/rating/decodePopmRating.js";
 import {
   INVOLVED_PEOPLE_FRAME_IDS,
   INVOLVED_PEOPLE_ROLE_PRODUCER,
@@ -6,6 +7,8 @@ import {
 import { parseInvolvedPeopleFrame } from "../involvedPeople/parseInvolvedPeopleFrame.js";
 import { readInvolvedPeopleRole } from "../involvedPeople/readInvolvedPeopleRole.js";
 import { parseCommentFrame } from "../parseId3v2/parseCommentFrame/parseCommentFrame.js";
+import { POPM_FRAME_ID } from "../popularimeter/constants.js";
+import { parsePopularimeterFrame } from "../popularimeter/parsePopularimeterFrame.js";
 import type { Id3v2Tag } from "../types.js";
 import { assignTextFrame } from "./assignTextFrame.js";
 
@@ -14,7 +17,8 @@ import { assignTextFrame } from "./assignTextFrame.js";
  *
  * Only frames listed in {@link ID3V2_TEXT_FRAME_MAP} are surfaced; everything
  * else is left in `tag.frames` for round-trip preservation. `TRCK` / `TPOS`
- * "X/Y" strings split into number + total fields.
+ * "X/Y" strings split into number + total fields. The first `POPM` frame
+ * supplies `rating` (decoded via {@link decodePopmRating}).
  *
  * @param tag - Parsed ID3v2 tag.
  * @returns A `TagData` populated with the recognised text/comment fields.
@@ -39,6 +43,17 @@ export const id3v2TagToTagData = (tag: Id3v2Tag): TagData => {
         );
         if (producer !== undefined) {
           result.producer = producer;
+        }
+      }
+
+      continue;
+    }
+
+    if (frame.id === POPM_FRAME_ID) {
+      if (result.rating === undefined) {
+        const popularimeter = parsePopularimeterFrame(frame.data);
+        if (popularimeter !== undefined) {
+          result.rating = decodePopmRating(popularimeter.rating);
         }
       }
 

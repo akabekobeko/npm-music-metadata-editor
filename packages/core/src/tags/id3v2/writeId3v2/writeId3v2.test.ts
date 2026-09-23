@@ -3,6 +3,8 @@ import { buildTextFrameBody } from "../buildId3v2/buildTextFrameBody.js";
 import { id3v2TagToTagData } from "../id3v2TagToTagData/id3v2TagToTagData.js";
 import { parseInvolvedPeopleFrame } from "../involvedPeople/parseInvolvedPeopleFrame.js";
 import { parseId3v2 } from "../parseId3v2/parseId3v2.js";
+import { buildPopularimeterFrameBody } from "../popularimeter/buildPopularimeterFrameBody.js";
+import { parsePopularimeterFrame } from "../popularimeter/parsePopularimeterFrame.js";
 import { writeId3v2 } from "./writeId3v2.js";
 
 const FRAME_FLAGS = {
@@ -175,4 +177,62 @@ it("emits no frame for fields set to null", () => {
   const tag = parseId3v2(bytes);
   if (tag === undefined) throw new Error("tag should be defined");
   expect(id3v2TagToTagData(tag)).toEqual({ title: "Only title" });
+});
+
+it("writes rating as a POPM frame and reads it back", () => {
+  const bytes = writeId3v2({ majorVersion: 3, tag: { title: "T", rating: 0.7 } });
+  const tag = parseId3v2(bytes);
+  if (tag === undefined) throw new Error("tag should be defined");
+  const popm = tag.frames.find((f) => f.id === "POPM");
+  expect(popm).toBeDefined();
+  expect(id3v2TagToTagData(tag).rating).toBeCloseTo(0.7, 10);
+});
+
+it("keeps the existing POPM email and play counter when updating the rating", () => {
+  const existing = buildPopularimeterFrameBody({
+    email: "user@example.com",
+    rating: 1,
+    counter: Uint8Array.from([0, 0, 0, 42]),
+  });
+  const bytes = writeId3v2({
+    majorVersion: 4,
+    tag: { rating: 1 },
+    preserveFrames: [
+      { id: "POPM", flags: FRAME_FLAGS, data: existing },
+      {
+        id: "POPM",
+        flags: FRAME_FLAGS,
+        data: buildPopularimeterFrameBody({
+          email: "other",
+          rating: 64,
+          counter: new Uint8Array(),
+        }),
+      },
+    ],
+  });
+  const tag = parseId3v2(bytes);
+  const popms = (tag?.frames ?? []).filter((f) => f.id === "POPM");
+  expect(popms).toHaveLength(1);
+  expect(parsePopularimeterFrame(popms[0]?.data ?? new Uint8Array())).toEqual({
+    email: "user@example.com",
+    rating: 255,
+    counter: Uint8Array.from([0, 0, 0, 42]),
+  });
+});
+
+it("preserves POPM for an undefined rating and drops it for null", () => {
+  const preserveFrames = [
+    {
+      id: "POPM",
+      flags: FRAME_FLAGS,
+      data: buildPopularimeterFrameBody({ email: "x", rating: 128, counter: new Uint8Array(4) }),
+    },
+  ];
+  const kept = parseId3v2(writeId3v2({ majorVersion: 3, tag: { title: "T" }, preserveFrames }));
+  expect(kept?.frames.some((f) => f.id === "POPM")).toBe(true);
+
+  const dropped = parseId3v2(
+    writeId3v2({ majorVersion: 3, tag: { rating: null }, preserveFrames }),
+  );
+  expect(dropped?.frames.some((f) => f.id === "POPM")).toBe(false);
 });

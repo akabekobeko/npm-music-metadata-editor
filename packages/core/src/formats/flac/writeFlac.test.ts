@@ -156,3 +156,12 @@ it("falls back to year for DATE when only recordingDate is cleared", async () =>
   expect(result.tag.recordingDate).toBe("2020");
   expect(result.tag.year).toBe(2020);
 });
+
+it("round-trips rating through the RATING comment", async () => {
+  const original = await loadFixture("basic.flac");
+  const rewritten = await writeMetadata(original, { tag: { rating: 0.7 } });
+  expect((await readMetadata(rewritten)).tag.rating).toBeCloseTo(0.7, 10);
+
+  const cleared = await writeMetadata(rewritten, { tag: { rating: null } });
+  expect((await readMetadata(cleared)).tag.rating).toBeUndefined();
+});

@@ -70,7 +70,7 @@ export const tagDataToApeTag = ({
       continue;
     }
 
-    const text = stringifyValue(raw);
+    const text = stringifyValue(field, raw);
     if (text !== undefined) {
       items.push({ key: canonicalKey, value: text, kind: ApeItemKind.Text, readOnly: false });
     }

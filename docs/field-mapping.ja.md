@@ -40,7 +40,7 @@
 | `discNumber` | `TPOS` (`X[/Y]`) | — | `DISCNUMBER` (`X[/Y]`) | `DISC` / `DISCNUMBER` (`X[/Y]`) | `disk` (number) | — | — | `WM/PartOfSet` (`X[/Y]`) |
 | `discTotal` | `TPOS` の `Y` | — | `DISCTOTAL` / `TOTALDISCS` / `DISCNUMBER` の `Y` | `DISCTOTAL` / `TOTALDISCS` / `DISCNUMBER` の `Y` | `disk` (total) | — | — | `WM/PartOfSet` の `Y` |
 | `bpm` | `TBPM` | — | `BPM` | `BPM` | `tmpo` | — | — | `WM/BeatsPerMinute` |
-| `rating` | — | — | — | — | `rtng` (0–100 → `[0, 1]` に正規化) | — | — | `WM/SharedUserRating` (0–99 → `[0, 1]` に正規化) |
+| `rating` | `POPM` (rating byte 0–255、Windows / MediaMonkey の半星慣用値) | — | `RATING` (0–100。読み取りは 0–5 の星数も可) | `RATING` / `PREFERENCE` (0–100。読み取りは 0–5 の星数も可) | `rtng` (0–100 → `[0, 1]` に正規化) | — | — | `WM/SharedUserRating` (0–99 → `[0, 1]` に正規化) |
 
 ## 補足
 
@@ -48,6 +48,7 @@
 
 - `producer` は専用のテキスト フレームを持たず、involved people list (v2.4 は `TIPL`、v2.3 は `IPLS`、v2.2 の `IPL` はパース時に `TIPL` へ昇格) の中に role / name のペアとして格納される。読み取り時の role 照合は大文字小文字を区別せず、書き込み時は小文字の `producer` role を出力する。
 - 書き込みでは involved people frame 内の `producer` エントリーのみを置換し、同じフレームに格納された他の role (engineer、mixer など) は保持する。`producer` に `""` を指定すると role を削除し、エントリーが残らない場合はフレーム自体を出力しない。
+- `rating` は最初の `POPM` フレームから取得する。rating byte は Windows Explorer / MediaMonkey / MusicBee の慣用値 (ATL.NET と同じ) に従い、1〜5 つ星が `1` / `64` / `128` / `196` / `255`、半星が `13` / `54` / `118` / `186` / `242`。読み取りでは `1`〜`5` を星数、`6`〜`10` を 0–10 スケールとして扱い、その他の値は最も近い半星に丸める。書き込みでは正規化値を最も近い半星に丸めて出力する。既存フレームの e-mail と再生カウンターは保持し、新規フレームの e-mail は `Windows Media Player 9 Series` とする。
 
 ### ID3v1 / ID3v1.1
 
@@ -60,6 +61,7 @@
 - `TRACKNUMBER` (`DISCNUMBER`) は `"X"` または `"X/Y"` の両形式を受け付け、`/Y` 部分は `trackTotal` (`discTotal`) に降ろす。
 - 同一キーが複数回現れる multi-value については **最初の値が勝つ**。`TagData` は単一値モデルのため。
 - 認識されないキーは `TagData` には現れないが、書き戻し時は元のタグ ブロック側で round-trip される。
+- `RATING` (APE は `RATING` / `PREFERENCE`) は 0–100 の整数 (`Math.round(rating * 100)`) で書き込む。読み取りでは 5 以下を 0–5 の星数 (`2.5` のような半星も可)、それより大きい値を 100 で頭打ちしたパーセントとして扱う (ATL.NET と同じ)。
 
 ### MP4 / iTunes atoms
 

@@ -126,3 +126,30 @@ it.each([
   expect(reloaded.tag.bpm).toBeUndefined();
   expect(reloaded.tag.title).toBe(track.tag.title);
 });
+
+it.each([
+  ["mp3", "mp3/v23-basic.mp3"],
+  ["wav", "wav/list-info.wav"],
+  ["aiff", "aiff/native.aiff"],
+  ["flac", "flac/basic.flac"],
+  ["ogg vorbis", "ogg/vorbis-basic.ogg"],
+  ["opus", "ogg/opus-basic.opus"],
+  ["ape", "ape/basic.ape"],
+  ["m4a", "mp4/basic.m4a"],
+  ["wma", "wma/content-only.wma"],
+])("saveTrack round-trips a half-star rating (%s)", async (_label, rel) => {
+  const bytes = await readFile(fixturePath(rel));
+  const original = await loadTrack(bytes);
+  const rated = await saveTrack(
+    { ...original, tag: { ...original.tag, rating: 0.7 } },
+    { source: bytes },
+  );
+  if (rated === undefined) {
+    expect.fail("expected rebuilt bytes for buffer source");
+  }
+
+  const reloaded = await loadTrack(rated);
+  // WMA quantizes to 0..99, so allow a small deviation there.
+  expect(reloaded.tag.rating).toBeCloseTo(0.7, 1);
+  expect(reloaded.tag.title).toBe(original.tag.title);
+});

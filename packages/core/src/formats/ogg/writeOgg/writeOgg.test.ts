@@ -142,3 +142,13 @@ it("removes a numeric field when it is set to null (Opus)", async () => {
   expect(result.tag.trackNumber).toBeUndefined();
   expect(result.tag.title).toBe("Opus basic");
 });
+
+it.each(["vorbis-basic.ogg", "opus-basic.opus"])(
+  "round-trips rating through the RATING comment (%s)",
+  async (name) => {
+    const original = await loadFixture(name);
+    const rewritten = await writeMetadata(original, { tag: { rating: 0.5 } });
+    expect((await readMetadata(rewritten)).tag.rating).toBeCloseTo(0.5, 10);
+    expect(allCrcsValid(rewritten)).toBe(true);
+  },
+);

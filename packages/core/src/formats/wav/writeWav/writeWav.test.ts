@@ -109,3 +109,10 @@ it("skips LIST/INFO and id3 fields set to null", async () => {
   expect(reparsed.tag.comment).toBeUndefined();
   expect(reparsed.tag.title).toBe("WAV title");
 });
+
+it("round-trips rating through the id3 chunk", async () => {
+  const bytes = await loadFixture("list-info.wav");
+  const rewritten = await writeMetadata(bytes, { tag: { rating: 0.6 } });
+  expect((await readMetadata(rewritten)).tag.rating).toBeCloseTo(0.6, 10);
+  expect(collectChunkIds(rewritten)).toContain("id3 ");
+});

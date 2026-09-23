@@ -101,3 +101,10 @@ it("skips native chunks for fields set to null", async () => {
   expect(ids).not.toContain("(c) ");
   expect(ids).not.toContain("ANNO");
 });
+
+it("round-trips rating through the ID3 chunk", async () => {
+  const bytes = await loadFixture("native.aiff");
+  const rewritten = await writeMetadata(bytes, { tag: { rating: 0.6 } });
+  expect((await readMetadata(rewritten)).tag.rating).toBeCloseTo(0.6, 10);
+  expect(collectChunkIds(rewritten)).toContain("ID3 ");
+});

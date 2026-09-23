@@ -74,7 +74,7 @@ export const tagDataToVorbisComment = ({
       continue;
     }
 
-    const text = stringifyValue(raw);
+    const text = stringifyValue(field, raw);
     if (text !== undefined) {
       comments.push({ key: canonicalKey, value: text });
     }
@@ -84,7 +84,7 @@ export const tagDataToVorbisComment = ({
   // `year` when `recordingDate` carries no value of its own.
   if (tag.year !== undefined && !hasTagValue(tag.recordingDate)) {
     managedKeys.add("DATE");
-    const yearText = stringifyValue(tag.year);
+    const yearText = stringifyValue("year", tag.year);
     if (yearText !== undefined) {
       comments.push({ key: "DATE", value: yearText });
     }
